@@ -181,12 +181,11 @@ executeDiagnostics(
   cohorts = cohorts,
   exportFolder = "export",
   cohortTable = "cohort",
-  conceptCountsTable = "concept_counts",
+  conceptCountsTable = "#concept_counts",
   cohortDatabaseSchema = "results",
   cdmDatabaseSchema = "cdm",
   databaseId = "mySpecialCdm",
   connectionDetails = connectionDetails
 )
 }
-
 }

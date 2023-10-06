@@ -181,7 +181,7 @@ getDefaultCovariateSettings <- function() {
 #'   connectionDetails = connectionDetails
 #' )
 #' }
-#'
+#' @import future
 #' @importFrom CohortGenerator getCohortTableNames
 #' @importFrom tidyr any_of
 #' @export
@@ -798,8 +798,11 @@ executeDiagnostics <- function(cohortDefinitionSet,
     )
   }
 
+
   # Incidence rates --------------------------------------------------------------------------------------
   if (runIncidenceRate) {
+    plan("future::multisession")
+    IncidenceRatesExecution %<-% {
     timeExecution(
       exportFolder,
       "computeIncidenceRates",
@@ -821,9 +824,16 @@ executeDiagnostics <- function(cohortDefinitionSet,
           recordKeepingFile = recordKeepingFile,
           incremental = incremental
         )
+        
       }
-    )
+    )}
   }
+  
+  if (runIncidenceRate) {
+    IncidenceRatesExecution
+  }
+  
+  
 
   # Cohort relationship ---------------------------------------------------------------------------------
   if (runCohortRelationship) {
@@ -887,6 +897,8 @@ executeDiagnostics <- function(cohortDefinitionSet,
       }
     )
   }
+  
+  
 
   # Store information from the vocabulary on the concepts used -------------------------
   timeExecution(
@@ -1059,6 +1071,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     incremental = TRUE,
     start_time = as.character(start)
   )
+  
 
   # Add all to zip file -------------------------------------------------------------------------------
   timeExecution(
@@ -1077,7 +1090,10 @@ executeDiagnostics <- function(cohortDefinitionSet,
     " ",
     attr(delta, "units")
   )
+  
+  
 }
+
 
 
 writeResultsZip <- function(exportFolder, databaseId) {
