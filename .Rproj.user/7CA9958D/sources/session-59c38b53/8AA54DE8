@@ -1,0 +1,27 @@
+{
+    "id": "8AA54DE8",
+    "path": "~/darwin/CohortDiagnostics/R/ConceptSets.R",
+    "project_path": "R/ConceptSets.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1696607060794.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "79,3",
+        "scrollLine": "195",
+        "docOutlineVisible": "1"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1696621710,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1696621710,
+    "read_only": false,
+    "read_only_alternatives": []
+}

@@ -1,0 +1,126 @@
+library(CDMConnector)
+library(dplyr)
+
+
+con <- DBI::dbConnect(duckdb::duckdb(), eunomia_dir())
+cdm <- cdm_from_con(con, "main", "main")
+
+concepts <- cdm$condition_occurrence %>% 
+  left_join(select(cdm$concept, concept_id, concept_name), by = c("condition_concept_id" = "concept_id")) %>% 
+  count(condition_concept_id, concept_name, sort = T) %>% 
+  head() %>% 
+  collect()
+
+concepts
+
+concept_list <- as.list(concepts$condition_concept_id)
+names(concept_list) <- concepts$concept_name
+cdm <- generate_concept_cohort_set(cdm, concept_set = concept_list)
+
+
+cdm$cohort %>% 
+  PatientProfiles::addDemographics() 
+  
+
+# pass in the CDM
+
+# cohort counts
+
+cohort_set(cdm$cohort) %>% 
+  dplyr::left_join(cohort_count(cdm$cohort), by = "cohort_definition_id")
+
+# Incidence Rates
+
+tic(msg = "Incidence by year, age, sex")
+
+cdm <- generateDenominatorCohortSet(
+  cdm = cdm, 
+  name = "denominator", 
+  cohortDateRange = NULL,
+  ageGroup = list(c(0,17), c(18,64), c(65,199)),
+  sex = c("Male", "Female", "Both"),
+  daysPriorHistory = 180
+)
+
+
+inc <- estimateIncidence(
+  cdm = cdm,
+  denominatorTable = "denominator",
+  outcomeTable = cohorts_name,
+  interval = "years",
+  repeatedEvents = FALSE,
+  outcomeWashout = Inf,
+  completeDatabaseIntervals = FALSE,
+  minCellCount = 0 )
+
+toc(log = TRUE)
+
+
+tic(msg = "Prevalence by year, age, sex")
+
+prev <- estimatePeriodPrevalence(
+  cdm = cdm,
+  denominatorTable = "denominator",
+  outcomeTable = cohorts_name,
+  outcomeLookbackDays = NULL,
+  interval = "years",
+  completeDatabaseIntervals = TRUE,
+  fullContribution = FALSE,
+  minCellCount = 5,
+  temporary = TRUE,
+  returnParticipants = FALSE
+)
+
+
+toc()
+
+cohort
+
+################ 9 - Cohort Overlap (Subjects) ###############
+# Percentages and counts: Counts only for now, percentages easy
+# May want to add names to cohorts
+
+tic(msg = "Calculate Overlap")
+
+# Summarize the number of IDs in each group
+summary_by_group <- cdm[[cohorts_name]] %>%
+  group_by(cohort_definition_id) %>%
+  summarize(ids_in_group = n()) %>% 
+  collect()
+
+# Join to get the IDs that intersect between groups
+summary_intersections <- cdm[[cohorts_name]] %>%
+  inner_join(cdm[[cohorts_name]], by = "subject_id") %>%
+  filter(cohort_definition_id.x != cohort_definition_id.y) %>%
+  select(subject_id, cohort_definition_id_x = cohort_definition_id.x, cohort_definition_id_y = cohort_definition_id.y) %>%
+  distinct()  %>%
+  group_by(cohort_definition_id_x, cohort_definition_id_y) %>%
+  summarize(intersect_count = n()) %>% 
+  collect()
+
+toc(log = TRUE)
+
+
+
+tic(msg = "Patient_profiles summary")
+cdm$results_dx <- cdm[[cohorts_name]]
+
+Patient_profiles <- cdm$results_dx %>%
+  addDemographics(cdm) %>% 
+  collect()   %>%
+  mutate( age_group= cut(age, c(seq(0, 110, 5), Inf), include.lowest=TRUE))
+
+Age_distribution <- Patient_profiles %>% 
+  group_by(cohort_definition_id, age_group, sex) %>% 
+  tally()
+
+Time_distribution <- Patient_profiles %>%
+  group_by(cohort_definition_id, sex) %>% 
+  summarise_at(vars(age, prior_observation, future_observation), 
+               list(Min = min, Mean = mean, Median = median,  Max = max, Sd = sd)) %>%
+  collect()
+
+rm(Patient_profiles)
+toc(log = TRUE)
+
+

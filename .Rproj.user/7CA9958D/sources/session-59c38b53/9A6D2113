@@ -1,0 +1,26 @@
+{
+    "id": "9A6D2113",
+    "path": "~/darwin/CohortDiagnostics/inst/sql/sql_server/CohortSourceCodes.sql",
+    "project_path": "inst/sql/sql_server/CohortSourceCodes.sql",
+    "type": "sql",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1696608804367.0,
+    "source_on_save": false,
+    "relative_order": 5,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "170,0",
+        "scrollLine": "15"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1693587488,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1693587488,
+    "read_only": false,
+    "read_only_alternatives": []
+}

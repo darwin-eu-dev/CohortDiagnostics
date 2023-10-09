@@ -1,0 +1,16 @@
+{
+    "dialog-state": {
+        "query": "instantiateUniqueConceptSets",
+        "path": "/Users/adamblack/darwin/CohortDiagnostics/R",
+        "regex": false,
+        "caseSensitive": false,
+        "wholeWord": false,
+        "filePatterns": [],
+        "useGitGrep": true,
+        "excludeGitIgnore": true,
+        "excludeFilePatterns": [],
+        "resultsCount": 2,
+        "errorCount": 0,
+        "replaceErrors": ""
+    }
+}

@@ -1,0 +1,30 @@
+########### 5 - Incidence Rates ################
+# Stratified by Age 10y, Gender, Calendar Year
+# For now stratified by kid-Adult-Older Adult 
+# it is the step it takes longest
+
+tic(msg = "Incidence by year, age, sex")
+
+cdm <- generateDenominatorCohortSet(
+  cdm = cdm, 
+  name = "denominator", 
+  cohortDateRange = NULL,
+  ageGroup = list(c(0,17), c(18,64),
+                  c(65,199)),
+  sex = c("Male", "Female", "Both"),
+  daysPriorHistory = 180
+)
+
+inc <- estimateIncidence(
+  cdm = cdm,
+  denominatorTable = "denominator",
+  outcomeTable = cohorts_name,
+  interval = "years",
+  repeatedEvents = FALSE,
+  outcomeWashout = Inf,
+  completeDatabaseIntervals = FALSE,
+  minCellCount = 0 )
+
+toc(log = TRUE)
+
+
