@@ -94,6 +94,7 @@ executeDiagnosticsCdm <- function(cdm,
   conceptCountsTable = paste0(prefix, "concept_counts")
   cohortTable = paste0(prefix, "cohort")
   
+  
   cdm <- CDMConnector::generateCohortSet(
     cdm,
     cohortSet = cohortSet,
@@ -115,6 +116,8 @@ executeDiagnosticsCdm <- function(cdm,
                      cdmVersion = floor(as.numeric(CDMConnector::version(cdm))),
                      cohortTable = cohortTable,
                      conceptCountsTable = conceptCountsTable,
+                     # cohortTable = paste(attr(cdm, "write_schema"), cohortTable, sep = "."),
+                     # conceptCountsTable = paste(attr(cdm, "write_schema"), conceptCountsTable, sep = "."),
                      cohortDatabaseSchema = attr(cdm, "write_schema"),
                      cdmDatabaseSchema = attr(cdm, "cdm_schema"),
                      exportFolder = exportFolder,

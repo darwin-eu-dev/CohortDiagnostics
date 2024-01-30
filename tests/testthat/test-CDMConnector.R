@@ -16,5 +16,6 @@ test_that("cdm interface works", {
                         cohortSet = cohortSet,
                         exportFolder = exportFolder)
   
+  DBI::dbDisconnect(con, shutdown = TRUE)
 })
 
