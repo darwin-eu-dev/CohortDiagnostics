@@ -238,6 +238,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                seed = 64374,
                                seedArgs = NULL,
                                sampleIdentifierExpression = "cohortId * 1000 + seed") {
+  
   # collect arguments that were passed to cohort diagnostics at initiation
   callingArgs <- formals(executeDiagnostics)
   callingArgsJson <-
@@ -287,18 +288,6 @@ executeDiagnostics <- function(cohortDefinitionSet,
     add = errorMessage
   )
   checkmate::assertDataFrame(cohortDefinitionSet, add = errorMessage)
-  
-  if ("cohort_defintion_id" %in% names(cohortDefinitionSet)) {
-    cohortDefinitionSet$cohortId <- cohortDefinitionSet$cohort_definition_id
-  }
-  
-  if ("cohort_defintion_id" %in% names(cohortDefinitionSet)) {
-    cohortDefinitionSet$cohortName <- cohortDefinitionSet$cohort_name
-  }
-  
-  if (!("sql" %in% names(cohortDefinitionSet))) {
-    
-  }
   
   checkmate::assertNames(names(cohortDefinitionSet),
     must.include = c(
@@ -734,7 +723,6 @@ executeDiagnostics <- function(cohortDefinitionSet,
     )
   }
 
-  browser()
   # Defines variables and checks version of external concept counts table -----
   if (useExternalConceptCountsTable == FALSE) {
     conceptCountsTableIsTemp <- TRUE
@@ -743,7 +731,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   } else {
     if (conceptCountsTable == "#concept_counts") {
-      stop("Temporary conceptCountsTable name. Please provide a valid external ConceptCountsTable name")
+      # stop("Temporary conceptCountsTable name. Please provide a valid external ConceptCountsTable name")
     }
     conceptCountsTableIsTemp <- FALSE
     conceptCountsTable <- conceptCountsTable

@@ -36,7 +36,6 @@ getCohortCounts <- function(connectionDetails = NULL,
                             cohortTable = "cohort",
                             cohortIds = c()) {
   start <- Sys.time()
-  browser()
   if (is.null(connection)) {
     connection <- DatabaseConnector::connect(connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
