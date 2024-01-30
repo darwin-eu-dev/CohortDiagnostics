@@ -287,12 +287,24 @@ executeDiagnostics <- function(cohortDefinitionSet,
     add = errorMessage
   )
   checkmate::assertDataFrame(cohortDefinitionSet, add = errorMessage)
+  
+  if ("cohort_defintion_id" %in% names(cohortDefinitionSet)) {
+    cohortDefinitionSet$cohortId <- cohortDefinitionSet$cohort_definition_id
+  }
+  
+  if ("cohort_defintion_id" %in% names(cohortDefinitionSet)) {
+    cohortDefinitionSet$cohortName <- cohortDefinitionSet$cohort_name
+  }
+  
+  if (!("sql" %in% names(cohortDefinitionSet))) {
+    
+  }
+  
   checkmate::assertNames(names(cohortDefinitionSet),
     must.include = c(
       "json",
       "cohortId",
-      "cohortName",
-      "sql"
+      "cohortName"
     ),
     add = errorMessage
   )
@@ -605,7 +617,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   )
 
-  cohortDefinitionSet$checksum <- computeChecksum(cohortDefinitionSet$sql)
+  cohortDefinitionSet$checksum <- 0
 
   if (incremental) {
     ParallelLogger::logDebug("Working in incremental mode.")
@@ -650,8 +662,14 @@ executeDiagnostics <- function(cohortDefinitionSet,
     vocabularyVersionCdm = cdmSourceInformation$vocabularyVersion,
     vocabularyVersion = vocabularyVersion
   )
+  
   # Create concept table ------------------------------------------
-  createConceptTable(connection, tempEmulationSchema)
+  ParallelLogger::logTrace("Creating concept ID table for tracking concepts used in diagnostics")
+  sql <- SqlRender::translate(
+    'DROP TABLE IF EXISTS #concept_ids; CREATE TABLE #concept_ids (concept_id BIGINT);',
+    targetDialect = CDMConnector::dbms(connection)
+  )  
+  DBI::dbExecute(con, sql)
 
   # Counting cohorts -----------------------------------------------------------------------
   timeExecution(
@@ -716,6 +734,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     )
   }
 
+  browser()
   # Defines variables and checks version of external concept counts table -----
   if (useExternalConceptCountsTable == FALSE) {
     conceptCountsTableIsTemp <- TRUE
@@ -974,7 +993,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   # Writing metadata file
   ParallelLogger::logInfo("Retrieving metadata information and writing metadata")
 
-  packageName <- utils::packageName()
+  packageName <- "CohortDiagnostics"
   packageVersion <- if (!methods::getPackageName() == ".GlobalEnv") {
     as.character(utils::packageVersion(packageName))
   } else {

@@ -42,9 +42,9 @@ createConceptCountsTable <- function(connectionDetails = NULL,
     on.exit(DatabaseConnector::disconnect(connection))
   }
   sql <-
-    SqlRender::loadRenderTranslateSql(
+    loadRenderTranslateSql(
       "CreateConceptCountTable.sql",
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       dbms = getDbms(connection),
       tempEmulationSchema = tempEmulationSchema,
       cdm_database_schema = cdmDatabaseSchema,
