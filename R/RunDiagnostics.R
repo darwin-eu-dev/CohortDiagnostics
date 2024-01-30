@@ -238,6 +238,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                seed = 64374,
                                seedArgs = NULL,
                                sampleIdentifierExpression = "cohortId * 1000 + seed") {
+  
   # collect arguments that were passed to cohort diagnostics at initiation
   callingArgs <- formals(executeDiagnostics)
   callingArgsJson <-
@@ -287,12 +288,12 @@ executeDiagnostics <- function(cohortDefinitionSet,
     add = errorMessage
   )
   checkmate::assertDataFrame(cohortDefinitionSet, add = errorMessage)
+  
   checkmate::assertNames(names(cohortDefinitionSet),
     must.include = c(
       "json",
       "cohortId",
-      "cohortName",
-      "sql"
+      "cohortName"
     ),
     add = errorMessage
   )
@@ -605,7 +606,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   )
 
-  cohortDefinitionSet$checksum <- computeChecksum(cohortDefinitionSet$sql)
+  cohortDefinitionSet$checksum <- 0
 
   if (incremental) {
     ParallelLogger::logDebug("Working in incremental mode.")
@@ -650,8 +651,14 @@ executeDiagnostics <- function(cohortDefinitionSet,
     vocabularyVersionCdm = cdmSourceInformation$vocabularyVersion,
     vocabularyVersion = vocabularyVersion
   )
+  
   # Create concept table ------------------------------------------
-  createConceptTable(connection, tempEmulationSchema)
+  ParallelLogger::logTrace("Creating concept ID table for tracking concepts used in diagnostics")
+  sql <- SqlRender::translate(
+    'DROP TABLE IF EXISTS #concept_ids; CREATE TABLE #concept_ids (concept_id BIGINT);',
+    targetDialect = CDMConnector::dbms(connection)
+  )  
+  DBI::dbExecute(con, sql)
 
   # Counting cohorts -----------------------------------------------------------------------
   timeExecution(
@@ -724,7 +731,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   } else {
     if (conceptCountsTable == "#concept_counts") {
-      stop("Temporary conceptCountsTable name. Please provide a valid external ConceptCountsTable name")
+      # stop("Temporary conceptCountsTable name. Please provide a valid external ConceptCountsTable name")
     }
     conceptCountsTableIsTemp <- FALSE
     conceptCountsTable <- conceptCountsTable
@@ -974,7 +981,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   # Writing metadata file
   ParallelLogger::logInfo("Retrieving metadata information and writing metadata")
 
-  packageName <- utils::packageName()
+  packageName <- "CohortDiagnostics"
   packageVersion <- if (!methods::getPackageName() == ".GlobalEnv") {
     as.character(utils::packageVersion(packageName))
   } else {

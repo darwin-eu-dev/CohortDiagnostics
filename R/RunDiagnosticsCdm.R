@@ -14,77 +14,101 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#' executeDiagnosticsCdm
+#' Run Diagnostics for a cohort set
+#' 
+#' This is the main function exported by the CohortDiagnositcs package. It runs the 
+#' diagnostic analysis and saves the results to a folder.
+#' 
 #'
-#' @param cdm                         Cdm reference object
-#' @param cohortDefinitionSet         Data.frame of cohorts must include columns cohortId, cohortName, json, sql 
-#' @param cohortTable                 Cohort table name
-#' @param conceptCountsTable          Concept counts table name
-#' @param exportFolder                The folder where the output will be exported to. If this folder does not exist it will be created.
-#' @param minCellCount                The minimum cell count for fields contains person counts or fractions.
-#' @param runInclusionStatistics      Generate and export statistic on the cohort inclusion rules?
-#' @param runIncludedSourceConcepts   Generate and export the source concepts included in the cohorts?
-#' @param runOrphanConcepts           Generate and export potential orphan concepts?
-#' @param runTimeSeries               Generate and export the time series diagnostics?
-#' @param runVisitContext             Generate and export index-date visit context?
-#' @param runBreakdownIndexEvents     Generate and export the breakdown of index events?
-#' @param runIncidenceRate            Generate and export the cohort incidence  rates?
-#' @param runCohortRelationship       Generate and export the cohort relationship? Cohort relationship checks the temporal
-#'                                    relationship between two or more cohorts.
-#' @param runTemporalCohortCharacterization   Generate and export the temporal cohort characterization?
-#'                                            Only records with values greater than 0.001 are returned.
-#' @param useExternalConceptCountsTable if external concept counts table should be used
+#' @param cdm A cdm_reference object create by CDMConnector::cdm_from_con()
+#' @param cohortSet A cohort set created by CDMConnector::readCohortSet()
+#' @param exportFolder The folder where the output will be exported to. If this folder does not exist it will be created.
+#' @param runAnalysis A numeric vector corresponding to the diagnostic analyses should be executed. See Details
+#' @param minCellCount  The minimum cell count for fields contains person counts or fractions.
+#' 
+#' @details runAnalysis argument
+#' 
+#' Pass a numeric vector matching the following analyses. Negative numbers will be interpreted as exclusions.
+#' Use a numeric vector to select the analyses you want to run. Negative numbers will exclude analyses.
+#' The selection works the same way as vector subsetting in R.
+#' 
+#' # Analyses to choose from:
+#' 1. InclusionStatistics - TODO fill in descriptions of each analyses
+#' 1. IncludedSourceConcepts - 
+#' 1. OrphanConcepts - Find potential orphan concepts that should possibly included in your concept set.
+#' 1. TimeSeries -
+#' 1. VisitContext - 
+#' 1. BreakdownIndexEvents
+#' 1. IncidenceRate
+#' 1. CohortRelationship
+#' 1. TemporalCohortCharacterization
+#' 
+#' @md
 #' 
 #' @examples
 #' \dontrun{
-#' cohortTable <- "mycohort"
+#' 
 #' con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
+#' 
 #' cdm <- cdmFromCon(con, cdmSchema = "main", writeSchema = "main", cdmName = "eunomia")
+#' 
 #' cohortDefinitionSet <- CDMConnector::readCohortSet(system.file("cohorts", package = "CohortDiagnostics"))
-#' cdm <- generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
-#' executeDiagnosticsCdm(cdm = cdm,
-#'  cohortDefinitionSet = cohortDefinitionSet,
-#'  cohortTable = cohortTable,
-#'  exportFolder = "output",
-#'  minCellCount = 5,
-#'  runInclusionStatistics = T,
-#'  runIncludedSourceConcepts = T,
-#'  runOrphanConcepts = T,
-#'  runTimeSeries = T,
-#'  runVisitContext = T,
-#'  runBreakdownIndexEvents = T,
-#'  runIncidenceRate = T,
-#'  runCohortRelationship = T,
-#'  runTemporalCohortCharacterization = T,
-#'  useExternalConceptCountsTable = F)
+#' 
+#' executeDiagnosticsCdm(
+#'  cdm,
+# ' cohortSet,
+# ' exportFolder,
+# ' runAnalysis = 1:9,
+# ' minCellCount = 5) 
 #' }
 #' 
 #' @export
 executeDiagnosticsCdm <- function(cdm,
-                                  cohortDefinitionSet,
-                                  cohortTable = "cohort",
-                                  conceptCountsTable = "#concept_counts",
+                                  cohortSet,
                                   exportFolder,
-                                  minCellCount = 5,
-                                  runInclusionStatistics = TRUE,
-                                  runIncludedSourceConcepts = TRUE,
-                                  runOrphanConcepts = TRUE,
-                                  runTimeSeries = TRUE,
-                                  runVisitContext = TRUE,
-                                  runBreakdownIndexEvents = TRUE,
-                                  runIncidenceRate = TRUE,
-                                  runCohortRelationship = TRUE,
-                                  runTemporalCohortCharacterization = TRUE,
-                                  useExternalConceptCountsTable = TRUE) {
+                                  runAnalysis = 1:9,
+                                  minCellCount = 5) { 
   
-  errorMessage <- checkmate::makeAssertCollection()
-  cdmCheck <- inherits(cdm, "cdm_reference")
-  if (!isTRUE(cdmCheck)) {
-    errorMessage$push(
-      "- cdm must be a CDMConnector CDM reference object"
-    )
+  checkmate::assertClass(cdm, "cdm_reference")
+  cohortSetColnames <- c("cohort_definition_id", "cohort_name", "cohort", "json", "cohort_name_snakecase")
+  
+  if (!(is.data.frame(cohortSet) && all(names(cohortSet) == cohortSetColnames))) {
+    cli::cli_abort("{.arg cohortSet} needs to be a dataframe created by CDMConnector::readCohortSet()")
   }
-  checkmate::reportAssertions(collection = errorMessage)
+
+  allAnalyses <- c(
+    "InclusionStatistics",
+    "IncludedSourceConcepts",
+    "OrphanConcepts",
+    "TimeSeries",
+    "VisitContext",
+    "BreakdownIndexEvents",
+    "IncidenceRate",
+    "CohortRelationship",
+    "TemporalCohortCharacterization")
+  
+  selectedAnalyses <- allAnalyses[runAnalysis]
+  
+  # table names. these are tables created just for running cohort diagnostics
+  prefix <- paste0("tmp", as.integer(Sys.time()) %% 10000, "_")
+  conceptCountsTable = paste0(prefix, "concept_counts")
+  cohortTable = paste0(prefix, "cohort")
+  
+  
+  cdm <- CDMConnector::generateCohortSet(
+    cdm,
+    cohortSet = cohortSet,
+    name = cohortTable,
+    computeAttrition = TRUE,
+    overwrite = TRUE
+  )
+  
+  cohortDefinitionSet <- cohortSet %>% 
+    dplyr::mutate(
+      cohortName = cohort_name, 
+      sql = "adsf",
+      json = as.character(json),
+      cohortId = as.numeric(cohort_definition_id))
   
   executeDiagnostics(cohortDefinitionSet,
                      connectionDetails = NULL,
@@ -92,19 +116,22 @@ executeDiagnosticsCdm <- function(cdm,
                      cdmVersion = floor(as.numeric(CDMConnector::version(cdm))),
                      cohortTable = cohortTable,
                      conceptCountsTable = conceptCountsTable,
+                     # cohortTable = paste(attr(cdm, "write_schema"), cohortTable, sep = "."),
+                     # conceptCountsTable = paste(attr(cdm, "write_schema"), conceptCountsTable, sep = "."),
                      cohortDatabaseSchema = attr(cdm, "write_schema"),
                      cdmDatabaseSchema = attr(cdm, "cdm_schema"),
                      exportFolder = exportFolder,
                      databaseId = attr(cdm, "cdm_name"),
                      minCellCount = minCellCount,
-                     runInclusionStatistics = runInclusionStatistics,
-                     runIncludedSourceConcepts = runIncludedSourceConcepts,
-                     runOrphanConcepts = runIncludedSourceConcepts,
-                     runTimeSeries = runIncludedSourceConcepts,
-                     runVisitContext = runVisitContext,
-                     runBreakdownIndexEvents = runBreakdownIndexEvents,
-                     runIncidenceRate = runIncidenceRate,
-                     runCohortRelationship = runCohortRelationship,
-                     runTemporalCohortCharacterization = runTemporalCohortCharacterization,
-                     useExternalConceptCountsTable = useExternalConceptCountsTable)
+                     runInclusionStatistics = "InclusionStatistics" %in% selectedAnalyses,
+                     runIncludedSourceConcepts = "IncludedSourceConcepts" %in% selectedAnalyses,
+                     runOrphanConcepts = "IncludedSourceConcepts" %in% selectedAnalyses,
+                     runTimeSeries = "IncludedSourceConcepts" %in% selectedAnalyses,
+                     runVisitContext = "VisitContext" %in% selectedAnalyses,
+                     runBreakdownIndexEvents = "BreakdownIndexEvents" %in% selectedAnalyses,
+                     runIncidenceRate = "IncidenceRate" %in% selectedAnalyses,
+                     runCohortRelationship = "CohortRelationship" %in% selectedAnalyses,
+                     runTemporalCohortCharacterization = "TemporalCohortCharacterization" %in% selectedAnalyses,
+                     useExternalConceptCountsTable = FALSE)
+  
 }

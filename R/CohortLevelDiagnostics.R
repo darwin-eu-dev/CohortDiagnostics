@@ -36,26 +36,27 @@ getCohortCounts <- function(connectionDetails = NULL,
                             cohortTable = "cohort",
                             cohortIds = c()) {
   start <- Sys.time()
-
   if (is.null(connection)) {
     connection <- DatabaseConnector::connect(connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
   }
 
   sql <-
-    SqlRender::loadRenderTranslateSql(
+    loadRenderTranslateSql(
       sqlFilename = "CohortCounts.sql",
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       dbms = getDbms(connection),
       cohort_database_schema = cohortDatabaseSchema,
       cohort_table = cohortTable,
       cohort_ids = cohortIds
     )
-  counts <- querySql(connection, sql, snakeCaseToCamelCase = TRUE) %>%
+  
+  counts <- DBI::dbGetQuery(connection, sql) %>%
+    dplyr::rename_all(SqlRender::snakeCaseToCamelCase) %>% 
     tidyr::tibble()
 
   if (length(cohortIds) > 0) {
-    cohortIdDf <- tidyr::tibble(cohortId = cohortIds)
+    cohortIdDf <- dplyr::tibble(cohortId = cohortIds)
     counts <- cohortIdDf %>%
       dplyr::left_join(counts, by = "cohortId") %>%
       tidyr::replace_na(list(cohortEntries = 0, cohortSubjects = 0))
@@ -93,7 +94,7 @@ computeCohortCounts <- function(connection,
                                 cohorts,
                                 exportFolder,
                                 minCellCount,
-                                databaseId) {
+                                databaseId) { 
   ParallelLogger::logInfo("Counting cohort records and subjects")
   cohortCounts <- getCohortCounts(
     connection = connection,
