@@ -658,7 +658,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     'DROP TABLE IF EXISTS #concept_ids; CREATE TABLE #concept_ids (concept_id BIGINT);',
     targetDialect = CDMConnector::dbms(connection)
   )  
-  DBI::dbExecute(con, sql)
+  DBI::dbExecute(connection, sql)
 
   # Counting cohorts -----------------------------------------------------------------------
   timeExecution(

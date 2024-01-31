@@ -114,7 +114,7 @@ getParentCohort <- function(cohort, cohortDefinitionSet) {
   ))
 }
 
-combineConceptSetsFromCohorts <- function(cohorts) {
+combineConceptSetsFromCohorts <- function(cohorts) { #browser()
   # cohorts should be a dataframe with at least cohortId, sql and json
 
   errorMessage <- checkmate::makeAssertCollection()

@@ -75,6 +75,8 @@ executeDiagnosticsCdm <- function(cdm,
   if (!(is.data.frame(cohortSet) && all(names(cohortSet) == cohortSetColnames))) {
     cli::cli_abort("{.arg cohortSet} needs to be a dataframe created by CDMConnector::readCohortSet()")
   }
+  
+
 
   allAnalyses <- c(
     "InclusionStatistics",
@@ -122,6 +124,7 @@ executeDiagnosticsCdm <- function(cdm,
                      cdmDatabaseSchema = attr(cdm, "cdm_schema"),
                      exportFolder = exportFolder,
                      databaseId = attr(cdm, "cdm_name"),
+                     tempEmulationSchema = attr(cdm, "write_schema"),
                      minCellCount = minCellCount,
                      runInclusionStatistics = "InclusionStatistics" %in% selectedAnalyses,
                      runIncludedSourceConcepts = "IncludedSourceConcepts" %in% selectedAnalyses,
