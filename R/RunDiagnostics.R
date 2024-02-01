@@ -534,7 +534,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   )
 
-  cohortDefinitionSet$checksum <- 0
+  cohortDefinitionSet$checksum <- md5::
 
   if (incremental) {
     ParallelLogger::logDebug("Working in incremental mode.")
