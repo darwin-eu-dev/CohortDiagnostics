@@ -1,17 +1,19 @@
 Package: CohortDiagnostics
 Type: Package
 Title: Diagnostics for OHDSI Cohorts
-Version: 3.3.0
+Version: 3.4.0
 Date: 2023-29-11
 Authors@R: c(
-    person("Jamie", "Gilbert", email = "gilbert@ohdsi.org", role = c("aut", "cre")),
+    person("Ger", "Inberg", email = "g.inberg@erasmusmc.nl", role = c("aut", "cre")),
+    person("Adam", "Black", email = "black@ohdsi.org", role = "aut"),
+    person("Jamie", "Gilbert", email = "gilbert@ohdsi.org", role = "aut"),
     person("Gowtham", "Rao", role = c("aut")),
     person("Martijn", "Schuemie", role = c("aut")),
     person("Patrick", "Ryan", role = c("aut")),
     person("James", "Weaver", role = c("aut")),
     person("Observational Health Data Science and Informatics", role = c("cph"))
   )
-Maintainer: Jamie Gilbert <gilbert@ohdsi.org>
+Maintainer: Ger Inberg <g.inberg@erasmusmc.nl>
 Description: CohortDiagnostics is an R utility package for the development and evaluation of phenotype algorithms for
     OMOP CDM compliant data sets. This package provides a standard, end to end, set of analytics for understanding
     patient capture including data generation and result exploration through an R Shiny interface.
@@ -53,7 +55,6 @@ Suggests:
   zip,
   knitr,
   shiny,
-  OhdsiShinyModules,
   rsconnect,
   yaml
 Remotes:
@@ -61,8 +62,6 @@ Remotes:
   ohdsi/FeatureExtraction,
   ohdsi/CirceR,
   ohdsi/CohortGenerator@random_sample,
-  ohdsi/OhdsiShinyModules,
-  darwin-eu/CDMConnector
 License: Apache License
 VignetteBuilder: knitr
 URL: https://ohdsi.github.io/CohortDiagnostics, https://github.com/OHDSI/CohortDiagnostics

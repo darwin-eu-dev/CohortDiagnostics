@@ -1,3 +1,12 @@
+
+===================================
+CohortDiagnostics 3.4.0 Darwin fork
+===================================
+
+First release of Darwin fork of Cohort Diagnostics for use in Darwin studies
+
+- Add CDMConnector support
+
 =======
 CohortDiagnostics 3.3.0
 =======================
