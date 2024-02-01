@@ -37,7 +37,7 @@ getVisitContext <- function(connectionDetails = NULL,
   sql <- loadRenderTranslateSql(
     "VisitContext.sql",
     packageName = "CohortDiagnostics",
-    dbms = getDbms(connection),
+    dbms = CDMConnector::dbms(connection),
     tempEmulationSchema = tempEmulationSchema,
     visit_context_table = "#visit_context",
     cdm_database_schema = cdmDatabaseSchema,

@@ -20,7 +20,6 @@
 #' @param sql The SQL to be executed
 #' @param errorReportFile error file
 #' @param snakeCaseToCamelCase snake case to camel case boolean
-#' @param oracleTempSchema oracle temp schema
 #' @param tempEmulationSchema temp emulation schema
 #' @param integerAsNumeric int as numeric boolean
 #' @param integer64AsNumeric int64 as numeric boolean
@@ -31,13 +30,14 @@ renderTranslateExecuteSql <- function(connection,
                                       sql,
                                       errorReportFile = file.path(getwd(), "errorReportSql.txt"),
                                       snakeCaseToCamelCase = FALSE,
-                                      oracleTempSchema = NULL,
                                       tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                                       integerAsNumeric = getOption("databaseConnectorIntegerAsNumeric", default = TRUE),
                                       integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
+                                      reportOverallTime = FALSE,
+                                      progressBar = FALSE,
                                       ...) {
   sql <- SqlRender::render(sql = sql, ...)
-  sql <- SqlRender::translate(sql = sql, targetDialect = getDbms(connection))
+  sql <- SqlRender::translate(sql = sql, targetDialect = CDMConnector::dbms(connection))
   DBI::dbExecute(conn = connection, statement = sql)
 }
 
@@ -47,7 +47,6 @@ renderTranslateExecuteSql <- function(connection,
 #' @param sql The SQL to be executed
 #' @param errorReportFile error file
 #' @param snakeCaseToCamelCase snake case to camel case boolean
-#' @param oracleTempSchema oracle temp schema
 #' @param tempEmulationSchema temp emulation schema
 #' @param integerAsNumeric int as numeric boolean
 #' @param integer64AsNumeric int64 as numeric boolean
@@ -58,13 +57,12 @@ renderTranslateQuerySql <- function(connection,
                                     sql,
                                     errorReportFile = file.path(getwd(), "errorReportSql.txt"),
                                     snakeCaseToCamelCase = FALSE,
-                                    oracleTempSchema = NULL,
                                     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                                     integerAsNumeric = getOption("databaseConnectorIntegerAsNumeric", default = TRUE),
                                     integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
                                     ...) {
   sql <- SqlRender::render(sql = sql, ...)
-  sql <- SqlRender::translate(sql = sql, targetDialect = getDbms(connection))
+  sql <- SqlRender::translate(sql = sql, targetDialect = CDMConnector::dbms(connection))
   result <- DBI::dbGetQuery(conn = connection, statement = sql)
   if (snakeCaseToCamelCase) {
     colnames(result) <- SqlRender::snakeCaseToCamelCase(colnames(result))
@@ -165,7 +163,7 @@ renderTranslateQuerySqlToAndromeda <- function(connection,
                                                                                default = TRUE),
                                                ...) {
   sql <- SqlRender::render(sql = sql, ...)
-  sql <- SqlRender::translate(sql = sql, targetDialect = getDbms(connection))
+  sql <- SqlRender::translate(sql = sql, targetDialect = CDMConnector::dbms(connection))
   querySqlToAndromeda(connection = connection,
                       sql = sql,
                       andromeda = andromeda,
@@ -209,22 +207,6 @@ isCDMConnection <- function(connection) {
   return(!("dbms" %in% names(attributes(connection))))
 }
 
-#' getDbms
-#'
-#' @param connection db connection
-#'
-#' @return dbms
-#' 
-getDbms <- function(connection) {
-  result <- NULL
-  if (isCDMConnection(connection)) {
-    result <- CDMConnector::dbms(connection)
-  } else {
-    result <- connection@dbms
-  }
-  return(result)
-}
-
 #' getTableNames
 #'
 #' @param connection db connection
@@ -266,7 +248,6 @@ existsTable <- function(connection, databaseSchema, tableName) {
 #' @param dropTableIfExists   Drop the table if the table already exists before writing?
 #' @param createTable         Create a new table? If false, will append to existing table.
 #' @param tempTable           Should the table created as a temp table?
-#' @param oracleTempSchema    oracle temp schema name
 #' @template TempEmulationSchema 
 #' @param bulkLoad            If using Redshift, PDW, Hive or Postgres, use more performant bulk loading
 #'                            techniques. Does not work for temp tables (except for HIVE). See Details for
@@ -322,7 +303,6 @@ insertTable <- function(connection,
                         dropTableIfExists = TRUE,
                         createTable = TRUE,
                         tempTable = FALSE,
-                        oracleTempSchema = NULL,
                         tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                         bulkLoad = Sys.getenv("DATABASE_CONNECTOR_BULK_UPLOAD"),
                         useMppBulkLoad = Sys.getenv("USE_MPP_BULK_LOAD"),

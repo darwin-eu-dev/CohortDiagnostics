@@ -4,7 +4,7 @@ loadRenderTranslateSql <- function(
   dbms = "sql server", 
   ..., 
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"), 
-  oracleTempSchema = NULL, warnOnMissingParameters = TRUE) {
+  warnOnMissingParameters = TRUE) {
 
   errorMessages <- checkmate::makeAssertCollection()
   checkmate::assertCharacter(sqlFilename, len = 1, add = errorMessages)
@@ -12,24 +12,15 @@ loadRenderTranslateSql <- function(
   checkmate::assertCharacter(dbms, len = 1, add = errorMessages)
   checkmate::assertChoice(dbms, SqlRender::listSupportedDialects()$dialect, add = errorMessages)
   checkmate::assertCharacter(tempEmulationSchema, len = 1, null.ok = TRUE, add = errorMessages)
-  checkmate::assertCharacter(oracleTempSchema, len = 1, null.ok = TRUE, add = errorMessages)
   checkmate::assertLogical(warnOnMissingParameters, len = 1, add = errorMessages)
   checkmate::reportAssertions(collection = errorMessages)
-  
-  if (!is.null(oracleTempSchema) && oracleTempSchema != "") {
-    rlang::warn("The 'oracleTempSchema' argument is deprecated. Use 'tempEmulationSchema' instead.", 
-                .frequency = "regularly", .frequency_id = "oracleTempSchema")
-    
-    tempEmulationSchema <- oracleTempSchema
-  }
   
   pathToSql <- system.file("sql", gsub(" ", "_", dbms), sqlFilename, package = packageName)
   
   mustTranslate <- pathToSql == ""
   
   if (mustTranslate) {
-    pathToSql <- system.file("sql", "sql_server", sqlFilename, 
-                             package = packageName)
+    pathToSql <- system.file("sql", "sql_server", sqlFilename, package = packageName)
     if (pathToSql == "") {
       pathToSql <- system.file("sql", sqlFilename, package = packageName)
     }

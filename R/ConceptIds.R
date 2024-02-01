@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-
 exportConceptInformation <- function(connection = NULL,
                                      cdmDatabaseSchema,
                                      tempEmulationSchema,
@@ -23,18 +21,16 @@ exportConceptInformation <- function(connection = NULL,
                                      vocabularyTableNames = getDefaultVocabularyTableNames(),
                                      incremental,
                                      exportFolder) {
+  
   ParallelLogger::logInfo("Retrieving concept information")
   start <- Sys.time()
   if (is.null(connection)) {
     warning("No connection provided")
   }
   
-  vocabularyTableNames <-
-    tolower(SqlRender::camelCaseToSnakeCase(vocabularyTableNames))
-  tablesInCdmDatabaseSchema <-
-    tolower(getTableNames(connection, cdmDatabaseSchema))
-  vocabularyTablesInCdmDatabaseSchema <-
-    tablesInCdmDatabaseSchema[tablesInCdmDatabaseSchema %in% vocabularyTableNames]
+  vocabularyTableNames <- tolower(SqlRender::camelCaseToSnakeCase(vocabularyTableNames))
+  tablesInCdmDatabaseSchema <- tolower(getTableNames(connection, cdmDatabaseSchema))
+  vocabularyTablesInCdmDatabaseSchema <- tablesInCdmDatabaseSchema[tablesInCdmDatabaseSchema %in% vocabularyTableNames]
 
   if (length(vocabularyTablesInCdmDatabaseSchema) == 0) {
     stop("Vocabulary tables not found in ", cdmDatabaseSchema)
@@ -49,6 +45,7 @@ exportConceptInformation <- function(connection = NULL,
       snakeCaseToCamelCase = TRUE,
       tempEmulationSchema = tempEmulationSchema
     )[, 1]
+  
   if (length(uniqueConceptIds) == 0) {
     if (!incremental) {
       warning("No concept IDs in cohorts. No concept information exported.")

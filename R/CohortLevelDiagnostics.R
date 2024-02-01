@@ -45,7 +45,7 @@ getCohortCounts <- function(connectionDetails = NULL,
     loadRenderTranslateSql(
       sqlFilename = "CohortCounts.sql",
       packageName = "CohortDiagnostics",
-      dbms = getDbms(connection),
+      dbms = CDMConnector::dbms(connection),
       cohort_database_schema = cohortDatabaseSchema,
       cohort_table = cohortTable,
       cohort_ids = cohortIds

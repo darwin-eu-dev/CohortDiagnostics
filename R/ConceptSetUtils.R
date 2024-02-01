@@ -34,7 +34,7 @@
   sql <- loadRenderTranslateSql(
     "OrphanCodes.sql",
     packageName = "CohortDiagnostics",
-    dbms = getDbms(connection),
+    dbms = CDMConnector::dbms(connection),
     tempEmulationSchema = tempEmulationSchema,
     vocabulary_database_schema = vocabularyDatabaseSchema,
     work_database_schema = conceptCountsDatabaseSchema,
@@ -60,18 +60,13 @@
     tidyr::tibble()
 
   ParallelLogger::logTrace("- Dropping orphan temp tables")
-  sql <-
-    loadRenderTranslateSql(
-      "DropOrphanConceptTempTables.sql",
-      packageName = "CohortDiagnostics",
-      dbms = getDbms(connection),
-      tempEmulationSchema = tempEmulationSchema
-    )
-  executeSql(
-    connection = connection,
-    sql = sql,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+  sql <- loadRenderTranslateSql(
+    "DropOrphanConceptTempTables.sql",
+    packageName = "CohortDiagnostics",
+    dbms = CDMConnector::dbms(connection),
+    tempEmulationSchema = tempEmulationSchema
   )
+  
+  DBI::dbExecute(connection, sql)
   return(orphanConcepts)
 }

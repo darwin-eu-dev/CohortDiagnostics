@@ -239,25 +239,6 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                seedArgs = NULL,
                                sampleIdentifierExpression = "cohortId * 1000 + seed") {
   
-  # collect arguments that were passed to cohort diagnostics at initiation
-  callingArgs <- formals(executeDiagnostics)
-  callingArgsJson <-
-    list(
-      runInclusionStatistics = callingArgs$runInclusionStatistics,
-      runIncludedSourceConcepts = callingArgs$runIncludedSourceConcepts,
-      runOrphanConcepts = callingArgs$runOrphanConcepts,
-      runTimeSeries = callingArgs$runTimeSeries,
-      runVisitContext = callingArgs$runVisitContext,
-      runBreakdownIndexEvents = callingArgs$runBreakdownIndexEvents,
-      runIncidenceRate = callingArgs$runIncidenceRate,
-      runTemporalCohortCharacterization = callingArgs$runTemporalCohortCharacterization,
-      minCellCount = callingArgs$minCellCount,
-      minCharacterizationMean = callingArgs$minCharacterizationMean,
-      incremental = callingArgs$incremental,
-      temporalCovariateSettings = callingArgs$temporalCovariateSettings
-    ) %>%
-    RJSONIO::toJSON(digits = 23, pretty = TRUE)
-
   exportFolder <- normalizePath(exportFolder, mustWork = FALSE)
   incrementalFolder <- normalizePath(incrementalFolder, mustWork = FALSE)
   executionTimePath <- file.path(exportFolder, "taskExecutionTimes.csv")
@@ -271,11 +252,11 @@ executeDiagnostics <- function(cohortDefinitionSet,
     ParallelLogger::logTrace(" - Databasename was not provided. Using CDM source table")
   }
   if (any(is.null(databaseDescription), is.na(databaseDescription))) {
-    ParallelLogger::logTrace(" - Databasedescription was not provided. Using CDM source table")
+    ParallelLogger::logTrace(" - Database description was not provided. Using CDM source table")
   }
 
   errorMessage <- checkmate::makeAssertCollection()
-  checkmate::assertList(cohortTableNames, null.ok = FALSE, types = "character", add = errorMessage, names = "named")
+  checkmate::assertList(cohortTableNames, null.ok = FALSE, types = "character", names = "named")
   checkmate::assertNames(names(cohortTableNames),
     must.include = c(
       "cohortTable",
@@ -287,80 +268,30 @@ executeDiagnostics <- function(cohortDefinitionSet,
     ),
     add = errorMessage
   )
-  checkmate::assertDataFrame(cohortDefinitionSet, add = errorMessage)
-  
-  checkmate::assertNames(names(cohortDefinitionSet),
-    must.include = c(
-      "json",
-      "cohortId",
-      "cohortName"
-    ),
-    add = errorMessage
-  )
+  checkmate::assertDataFrame(cohortDefinitionSet)
+  checkmate::assertNames(names(cohortDefinitionSet), must.include = c("json","cohortId", "cohortName"))
 
   cohortTable <- cohortTableNames$cohortTable
-  checkmate::assertLogical(runInclusionStatistics, add = errorMessage)
-  checkmate::assertLogical(runIncludedSourceConcepts, add = errorMessage)
-  checkmate::assertLogical(runOrphanConcepts, add = errorMessage)
-  checkmate::assertLogical(runTimeSeries, add = errorMessage)
-  checkmate::assertLogical(runBreakdownIndexEvents, add = errorMessage)
-  checkmate::assertLogical(runIncidenceRate, add = errorMessage)
-  checkmate::assertLogical(runTemporalCohortCharacterization, add = errorMessage)
-  checkmate::assertInt(
-    x = cdmVersion,
-    na.ok = FALSE,
-    lower = 5,
-    upper = 5,
-    null.ok = FALSE,
-    add = errorMessage
-  )
-  minCellCount <- utils::type.convert(minCellCount, as.is = TRUE)
-  checkmate::assertInteger(x = minCellCount, len = 1, lower = 0, add = errorMessage)
-  minCharacterizationMean <- utils::type.convert(minCharacterizationMean, as.is = TRUE)
-  checkmate::assertNumeric(x = minCharacterizationMean, lower = 0, add = errorMessage)
-  checkmate::assertLogical(incremental, add = errorMessage)
-
-  if (any(
-    runInclusionStatistics,
-    runIncludedSourceConcepts,
-    runOrphanConcepts,
-    runBreakdownIndexEvents,
-    runIncidenceRate
-  )) {
-    checkmate::assertCharacter(
-      x = cdmDatabaseSchema,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = vocabularyDatabaseSchema,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = cohortDatabaseSchema,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = cohortTable,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = databaseId,
-      min.len = 1,
-      add = errorMessage
-    )
-  }
-  checkmate::reportAssertions(collection = errorMessage)
-
-  errorMessage <-
-    createIfNotExist(
-      type = "folder",
-      name = exportFolder,
-      errorMessage = errorMessage
-    )
+  
+  checkmate::assertLogical(runInclusionStatistics)
+  checkmate::assertLogical(runIncludedSourceConcepts)
+  checkmate::assertLogical(runOrphanConcepts)
+  checkmate::assertLogical(runTimeSeries)
+  checkmate::assertLogical(runBreakdownIndexEvents)
+  checkmate::assertLogical(runIncidenceRate)
+  checkmate::assertLogical(runTemporalCohortCharacterization)
+  checkmate::assertInt(cdmVersion, lower = 5, upper = 5)
+  checkmate::assertIntegerish(x = minCellCount, len = 1, lower = 0)
+  checkmate::assertNumeric(x = minCharacterizationMean, lower = 0)
+  checkmate::assertLogical(incremental)
+  checkmate::assertCharacter(cdmDatabaseSchema, min.len = 1, any.missing = FALSE)
+  checkmate::assertCharacter(vocabularyDatabaseSchema, min.len = 1, any.missing = FALSE)
+  checkmate::assertCharacter(cohortDatabaseSchema, min.len = 1, any.missing = FALSE)
+  checkmate::assertCharacter(cohortTable, min.len = 1, any.missing = FALSE)
+  checkmate::assertCharacter(databaseId, min.len = 1, any.missing = FALSE)
+  
+  fs::dir_create(exportFolder)
+  checkmate::assertDirectoryExists(exportFolder)
 
   ParallelLogger::addDefaultFileLogger(file.path(exportFolder, "log.txt"))
   ParallelLogger::addDefaultErrorReportLogger(file.path(exportFolder, "errorReportR.txt"))
@@ -370,21 +301,18 @@ executeDiagnostics <- function(cohortDefinitionSet,
     add = TRUE
   )
 
-
   if (incremental) {
-    errorMessage <-
-      createIfNotExist(
-        type = "folder",
-        name = incrementalFolder,
-        errorMessage = errorMessage
-      )
+    fs::dir_create(incrementalFolder)
+    checkmate::assertDirectoryExists(incrementalFolder)
   }
+  
   if (runTemporalCohortCharacterization) {
     if (is(temporalCovariateSettings, "covariateSettings")) {
       temporalCovariateSettings <- list(temporalCovariateSettings)
     }
+    
     # All temporal covariate settings objects must be covariateSettings
-    checkmate::assert_true(all(lapply(temporalCovariateSettings, class) == c("covariateSettings")), add = errorMessage)
+    checkmate::assert_true(all(lapply(temporalCovariateSettings, class) == c("covariateSettings")))
 
     requiredCharacterisationSettings <- c(
       "DemographicsGender", "DemographicsAgeGroup", "DemographicsRace",
@@ -656,7 +584,8 @@ executeDiagnostics <- function(cohortDefinitionSet,
   ParallelLogger::logTrace("Creating concept ID table for tracking concepts used in diagnostics")
   sql <- SqlRender::translate(
     'DROP TABLE IF EXISTS #concept_ids; CREATE TABLE #concept_ids (concept_id BIGINT);',
-    targetDialect = CDMConnector::dbms(connection)
+    targetDialect = CDMConnector::dbms(connection),
+    tempEmulationSchema = tempEmulationSchema
   )  
   DBI::dbExecute(connection, sql)
 
@@ -1006,8 +935,6 @@ executeDiagnostics <- function(cohortDefinitionSet,
     "runTimeUnits",
     # 3
     "packageDependencySnapShotJson",
-    # 4
-    "argumentsAtDiagnosticsInitiationJson",
     # 5
     "rversion",
     # 6
@@ -1053,8 +980,6 @@ executeDiagnostics <- function(cohortDefinitionSet,
     as.character(attr(delta, "units")),
     # 3
     "{}",
-    # 4
-    callingArgsJson,
     # 5
     as.character(R.Version()$version.string),
     # 6
@@ -1122,26 +1047,16 @@ executeDiagnostics <- function(cohortDefinitionSet,
     NULL,
     parent = "executeDiagnostics",
     expr = {
-      writeResultsZip(exportFolder, databaseId)
+      ParallelLogger::logInfo("Adding results to zip file")
+      zipName <- file.path(exportFolder, paste0("Results_", databaseId, ".zip"))
+      files <- list.files(exportFolder, pattern = ".*\\.csv$")
+      wd <- getwd()
+      on.exit(setwd(wd), add = TRUE)
+      setwd(exportFolder)
+      DatabaseConnector::createZipFile(zipFile = zipName, files = files)
+      ParallelLogger::logInfo("Results are ready for sharing at: ", zipName)
     }
   )
 
-  ParallelLogger::logInfo(
-    "Computing all diagnostics took ",
-    signif(delta, 3),
-    " ",
-    attr(delta, "units")
-  )
-}
-
-
-writeResultsZip <- function(exportFolder, databaseId) {
-  ParallelLogger::logInfo("Adding results to zip file")
-  zipName <- file.path(exportFolder, paste0("Results_", databaseId, ".zip"))
-  files <- list.files(exportFolder, pattern = ".*\\.csv$")
-  wd <- getwd()
-  on.exit(setwd(wd), add = TRUE)
-  setwd(exportFolder)
-  DatabaseConnector::createZipFile(zipFile = zipName, files = files)
-  ParallelLogger::logInfo("Results are ready for sharing at: ", zipName)
+  ParallelLogger::logInfo("Computing all diagnostics took ", signif(delta, 3), " ", attr(delta, "units"))
 }

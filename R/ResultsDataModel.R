@@ -58,7 +58,7 @@ getDefaultVocabularyTableNames <- function() {
       list(
         sqlFilename = "CreateResultsDataModel.sql",
         packageName = "CohortDiagnostics",
-        dbms = getDbms(connection),
+        dbms = CDMConnector::dbms(connection),
         results_schema = databaseSchema
       )
     )

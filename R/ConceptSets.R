@@ -33,8 +33,7 @@ extractConceptSetsSqlFromCohortSql <- function(cohortSql) {
   level <- cumsum(x)
   level0 <- which(level == 0)
 
-  subQueryLocations <-
-    stringr::str_locate_all(sql, "SELECT [0-9]+ as codeset_id")[[1]]
+  subQueryLocations <- stringr::str_locate_all(sql, "SELECT [0-9]+ as codeset_id")[[1]]
   subQueryCount <- nrow(subQueryLocations)
   conceptsetSqls <- vector("character", subQueryCount)
   conceptSetIds <- vector("integer", subQueryCount)
@@ -230,7 +229,7 @@ mergeTempTables <-
       )
     sql <-
       SqlRender::translate(sql,
-        targetDialect = getDbms(connection),
+        targetDialect = CDMConnector::dbms(connection),
         tempEmulationSchema = tempEmulationSchema
       )
     executeSql(connection,
@@ -245,7 +244,7 @@ mergeTempTables <-
         sprintf("TRUNCATE TABLE %s;\nDROP TABLE %s;", tempTable, tempTable)
       sql <-
         SqlRender::translate(sql,
-          targetDialect = getDbms(connection),
+          targetDialect = CDMConnector::dbms(connection),
           tempEmulationSchema = tempEmulationSchema
         )
       executeSql(connection,
@@ -295,7 +294,7 @@ instantiateUniqueConceptSets <- function(uniqueConceptSets,
       sqlSubset <-
         SqlRender::render(sqlSubset, vocabulary_database_schema = vocabularyDatabaseSchema)
       sqlSubset <- SqlRender::translate(sqlSubset,
-        targetDialect = getDbms(connection),
+        targetDialect = CDMConnector::dbms(connection),
         tempEmulationSchema = tempEmulationSchema
       )
       executeSql(connection,
@@ -503,7 +502,7 @@ runConceptSetDiagnostics <- function(connection,
             sql <- loadRenderTranslateSql(
               "CohortSourceCodes.sql",
               packageName = "CohortDiagnostics",
-              dbms = getDbms(connection),
+              dbms = CDMConnector::dbms(connection),
               tempEmulationSchema = tempEmulationSchema,
               cdm_database_schema = cdmDatabaseSchema,
               instantiated_concept_sets = "#inst_concept_sets",
@@ -728,7 +727,7 @@ runConceptSetDiagnostics <- function(connection,
                 loadRenderTranslateSql(
                   "CohortEntryBreakdown.sql",
                   packageName = "CohortDiagnostics",
-                  dbms = getDbms(connection),
+                  dbms = CDMConnector::dbms(connection),
                   tempEmulationSchema = tempEmulationSchema,
                   cdm_database_schema = cdmDatabaseSchema,
                   vocabulary_database_schema = vocabularyDatabaseSchema,

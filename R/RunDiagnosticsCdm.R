@@ -105,12 +105,24 @@ executeDiagnosticsCdm <- function(cdm,
     overwrite = TRUE
   )
   
+  cohortSet$sql <- character(nrow(cohortSet))
+  
   cohortDefinitionSet <- cohortSet %>% 
     dplyr::mutate(
       cohortName = cohort_name, 
-      sql = "adsf",
+      sql = "",
       json = as.character(json),
-      cohortId = as.numeric(cohort_definition_id))
+      cohortId = as.numeric(cohort_definition_id),
+      isSubset = FALSE)
+  
+  # fill in the sql column
+  for (i in seq_len(nrow(cohortDefinitionSet))) {
+    cohortJson <- cohortDefinitionSet$json[[i]]
+    cohortExpression <- CirceR::cohortExpressionFromJson(expressionJson = cohortJson)
+    cohortSql <- CirceR::buildCohortQuery(expression = cohortExpression,
+                                          options = CirceR::createGenerateOptions(generateStats = TRUE))
+    cohortDefinitionSet$sql[i] <- SqlRender::render(cohortSql, warnOnMissingParameters = FALSE)
+  }
   
   executeDiagnostics(cohortDefinitionSet,
                      connectionDetails = NULL,

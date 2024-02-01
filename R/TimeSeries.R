@@ -323,28 +323,28 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
       packageName = "CohortDiagnostics",
       stratify_by_gender = FALSE,
       stratify_by_age_group = FALSE,
-      dbms = getDbms(connection)
+      dbms = CDMConnector::dbms(connection)
     )
     sqlGender <- loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
       packageName = "CohortDiagnostics",
       stratify_by_gender = TRUE,
       stratify_by_age_group = FALSE,
-      dbms = getDbms(connection)
+      dbms = CDMConnector::dbms(connection)
     )
     sqlAgeGroup <- loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
       packageName = "CohortDiagnostics",
       stratify_by_gender = FALSE,
       stratify_by_age_group = TRUE,
-      dbms = getDbms(connection)
+      dbms = CDMConnector::dbms(connection)
     )
     sqlAgeGroupGender <- loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
       packageName = "CohortDiagnostics",
       stratify_by_gender = TRUE,
       stratify_by_age_group = TRUE,
-      dbms = getDbms(connection)
+      dbms = CDMConnector::dbms(connection)
     )
 
     if (seriesToRun[[i]] %in% c(

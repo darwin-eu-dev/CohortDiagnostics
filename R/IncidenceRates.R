@@ -60,7 +60,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
     loadRenderTranslateSql(
       sqlFilename = "GetCalendarYearRange.sql",
       packageName = "CohortDiagnostics",
-      dbms = getDbms(connection),
+      dbms = CDMConnector::dbms(connection),
       cdm_database_schema = cdmDatabaseSchema
     )
   yearRange <- querySql(connection, sql, snakeCaseToCamelCase = TRUE)
@@ -83,7 +83,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
     loadRenderTranslateSql(
       sqlFilename = "ComputeIncidenceRates.sql",
       packageName = "CohortDiagnostics",
-      dbms = getDbms(connection),
+      dbms = CDMConnector::dbms(connection),
       tempEmulationSchema = tempEmulationSchema,
       cohort_database_schema = cohortDatabaseSchema,
       cohort_table = cohortTable,
