@@ -239,6 +239,24 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                seedArgs = NULL,
                                sampleIdentifierExpression = "cohortId * 1000 + seed") {
   
+  # collect arguments that were passed to cohort diagnostics at initiation
+  callingArgs <- formals(executeDiagnostics)
+  callingArgsJson <- list(
+    runInclusionStatistics = callingArgs$runInclusionStatistics,
+    runIncludedSourceConcepts = callingArgs$runIncludedSourceConcepts,
+    runOrphanConcepts = callingArgs$runOrphanConcepts,
+    runTimeSeries = callingArgs$runTimeSeries,
+    runVisitContext = callingArgs$runVisitContext,
+    runBreakdownIndexEvents = callingArgs$runBreakdownIndexEvents,
+    runIncidenceRate = callingArgs$runIncidenceRate,
+    runTemporalCohortCharacterization = callingArgs$runTemporalCohortCharacterization,
+    minCellCount = callingArgs$minCellCount,
+    minCharacterizationMean = callingArgs$minCharacterizationMean,
+    incremental = callingArgs$incremental,
+    temporalCovariateSettings = callingArgs$temporalCovariateSettings
+  ) %>%
+    RJSONIO::toJSON(digits = 23, pretty = TRUE)
+  
   exportFolder <- normalizePath(exportFolder, mustWork = FALSE)
   incrementalFolder <- normalizePath(incrementalFolder, mustWork = FALSE)
   executionTimePath <- file.path(exportFolder, "taskExecutionTimes.csv")
@@ -320,6 +338,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
       "ConditionEraGroupOverlap", "DrugEraGroupOverlap", "CharlsonIndex",
       "Chads2", "Chads2Vasc"
     )
+    
     presentSettings <- temporalCovariateSettings[[1]][requiredCharacterisationSettings]
     if (!all(unlist(presentSettings))) {
       warning(
@@ -534,7 +553,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   )
 
-  cohortDefinitionSet$checksum <- 0
+  cohortDefinitionSet$checksum <- computeChecksum(cohortDefinitionSet$sql)
 
   if (incremental) {
     ParallelLogger::logDebug("Working in incremental mode.")
@@ -660,7 +679,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   } else {
     if (conceptCountsTable == "#concept_counts") {
-      # stop("Temporary conceptCountsTable name. Please provide a valid external ConceptCountsTable name")
+      stop("Temporary conceptCountsTable name. Please provide a valid external ConceptCountsTable name")
     }
     conceptCountsTableIsTemp <- FALSE
     conceptCountsTable <- conceptCountsTable
@@ -935,6 +954,8 @@ executeDiagnostics <- function(cohortDefinitionSet,
     "runTimeUnits",
     # 3
     "packageDependencySnapShotJson",
+    # 4
+    "callingArgsJson",
     # 5
     "rversion",
     # 6
@@ -980,6 +1001,8 @@ executeDiagnostics <- function(cohortDefinitionSet,
     as.character(attr(delta, "units")),
     # 3
     "{}",
+    # 4
+    callingArgsJson,
     # 5
     as.character(R.Version()$version.string),
     # 6

@@ -6,7 +6,7 @@
 \usage{
 getDbCovariateData(
   connection = NULL,
-  oracleTempSchema = NULL,
+  tempEmulationSchema = NULL,
   cdmDatabaseSchema,
   cdmVersion = "5",
   cohortTable = "cohort",
@@ -24,7 +24,7 @@ getDbCovariateData(
 Either the \code{connection} or \code{connectionDetails} argument
 should be specified.}
 
-\item{oracleTempSchema}{A schema where temp tables can be created in Oracle.}
+\item{tempEmulationSchema}{A schema where temp tables can be created.}
 
 \item{cdmDatabaseSchema}{The name of the database schema that contains the OMOP CDM instance.
 Requires read permissions to this database. On SQL Server, this should
@@ -81,7 +81,7 @@ Eunomia::createCohorts(
 )
 covData <- getDbCovariateData(
   connectionDetails = eunomiaConnectionDetails,
-  oracleTempSchema = NULL,
+  tempEmulationSchema = NULL,
   cdmDatabaseSchema = "main",
   cdmVersion = "5",
   cohortTable = "cohort",

@@ -2,87 +2,68 @@
 % Please edit documentation in R/RunDiagnosticsCdm.R
 \name{executeDiagnosticsCdm}
 \alias{executeDiagnosticsCdm}
-\title{executeDiagnosticsCdm}
+\title{Run Diagnostics for a cohort set}
 \usage{
 executeDiagnosticsCdm(
   cdm,
-  cohortDefinitionSet,
-  cohortTable = "cohort",
-  conceptCountsTable = "#concept_counts",
+  cohortSet,
   exportFolder,
-  minCellCount = 5,
-  runInclusionStatistics = TRUE,
-  runIncludedSourceConcepts = TRUE,
-  runOrphanConcepts = TRUE,
-  runTimeSeries = TRUE,
-  runVisitContext = TRUE,
-  runBreakdownIndexEvents = TRUE,
-  runIncidenceRate = TRUE,
-  runCohortRelationship = TRUE,
-  runTemporalCohortCharacterization = TRUE,
-  useExternalConceptCountsTable = TRUE
+  runAnalysis = 1:9,
+  minCellCount = 5
 )
 }
 \arguments{
-\item{cdm}{Cdm reference object}
+\item{cdm}{A cdm_reference object create by CDMConnector::cdm_from_con()}
 
-\item{cohortDefinitionSet}{Data.frame of cohorts must include columns cohortId, cohortName, json, sql}
-
-\item{cohortTable}{Cohort table name}
-
-\item{conceptCountsTable}{Concept counts table name}
+\item{cohortSet}{A cohort set created by CDMConnector::readCohortSet()}
 
 \item{exportFolder}{The folder where the output will be exported to. If this folder does not exist it will be created.}
 
+\item{runAnalysis}{A numeric vector corresponding to the diagnostic analyses should be executed. See Details}
+
 \item{minCellCount}{The minimum cell count for fields contains person counts or fractions.}
-
-\item{runInclusionStatistics}{Generate and export statistic on the cohort inclusion rules?}
-
-\item{runIncludedSourceConcepts}{Generate and export the source concepts included in the cohorts?}
-
-\item{runOrphanConcepts}{Generate and export potential orphan concepts?}
-
-\item{runTimeSeries}{Generate and export the time series diagnostics?}
-
-\item{runVisitContext}{Generate and export index-date visit context?}
-
-\item{runBreakdownIndexEvents}{Generate and export the breakdown of index events?}
-
-\item{runIncidenceRate}{Generate and export the cohort incidence  rates?}
-
-\item{runCohortRelationship}{Generate and export the cohort relationship? Cohort relationship checks the temporal
-relationship between two or more cohorts.}
-
-\item{runTemporalCohortCharacterization}{Generate and export the temporal cohort characterization?
-Only records with values greater than 0.001 are returned.}
-
-\item{useExternalConceptCountsTable}{if external concept counts table should be used}
 }
 \description{
-executeDiagnosticsCdm
+This is the main function exported by the CohortDiagnositcs package. It runs the
+diagnostic analysis and saves the results to a folder.
 }
+\details{
+runAnalysis argument
+
+Pass a numeric vector matching the following analyses. Negative numbers will be interpreted as exclusions.
+Use a numeric vector to select the analyses you want to run. Negative numbers will exclude analyses.
+The selection works the same way as vector subsetting in R.
+}
+\section{Analyses to choose from:}{
+\enumerate{
+\item InclusionStatistics - Report the number of subjects that match specific inclusion rules in each cohort definition.
+\item IncludedSourceConcepts - Report the source concepts observed in the database that are included in a concept set of a cohort.
+\item OrphanConcepts - Report the source concepts observed in the database that are not included in a concept set of a cohort, but maybe should be.
+\item TimeSeries - Boxplot and a table showing the distribution of time (in days) before and after the cohort index date (cohort start date), and the time between cohort start and end date.
+\item VisitContext - Report the relationship between the cohort start date and visits recorded in the database.
+\item BreakdownIndexEvents - Report the concepts belonging to the concept sets in the entry event definition that are observed on the index date.
+\item IncidenceRate - A graph showing the incidence rate, optionally stratified by age (in 10-year bins), gender, and calendar year.
+\item CohortRelationship - Stacked bar graph showing the overlap between two cohorts, and a table listing several overlap statistics.
+\item TemporalCohortCharacterization - A table showing temporal cohort characteristics (covariates). These characteristics are captured at specific time intervals before or after cohort start date.
+}
+}
+
 \examples{
 \dontrun{
-cohortTable <- "mycohort"
+
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
+
 cdm <- cdmFromCon(con, cdmSchema = "main", writeSchema = "main", cdmName = "eunomia")
+
 cohortDefinitionSet <- CDMConnector::readCohortSet(system.file("cohorts", package = "CohortDiagnostics"))
-cdm <- generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
-executeDiagnosticsCdm(cdm = cdm,
- cohortDefinitionSet = cohortDefinitionSet,
- cohortTable = cohortTable,
- exportFolder = "output",
- minCellCount = 5,
- runInclusionStatistics = T,
- runIncludedSourceConcepts = T,
- runOrphanConcepts = T,
- runTimeSeries = T,
- runVisitContext = T,
- runBreakdownIndexEvents = T,
- runIncidenceRate = T,
- runCohortRelationship = T,
- runTemporalCohortCharacterization = T,
- useExternalConceptCountsTable = F)
+
+# run all analyses
+executeDiagnosticsCdm(
+ cdm,
+
+# skip CohortRelationship and TemporalCohortCharacterization
+executeDiagnosticsCdm(
+ cdm,
 }
 
 }

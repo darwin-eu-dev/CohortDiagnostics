@@ -18,10 +18,12 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Jamie Gilbert \email{gilbert@ohdsi.org}
+\strong{Maintainer}: Ger Inberg \email{g.inberg@erasmusmc.nl}
 
 Authors:
 \itemize{
+  \item Adam Black \email{black@ohdsi.org}
+  \item Jamie Gilbert \email{gilbert@ohdsi.org}
   \item Gowtham Rao
   \item Martijn Schuemie
   \item Patrick Ryan

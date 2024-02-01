@@ -6,7 +6,7 @@
 \usage{
 getDbDefaultCovariateData(
   connection,
-  oracleTempSchema = NULL,
+  tempEmulationSchema = NULL,
   cdmDatabaseSchema,
   cohortTable = "#cohort_person",
   cohortIds = c(-1),
@@ -26,7 +26,7 @@ getDbDefaultCovariateData(
 Either the \code{connection} or \code{connectionDetails} argument
 should be specified.}
 
-\item{oracleTempSchema}{A schema where temp tables can be created in Oracle.}
+\item{tempEmulationSchema}{A schema where temp tables can be created.}
 
 \item{cdmDatabaseSchema}{The name of the database schema that contains the OMOP CDM instance.
 Requires read permissions to this database. On SQL Server, this should

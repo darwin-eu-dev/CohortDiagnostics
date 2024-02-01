@@ -25,27 +25,17 @@ cohortDefinitionSet <-
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
 cdm <- CDMConnector::cdmFromCon(con, cdmSchema = cdmDatabaseSchema, writeSchema = cohortDatabaseSchema, cdmName = databaseId)
 cdm <- CDMConnector::generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
+
 CohortDiagnostics::createConceptCountsTable(connection = attr(cdm, "dbcon"),
                                             cdmDatabaseSchema = cdmDatabaseSchema,
                                             conceptCountsDatabaseSchema = cdmDatabaseSchema,
                                             conceptCountsTable = conceptCountsTable)
 
 CohortDiagnostics::executeDiagnosticsCdm(cdm = cdm,
-                                         cohortDefinitionSet = cohortDefinitionSet,
-                                         cohortTable = cohortTable,
-                                         conceptCountsTable = conceptCountsTable,
+                                         cohortSet = cohortDefinitionSet,
+                                         # conceptCountsTable = conceptCountsTable,
                                          exportFolder = outputFolder,
-                                         minCellCount = minCellCount,
-                                         runInclusionStatistics = T,
-                                         runIncludedSourceConcepts = T,
-                                         runOrphanConcepts = T,
-                                         runTimeSeries = T,
-                                         runVisitContext = T,
-                                         runBreakdownIndexEvents = T,
-                                         runIncidenceRate = T,
-                                         runCohortRelationship = T,
-                                         runTemporalCohortCharacterization = T,
-                                         useExternalConceptCountsTable = T)
+                                         minCellCount = minCellCount)
 
 # package results ----
 CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, overwrite = TRUE)

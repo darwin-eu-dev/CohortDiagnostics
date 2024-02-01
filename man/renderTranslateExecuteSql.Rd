@@ -9,10 +9,11 @@ renderTranslateExecuteSql(
   sql,
   errorReportFile = file.path(getwd(), "errorReportSql.txt"),
   snakeCaseToCamelCase = FALSE,
-  oracleTempSchema = NULL,
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   integerAsNumeric = getOption("databaseConnectorIntegerAsNumeric", default = TRUE),
   integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
+  reportOverallTime = FALSE,
+  progressBar = FALSE,
   ...
 )
 }
@@ -24,8 +25,6 @@ renderTranslateExecuteSql(
 \item{errorReportFile}{error file}
 
 \item{snakeCaseToCamelCase}{snake case to camel case boolean}
-
-\item{oracleTempSchema}{oracle temp schema}
 
 \item{tempEmulationSchema}{temp emulation schema}
 

@@ -33,15 +33,15 @@
 #' The selection works the same way as vector subsetting in R.
 #' 
 #' # Analyses to choose from:
-#' 1. InclusionStatistics - TODO fill in descriptions of each analyses
-#' 1. IncludedSourceConcepts - 
-#' 1. OrphanConcepts - Find potential orphan concepts that should possibly included in your concept set.
-#' 1. TimeSeries -
-#' 1. VisitContext - 
-#' 1. BreakdownIndexEvents
-#' 1. IncidenceRate
-#' 1. CohortRelationship
-#' 1. TemporalCohortCharacterization
+#' 1. InclusionStatistics - Report the number of subjects that match specific inclusion rules in each cohort definition.
+#' 2. IncludedSourceConcepts - Report the source concepts observed in the database that are included in a concept set of a cohort. 
+#' 3. OrphanConcepts - Report the source concepts observed in the database that are not included in a concept set of a cohort, but maybe should be. 
+#' 4. TimeSeries - Boxplot and a table showing the distribution of time (in days) before and after the cohort index date (cohort start date), and the time between cohort start and end date.
+#' 5. VisitContext - Report the relationship between the cohort start date and visits recorded in the database. 
+#' 6. BreakdownIndexEvents - Report the concepts belonging to the concept sets in the entry event definition that are observed on the index date.
+#' 7. IncidenceRate - A graph showing the incidence rate, optionally stratified by age (in 10-year bins), gender, and calendar year.
+#' 8. CohortRelationship - Stacked bar graph showing the overlap between two cohorts, and a table listing several overlap statistics.
+#' 9. TemporalCohortCharacterization - A table showing temporal cohort characteristics (covariates). These characteristics are captured at specific time intervals before or after cohort start date. 
 #' 
 #' @md
 #' 
@@ -54,11 +54,20 @@
 #' 
 #' cohortDefinitionSet <- CDMConnector::readCohortSet(system.file("cohorts", package = "CohortDiagnostics"))
 #' 
+#' # run all analyses
 #' executeDiagnosticsCdm(
 #'  cdm,
 # ' cohortSet,
 # ' exportFolder,
 # ' runAnalysis = 1:9,
+# ' minCellCount = 5) 
+#' 
+#' # skip CohortRelationship and TemporalCohortCharacterization
+#' executeDiagnosticsCdm(
+#'  cdm,
+# ' cohortSet,
+# ' exportFolder,
+# ' runAnalysis = c(-8, -9),
 # ' minCellCount = 5) 
 #' }
 #' 
@@ -76,8 +85,6 @@ executeDiagnosticsCdm <- function(cdm,
     cli::cli_abort("{.arg cohortSet} needs to be a dataframe created by CDMConnector::readCohortSet()")
   }
   
-
-
   allAnalyses <- c(
     "InclusionStatistics",
     "IncludedSourceConcepts",
