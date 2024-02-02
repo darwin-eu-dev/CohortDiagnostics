@@ -154,7 +154,7 @@ writeToCsv <- function(data, fileName, incremental = FALSE, ...) {
 }
 
 
-writeToCsv.default <- function(data, fileName, incremental = FALSE, ...) {
+writeToCsv.data.frame <- function(data, fileName, incremental = FALSE, ...) {
   colnames(data) <- SqlRender::camelCaseToSnakeCase(colnames(data))
   if (incremental) {
     params <- list(...)

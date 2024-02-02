@@ -197,3 +197,4 @@ getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "")
     packageName = "CohortDiagnostics"
   )
 }
+

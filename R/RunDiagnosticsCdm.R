@@ -80,11 +80,11 @@ executeDiagnosticsCdm <- function(cdm,
                                   minCellCount = 5) { 
   
   checkmate::assertClass(cdm, "cdm_reference")
-  cohortSetColnames <- c("cohort_definition_id", "cohort_name", "cohort", "json", "cohort_name_snakecase")
-  
-  if (!(is.data.frame(cohortSet) && all(names(cohortSet) == cohortSetColnames))) {
-    cli::cli_abort("{.arg cohortSet} needs to be a dataframe created by CDMConnector::readCohortSet()")
-  }
+  # cohortSetColnames <- c("cohort_definition_id", "cohort_name", "cohort", "json", "cohort_name_snakecase")
+  # 
+  # if (!(is.data.frame(cohortSet) && all(names(cohortSet) == cohortSetColnames))) {
+  #   cli::cli_abort("{.arg cohortSet} needs to be a dataframe created by CDMConnector::readCohortSet()")
+  # }
   
   allAnalyses <- c(
     "InclusionStatistics",
@@ -101,42 +101,52 @@ executeDiagnosticsCdm <- function(cdm,
   
   # table names. these are tables created just for running cohort diagnostics
   prefix <- paste0("tmp", as.integer(Sys.time()) %% 10000, "_")
-  conceptCountsTable = paste0(prefix, "concept_counts")
-  cohortTable = paste0(prefix, "cohort")
-  
+  conceptCountsTable <- paste0(prefix, "concept_counts")
+  cohortTableNameWithoutPrefix <- paste0("cohort", as.integer(Sys.time()) %% 10000)
+  cohortTableName <- paste0(prefix, cohortTableNameWithoutPrefix)
   
   cdm <- CDMConnector::generateCohortSet(
     cdm,
     cohortSet = cohortSet,
-    name = cohortTable,
+    name = cohortTableName,
     computeAttrition = TRUE,
     overwrite = TRUE
   )
   
   cohortSet$sql <- character(nrow(cohortSet))
   
-  cohortDefinitionSet <- cohortSet %>% 
-    dplyr::mutate(
-      cohortName = cohort_name, 
-      sql = "",
-      json = as.character(json),
-      cohortId = as.numeric(cohort_definition_id),
-      isSubset = FALSE)
+  # handle both CohortGenerator cohort sets and cdm connector cohort sets
+  if (any(!(c("cohortName", "json", "cohortId") %in% names(cohortSet)))) {
+    cohortDefinitionSet <- cohortSet %>% 
+      dplyr::mutate(
+        cohortName = cohort_name, 
+        sql = "",
+        json = as.character(json),
+        cohortId = as.numeric(cohort_definition_id),
+        isSubset = FALSE)
   
-  # fill in the sql column
-  for (i in seq_len(nrow(cohortDefinitionSet))) {
-    cohortJson <- cohortDefinitionSet$json[[i]]
-    cohortExpression <- CirceR::cohortExpressionFromJson(expressionJson = cohortJson)
-    cohortSql <- CirceR::buildCohortQuery(expression = cohortExpression,
-                                          options = CirceR::createGenerateOptions(generateStats = TRUE))
-    cohortDefinitionSet$sql[i] <- SqlRender::render(cohortSql, warnOnMissingParameters = FALSE)
+    # fill in the sql column
+    for (i in seq_len(nrow(cohortDefinitionSet))) {
+      cohortJson <- cohortDefinitionSet$json[[i]]
+      cohortExpression <- CirceR::cohortExpressionFromJson(expressionJson = cohortJson)
+      cohortSql <- CirceR::buildCohortQuery(expression = cohortExpression,
+                                            options = CirceR::createGenerateOptions(generateStats = TRUE))
+      cohortDefinitionSet$sql[i] <- SqlRender::render(cohortSql, warnOnMissingParameters = FALSE)
+    }
+  } else {
+    cohortDefinitionSet <- cohortSet
+  }
+  
+  
+  if (!("isSubset" %in% names(cohortDefinitionSet))) {
+    cohortDefinitionSet$isSubset <- FALSE
   }
   
   # use hardcoded names for these tables since they only exist for the duration of the program execution
-  cohortTableName <- paste0("cd_cohort", as.integer(Sys.time()) %% 1000)
+  
   
   # TODO create the concept counts table from Achilles tables if they are in the cdm object
-  conceptCountsTableName <- paste0("cd_concept_counts", as.integer(Sys.time()) %% 1000)
+  conceptCountsTableName <- paste0("concept_counts", as.integer(Sys.time()) %% 1000)
   
   cohortTableNames <- list(
       cohortTable = cohortTableName,
@@ -170,5 +180,7 @@ executeDiagnosticsCdm <- function(cdm,
                      runCohortRelationship = "CohortRelationship" %in% selectedAnalyses,
                      runTemporalCohortCharacterization = "TemporalCohortCharacterization" %in% selectedAnalyses,
                      useExternalConceptCountsTable = FALSE)
+  
+  # clean up tables
   
 }

@@ -292,7 +292,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   checkmate::assertDataFrame(cohortDefinitionSet)
   checkmate::assertNames(names(cohortDefinitionSet), must.include = c("json","cohortId", "cohortName"))
 
-  # cohortTable <- cohortTableNames$cohortTable # I don't understand why this is here
+  cohortTable <- cohortTableNames$cohortTable # why is this here? very strange to me.
   
   checkmate::assertLogical(runInclusionStatistics)
   checkmate::assertLogical(runIncludedSourceConcepts)
@@ -474,10 +474,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     databaseId = NULL
   )
 
-  writeToCsv(
-    data = cohortDefinitionSet,
-    fileName = file.path(exportFolder, "cohort.csv")
-  )
+  readr::write_csv(cohortDefinitionSet, file.path(exportFolder, "cohort.csv"))
 
   subsets <- CohortGenerator::getSubsetDefinitions(cohortDefinitionSet)
   if (length(subsets)) {
