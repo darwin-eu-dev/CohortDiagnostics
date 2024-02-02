@@ -36,7 +36,7 @@ exportConceptInformation <- function(connection = NULL,
     stop("Vocabulary tables not found in ", cdmDatabaseSchema)
   }
 
-  sql <- "SELECT DISTINCT concept_id FROM main.@unique_concept_id_table;"
+  sql <- "SELECT DISTINCT concept_id FROM @unique_concept_id_table;"
   uniqueConceptIds <-
     renderTranslateQuerySql(
       connection = connection,
@@ -63,20 +63,20 @@ exportConceptInformation <- function(connection = NULL,
     )
     if (vocabularyTable %in% c("concept", "concept_synonym")) {
       sql <- "SELECT a.* FROM @cdm_database_schema.@table a
-        INNER JOIN (SELECT distinct concept_id FROM main.@unique_concept_id_table) b
+        INNER JOIN (SELECT distinct concept_id FROM @unique_concept_id_table) b
           ON a.concept_id = b.concept_id;"
     } else if (vocabularyTable %in% c("concept_ancestor")) {
       sql <- "SELECT a.* FROM @cdm_database_schema.@table a
-        LEFT JOIN (SELECT distinct concept_id FROM main.@unique_concept_id_table) b1
+        LEFT JOIN (SELECT distinct concept_id FROM @unique_concept_id_table) b1
           ON a.ancestor_concept_id = b1.concept_id
         LEFT JOIN (SELECT distinct concept_id FROM @unique_concept_id_table) b2
           ON a.descendant_concept_id = b2.concept_id
         WHERE b1.concept_id IS NOT NULL or b2.concept_id IS NOT NULL;"
     } else if (vocabularyTable %in% c("concept_relationship")) {
       sql <- "SELECT a.* FROM @cdm_database_schema.@table a
-        INNER JOIN (SELECT distinct concept_id FROM main.@unique_concept_id_table) b1
+        INNER JOIN (SELECT distinct concept_id FROM @unique_concept_id_table) b1
           ON a.concept_id_1 = b1.concept_id
-        INNER JOIN (SELECT distinct concept_id FROM main.@unique_concept_id_table) b2
+        INNER JOIN (SELECT distinct concept_id FROM @unique_concept_id_table) b2
           ON a.concept_id_2 = b2.concept_id
         WHERE b1.concept_id IS NOT NULL or b2.concept_id IS NOT NULL;"
     }

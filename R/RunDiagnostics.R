@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+
+
+
 #' Get default covariate settings
 #' @description
 #' Default covariate settings for cohort diagnostics execution
@@ -154,7 +158,7 @@ getDefaultCovariateSettings <- function() {
 #'                                   This expression can use the variables 'cohortId' and 'seed'.
 #'                                   Default is "cohortId * 1000 + seed", which ensures unique identifiers
 #'                                   as long as there are fewer than 1000 cohorts.
-
+#' 
 #' @examples
 #' \dontrun{
 #' # Load cohorts (assumes that they have already been instantiated)
@@ -198,8 +202,7 @@ getDefaultCovariateSettings <- function() {
 #' )
 #' }
 #'
-#' @importFrom CohortGenerator getCohortTableNames
-#' @importFrom tidyr any_of
+#' @importFrom dplyr any_of
 #' @export
 executeDiagnostics <- function(cohortDefinitionSet,
                                exportFolder,
@@ -212,7 +215,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                cdmDatabaseSchema,
                                tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                                cohortTable = "cohort",
-                               cohortTableNames = CohortGenerator::getCohortTableNames(cohortTable = cohortTable),
+                               cohortTableNames = getCohortTableNames(cohortTable = cohortTable),
                                conceptCountsTable = "#concept_counts",
                                vocabularyDatabaseSchema = cdmDatabaseSchema,
                                cohortIds = NULL,
@@ -238,7 +241,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                seed = 64374,
                                seedArgs = NULL,
                                sampleIdentifierExpression = "cohortId * 1000 + seed") {
-  
+
   # collect arguments that were passed to cohort diagnostics at initiation
   callingArgs <- formals(executeDiagnostics)
   callingArgsJson <- list(
@@ -289,7 +292,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   checkmate::assertDataFrame(cohortDefinitionSet)
   checkmate::assertNames(names(cohortDefinitionSet), must.include = c("json","cohortId", "cohortName"))
 
-  cohortTable <- cohortTableNames$cohortTable
+  # cohortTable <- cohortTableNames$cohortTable # I don't understand why this is here
   
   checkmate::assertLogical(runInclusionStatistics)
   checkmate::assertLogical(runIncludedSourceConcepts)

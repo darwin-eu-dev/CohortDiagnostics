@@ -18,7 +18,8 @@
 #' 
 #' This is the main function exported by the CohortDiagnositcs package. It runs the 
 #' diagnostic analysis and saves the results to a folder.
-#' 
+#' This function performs several analyses. See Details section for a short description of
+#' each analysis.
 #'
 #' @param cdm A cdm_reference object create by CDMConnector::cdm_from_con()
 #' @param cohortSet A cohort set created by CDMConnector::readCohortSet()
@@ -131,14 +132,28 @@ executeDiagnosticsCdm <- function(cdm,
     cohortDefinitionSet$sql[i] <- SqlRender::render(cohortSql, warnOnMissingParameters = FALSE)
   }
   
+  # use hardcoded names for these tables since they only exist for the duration of the program execution
+  cohortTableName <- paste0("cd_cohort", as.integer(Sys.time()) %% 1000)
+  
+  # TODO create the concept counts table from Achilles tables if they are in the cdm object
+  conceptCountsTableName <- paste0("cd_concept_counts", as.integer(Sys.time()) %% 1000)
+  
+  cohortTableNames <- list(
+      cohortTable = cohortTableName,
+      cohortInclusionTable = paste0(cohortTableName, "_inclusion"), 
+      cohortInclusionResultTable = paste0(cohortTableName, "_inclusion_result"), 
+      cohortInclusionStatsTable = paste0(cohortTableName, "_inclusion_stats"), 
+      cohortSummaryStatsTable = paste0(cohortTableName, "_summary_stats"), 
+      cohortCensorStatsTable = paste0(cohortTableName, "_censor_stats")
+    )
+  
   executeDiagnostics(cohortDefinitionSet,
                      connectionDetails = NULL,
                      connection = attr(cdm, "dbcon"),
                      cdmVersion = floor(as.numeric(CDMConnector::version(cdm))),
-                     cohortTable = cohortTable,
-                     conceptCountsTable = conceptCountsTable,
-                     # cohortTable = paste(attr(cdm, "write_schema"), cohortTable, sep = "."),
-                     # conceptCountsTable = paste(attr(cdm, "write_schema"), conceptCountsTable, sep = "."),
+                     cohortTable = cohortTableName,
+                     cohortTableNames = cohortTableNames,
+                     conceptCountsTable = paste(attr(cdm, "write_schema"), conceptCountsTableName, sep = "."),
                      cohortDatabaseSchema = attr(cdm, "write_schema"),
                      cdmDatabaseSchema = attr(cdm, "cdm_schema"),
                      exportFolder = exportFolder,

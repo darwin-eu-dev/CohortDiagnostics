@@ -39,11 +39,11 @@ Imports:
   SqlRender (>= 1.9.0),
   stringr,
   tidyr (>= 1.2.0),
-  CohortGenerator (>= 0.8.0),
   remotes,
   CDMConnector (>= 1.2.1),
   DBI,
   bit64,
+  fs,
   jsonlite,
   rJava
 Suggests:
@@ -61,7 +61,6 @@ Remotes:
   ohdsi/Eunomia,
   ohdsi/FeatureExtraction,
   ohdsi/CirceR,
-  ohdsi/CohortGenerator@random_sample,
 License: Apache License
 VignetteBuilder: knitr
 URL: https://ohdsi.github.io/CohortDiagnostics, https://github.com/OHDSI/CohortDiagnostics

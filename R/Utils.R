@@ -43,4 +43,3 @@ loadRenderTranslateSql <- function(
   renderedSql
 }
   
-  
