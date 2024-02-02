@@ -38,14 +38,12 @@ test_that("cdm interface works with ohdsi cohort set", {
   databaseId <- "Eunomia"
   minCellCount <- 5
 
-  cohortDefinitionSet <-
-    CohortGenerator::getCohortDefinitionSet(
-      settingsFileName = "settings/CohortsToCreate.csv",
-      jsonFolder = "cohorts",
-      sqlFolder = "sql/sql_server",
-      packageName = "SkeletonCohortDiagnosticsStudy",
-      cohortFileNameValue = "cohortId"
-    ) %>% dplyr::tibble()
+  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+    settingsFileName = "Cohorts.csv",
+    jsonFolder = "cohorts",
+    sqlFolder = "sql/sql_server",
+    packageName = "CohortDiagnostics"
+  )
 
   con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
   cdm <- CDMConnector::cdmFromCon(con, cdmSchema = cdmDatabaseSchema, writeSchema = cohortDatabaseSchema, cdmName = databaseId)
@@ -63,7 +61,12 @@ test_that("cdm interface works with ohdsi cohort set", {
                                            minCellCount = minCellCount)
 
   # package results ----
-  CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, overwrite = TRUE)
+  
+  expect_true(length(list.files(outputFolder, ".csv")) > 10)
+  
+  createMergedResultsFile(dataFolder = outputFolder, overwrite = TRUE)
+  
+  
   # Launch diagnostics explorer shiny app ----
   CohortDiagnostics::launchDiagnosticsExplorer()
 

@@ -423,7 +423,7 @@ runConceptSetDiagnostics <- function(connection,
   if (nrow(subset) == 0) {
     return(NULL)
   }
-
+# browser()
   # We need to get concept sets from all cohorts in case subsets are present and
   # Added incrementally after cohort generation
   conceptSets <- combineConceptSetsFromCohorts(cohorts)

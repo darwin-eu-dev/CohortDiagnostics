@@ -113,37 +113,36 @@ executeDiagnosticsCdm <- function(cdm,
     overwrite = TRUE
   )
   
-  cohortSet$sql <- character(nrow(cohortSet))
+ 
   
   # handle both CohortGenerator cohort sets and cdm connector cohort sets
-  if (any(!(c("cohortName", "json", "cohortId") %in% names(cohortSet)))) {
-    cohortDefinitionSet <- cohortSet %>% 
-      dplyr::mutate(
-        cohortName = cohort_name, 
-        sql = "",
-        json = as.character(json),
-        cohortId = as.numeric(cohort_definition_id),
-        isSubset = FALSE)
+  # if (any(!(c("cohortName", "json", "cohortId") %in% names(cohortSet)))) {
+  #   cohortDefinitionSet <- cohortSet %>% 
+  #     dplyr::mutate(
+  #       cohortName = cohort_name, 
+  #       sql = "",
+  #       json = as.character(json),
+  #       cohortId = as.numeric(cohort_definition_id),
+  #       isSubset = FALSE)
+  #   
+  #   # fill in the sql column
+  #   for (i in seq_len(nrow(cohortDefinitionSet))) {
+  #     cohortJson <- cohortDefinitionSet$json[[i]]
+  #     cohortExpression <- CirceR::cohortExpressionFromJson(expressionJson = cohortJson)
+  #     cohortSql <- CirceR::buildCohortQuery(expression = cohortExpression,
+  #                                           options = CirceR::createGenerateOptions(generateStats = TRUE))
+  #     cohortDefinitionSet$sql[i] <- SqlRender::render(cohortSql, warnOnMissingParameters = FALSE)
+  #   }
+  # } else {
+  #   cohortDefinitionSet <- cohortSet
+  # }
+  # 
   
-    # fill in the sql column
-    for (i in seq_len(nrow(cohortDefinitionSet))) {
-      cohortJson <- cohortDefinitionSet$json[[i]]
-      cohortExpression <- CirceR::cohortExpressionFromJson(expressionJson = cohortJson)
-      cohortSql <- CirceR::buildCohortQuery(expression = cohortExpression,
-                                            options = CirceR::createGenerateOptions(generateStats = TRUE))
-      cohortDefinitionSet$sql[i] <- SqlRender::render(cohortSql, warnOnMissingParameters = FALSE)
-    }
-  } else {
-    cohortDefinitionSet <- cohortSet
-  }
-  
-  
-  if (!("isSubset" %in% names(cohortDefinitionSet))) {
-    cohortDefinitionSet$isSubset <- FALSE
-  }
+  # if (!("isSubset" %in% names(cohortDefinitionSet))) {
+  #   cohortDefinitionSet$isSubset <- FALSE
+  # }
   
   # use hardcoded names for these tables since they only exist for the duration of the program execution
-  
   
   # TODO create the concept counts table from Achilles tables if they are in the cdm object
   conceptCountsTableName <- paste0("concept_counts", as.integer(Sys.time()) %% 1000)
