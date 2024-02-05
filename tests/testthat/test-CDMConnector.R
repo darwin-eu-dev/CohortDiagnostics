@@ -74,6 +74,6 @@ test_that("CDMConnector interface works", {
   # CohortDiagnostics::launchDiagnosticsExplorer()
 
 })
-
+ 
 
 
