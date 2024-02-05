@@ -52,13 +52,14 @@ getCohortCounts <- function(connectionDetails = NULL,
       cohort_ids = cohortIds
     )
   counts <- querySql(connection, sql, snakeCaseToCamelCase = TRUE) %>%
-    tidyr::tibble()
+    dplyr::tibble()
 
   if (length(cohortIds) > 0) {
-    cohortIdDf <- tidyr::tibble(cohortId = cohortIds)
+    cohortIdDf <- dplyr::tibble(cohortId = cohortIds)
     counts <- cohortIdDf %>%
       dplyr::left_join(counts, by = "cohortId") %>%
-      tidyr::replace_na(list(cohortEntries = 0, cohortSubjects = 0))
+      dplyr::mutate(cohortEntries = dplyr::coalesce(cohortEntries, 0),
+                    cohortSubjects = dplyr::coalesce(cohortSubjects, 0))
   }
 
   delta <- Sys.time() - start

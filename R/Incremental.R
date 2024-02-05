@@ -289,9 +289,9 @@ saveIncremental <- function(data, fileName, ...) {
       if (nrow(previousData) > 0) {
         data <- dplyr::bind_rows(previousData, data) %>%
           dplyr::distinct() %>%
-          tidyr::tibble()
+          dplyr::tibble()
       } else {
-        data <- data %>% tidyr::tibble()
+        data <- data %>% dplyr::tibble()
       }
     }
   }

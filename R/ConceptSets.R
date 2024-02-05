@@ -21,7 +21,7 @@ extractConceptSetsSqlFromCohortSql <- function(cohortSql) {
   sql <- gsub("with primary_events.*", "", cohortSql)
 
   if (is.null(sql) || length(nchar(sql)) == 0 || is.na(nchar(sql)) || is.nan(nchar(sql))) {
-    return(tidyr::tibble())
+    return(dplyr::tibble())
   }
   # Find opening and closing parentheses:
   starts <- stringr::str_locate_all(sql, "\\(")[[1]][, 1]
@@ -61,13 +61,13 @@ extractConceptSetsSqlFromCohortSql <- function(cohortSql) {
         replacement = "\\1"
       ) %>%
         utils::type.convert(as.is = TRUE)
-      temp[[i]] <- tidyr::tibble(
+      temp[[i]] <- dplyr::tibble(
         conceptSetId = conceptSetIds[i],
         conceptSetSql = conceptsetSqls[i]
       )
     }
   } else {
-    temp <- tidyr::tibble()
+    temp <- dplyr::tibble()
   }
   return(dplyr::bind_rows(temp))
 }
@@ -91,14 +91,14 @@ extractConceptSetsJsonFromCohortJson <- function(cohortJson) {
   if (length(expression$ConceptSets) > 0) {
     for (i in (1:length(expression$ConceptSets))) {
       conceptSetExpression[[i]] <-
-        tidyr::tibble(
+        dplyr::tibble(
           conceptSetId = expression$ConceptSets[[i]]$id,
           conceptSetName = expression$ConceptSets[[i]]$name,
           conceptSetExpression = expression$ConceptSets[[i]]$expression$items %>% RJSONIO::toJSON(digits = 23)
         )
     }
   } else {
-    conceptSetExpression <- tidyr::tibble()
+    conceptSetExpression <- dplyr::tibble()
   }
   return(dplyr::bind_rows(conceptSetExpression))
 }
@@ -177,7 +177,7 @@ combineConceptSetsFromCohorts <- function(cohorts) {
       if (length(sqlCs) > 0 && length(jsonCs) > 0) {
         conceptSetCounter <- conceptSetCounter + 1
         conceptSets[[conceptSetCounter]] <-
-          tidyr::tibble(
+          dplyr::tibble(
             cohortId = cohort$cohortId,
             dplyr::inner_join(x = sqlCs %>% dplyr::distinct(), y = jsonCs %>% dplyr::distinct(), by = "conceptSetId")
           )
@@ -519,7 +519,7 @@ runConceptSetDiagnostics <- function(connection,
                 tempEmulationSchema = tempEmulationSchema,
                 snakeCaseToCamelCase = TRUE
               ) %>%
-              tidyr::tibble()
+              dplyr::tibble()
 
             counts <- counts %>%
               dplyr::distinct() %>%
@@ -680,7 +680,7 @@ runConceptSetDiagnostics <- function(connection,
                 "No primary event criteria concept sets found for cohort id: ",
                 cohort$cohortId
               )
-              return(tidyr::tibble())
+              return(dplyr::tibble())
             }
             primaryCodesetIds <- primaryCodesetIds %>% dplyr::filter(.data$domain %in%
               c(domains$domain %>% unique()))
@@ -692,7 +692,7 @@ runConceptSetDiagnostics <- function(connection,
                   collapse = ", "
                 )
               )
-              return(tidyr::tibble())
+              return(dplyr::tibble())
             }
             primaryCodesetIds <- conceptSets %>%
               dplyr::filter(.data$cohortId %in% cohort$cohortId) %>%
@@ -761,7 +761,7 @@ runConceptSetDiagnostics <- function(connection,
                   store_table = "#breakdown",
                   snakeCaseToCamelCase = TRUE
                 ) %>%
-                tidyr::tibble()
+                dplyr::tibble()
               if (!is.null(conceptIdTable)) {
                 sql <- "INSERT INTO @concept_id_table (concept_id)
                   SELECT DISTINCT concept_id

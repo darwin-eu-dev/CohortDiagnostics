@@ -211,12 +211,16 @@ executeCohortRelationshipDiagnostics <- function(connection,
       targetChecksum = "checksum"
     ) %>%
     dplyr::distinct()
-  combinationsOfPossibleCohortRelationships <- allCohortIds %>%
-    tidyr::crossing(allCohortIds %>%
-      dplyr::rename(
-        comparatorCohortId = "targetCohortId",
-        comparatorChecksum = "targetChecksum"
-      )) %>%
+  combinationsOfPossibleCohortRelationships <-
+    expend.grid(targetCohortId = allCohortIds$targetCohortId,
+                comparatorCohortId = allCohortIds$targetCohortId) %>% 
+    dplyr::tibble() %>% 
+    dplyr::left_join(allCohortIds, by = "targetCohortId") %>% 
+    dplyr::left_join(
+      dplyr::rename(allCohortIds,
+                    comparatorCohortId = "targetCohortId",
+                    comparatorChecksum = "targetChecksum"
+      ), by = "comparatorCohortId") %>% 
     dplyr::filter(.data$targetCohortId != .data$comparatorCohortId) %>%
     dplyr::arrange(.data$targetCohortId, .data$comparatorCohortId) %>%
     dplyr::mutate(checksum = paste0(.data$targetChecksum, .data$comparatorChecksum))

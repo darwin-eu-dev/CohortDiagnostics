@@ -1,0 +1,2 @@
+﻿database_id,database_name,description,is_meta_analysis,vocabulary_version,vocabulary_version_cdm
+Eunomia,Synthea synthetic health database,"SyntheaTM is a Synthetic Patient Population Simulator. The goal is to output synthetic, realistic (but not real), patient data and associated health records in a variety of formats.",0,v5.0 18-JAN-19,v5.0 18-JAN-19

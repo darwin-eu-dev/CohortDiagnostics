@@ -52,7 +52,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
       signif(delta, 3),
       attr(delta, "units")
     ))
-    return(tidyr::tibble())
+    return(dplyr::tibble())
   }
 
   ParallelLogger::logInfo("Calculating incidence rate per year by age and gender")
@@ -103,7 +103,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
       tempEmulationSchema = tempEmulationSchema,
       snakeCaseToCamelCase = TRUE
     ) %>%
-    tidyr::tibble()
+    dplyr::tibble()
 
   sql <- "TRUNCATE TABLE #rates_summary; DROP TABLE #rates_summary;"
   renderTranslateExecuteSql(
@@ -116,7 +116,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
 
   irYearAgeGender <- recode(ratesSummary)
   irOverall <-
-    tidyr::tibble(
+    dplyr::tibble(
       cohortCount = sum(irYearAgeGender$cohortCount),
       personYears = sum(irYearAgeGender$personYears)
     )
@@ -183,7 +183,7 @@ recode <- function(ratesSummary) {
   ratesSummary$gender <- tolower(ratesSummary$gender)
   substr(ratesSummary$gender, 1, 1) <-
     toupper(substr(ratesSummary$gender, 1, 1))
-  return(tidyr::tibble(ratesSummary))
+  return(dplyr::tibble(ratesSummary))
 }
 
 aggregateIr <- function(ratesSummary, aggregateList) {
@@ -197,7 +197,7 @@ aggregateIr <- function(ratesSummary, aggregateList) {
       FUN = sum
     ))
   } else {
-    return(tidyr::tibble())
+    return(dplyr::tibble())
   }
 }
 

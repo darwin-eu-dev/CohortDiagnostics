@@ -57,7 +57,7 @@
       orphan_concept_table = orphanConceptTable,
       snakeCaseToCamelCase = TRUE
     ) %>%
-    tidyr::tibble()
+    dplyr::tibble()
 
   ParallelLogger::logTrace("- Dropping orphan temp tables")
   sql <-

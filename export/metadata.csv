@@ -1,0 +1,38 @@
+database_id,start_time,variable_field,value_field
+Eunomia,TM_2024-02-02 14:45:54.912516,timeZone,Europe/Amsterdam
+Eunomia,TM_2024-02-02 14:45:54.912516,runTime,34.576712846756
+Eunomia,TM_2024-02-02 14:45:54.912516,runTimeUnits,secs
+Eunomia,TM_2024-02-02 14:45:54.912516,packageDependencySnapShotJson,{}
+Eunomia,TM_2024-02-02 14:45:54.912516,argumentsAtDiagnosticsInitiationJson,"{
+	""runInclusionStatistics"" : true,
+	""runIncludedSourceConcepts"" : true,
+	""runOrphanConcepts"" : true,
+	""runTimeSeries"" : false,
+	""runVisitContext"" : true,
+	""runBreakdownIndexEvents"" : true,
+	""runIncidenceRate"" : true,
+	""runTemporalCohortCharacterization"" : true,
+	""minCellCount"" : 5,
+	""minCharacterizationMean"" : 0.010000000000000000208167,
+	""incremental"" : false,
+	""temporalCovariateSettings"" : [
+		""getDefaultCovariateSettings""
+	]
+}"
+Eunomia,TM_2024-02-02 14:45:54.912516,rversion,R version 4.3.1 (2023-06-16)
+Eunomia,TM_2024-02-02 14:45:54.912516,currentPackage,CohortDiagnostics
+Eunomia,TM_2024-02-02 14:45:54.912516,currentPackageVersion,3.3.0
+Eunomia,TM_2024-02-02 14:45:54.912516,sourceDescription,"SyntheaTM is a Synthetic Patient Population Simulator. The goal is to output synthetic, realistic (but not real), patient data and associated health records in a variety of formats."
+Eunomia,TM_2024-02-02 14:45:54.912516,cdmSourceName,Synthea synthetic health database
+Eunomia,TM_2024-02-02 14:45:54.912516,sourceReleaseDate,2019-05-25
+Eunomia,TM_2024-02-02 14:45:54.912516,cdmVersion,v5.3.1
+Eunomia,TM_2024-02-02 14:45:54.912516,cdmReleaseDate,2019-05-25
+Eunomia,TM_2024-02-02 14:45:54.912516,vocabularyVersion,v5.0 18-JAN-19
+Eunomia,TM_2024-02-02 14:45:54.912516,datasourceName,Synthea synthetic health database
+Eunomia,TM_2024-02-02 14:45:54.912516,datasourceDescription,"SyntheaTM is a Synthetic Patient Population Simulator. The goal is to output synthetic, realistic (but not real), patient data and associated health records in a variety of formats."
+Eunomia,TM_2024-02-02 14:45:54.912516,vocabularyVersionCdm,v5.0 18-JAN-19
+Eunomia,TM_2024-02-02 14:45:54.912516,observationPeriodMinDate,1908-09-22
+Eunomia,TM_2024-02-02 14:45:54.912516,observationPeriodMaxDate,2019-07-03
+Eunomia,TM_2024-02-02 14:45:54.912516,personsInDatasource,5343
+Eunomia,TM_2024-02-02 14:45:54.912516,recordsInDatasource,5343
+Eunomia,TM_2024-02-02 14:45:54.912516,personDaysInDatasource,76944551

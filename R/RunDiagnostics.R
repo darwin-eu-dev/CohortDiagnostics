@@ -198,8 +198,6 @@ getDefaultCovariateSettings <- function() {
 #' )
 #' }
 #'
-#' @importFrom CohortGenerator getCohortTableNames
-#' @importFrom tidyr any_of
 #' @export
 executeDiagnostics <- function(cohortDefinitionSet,
                                exportFolder,
@@ -212,7 +210,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                cdmDatabaseSchema,
                                tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                                cohortTable = "cohort",
-                               cohortTableNames = CohortGenerator::getCohortTableNames(cohortTable = cohortTable),
+                               cohortTableNames = NULL,
                                conceptCountsTable = "#concept_counts",
                                vocabularyDatabaseSchema = cdmDatabaseSchema,
                                cohortIds = NULL,
@@ -271,6 +269,16 @@ executeDiagnostics <- function(cohortDefinitionSet,
   }
   if (any(is.null(databaseDescription), is.na(databaseDescription))) {
     ParallelLogger::logTrace(" - Databasedescription was not provided. Using CDM source table")
+  }
+  
+  if (is.null(cohortTableNames)) {
+    cohortTableNames <- list(
+      cohortTable = cohortTable, 
+      cohortInclusionTable = paste0(cohortTable, "_inclusion"), 
+      cohortInclusionResultTable = paste0(cohortTable, "_inclusion_result"),
+      cohortInclusionStatsTable = paste0(cohortTable, "_inclusion_stats"), 
+      cohortSummaryStatsTable = paste0(cohortTable, "_summary_stats"), 
+      cohortCensorStatsTable = paste0(cohortTable, "_censor_stats"))
   }
 
   errorMessage <- checkmate::makeAssertCollection()
@@ -555,6 +563,8 @@ executeDiagnostics <- function(cohortDefinitionSet,
   }
 
   if (runOnSample & !isTRUE(attr(cohortDefinitionSet, "isSampledCohortDefinition"))) {
+    if (!rlang::is_installed("CohortGenerator")) stop("CohortGenerator is required. Please install it with `remotes::install_github('ohdsi/CohortGenerator')`")
+    
     cohortDefinitionSet <-
       CohortGenerator::sampleCohortDefinitionSet(
         connection = connection,

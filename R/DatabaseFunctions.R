@@ -62,6 +62,8 @@ renderTranslateQuerySql <- function(connection,
                                     tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                                     integerAsNumeric = getOption("databaseConnectorIntegerAsNumeric", default = TRUE),
                                     integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
+                                    reportOverallTime = NULL, # ignored
+                                    progressBar = NULL, # ignored
                                     ...) {
   sql <- SqlRender::render(sql = sql, ...)
   sql <- SqlRender::translate(sql = sql, targetDialect = getDbms(connection))

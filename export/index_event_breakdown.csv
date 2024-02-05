@@ -1,0 +1,7 @@
+﻿concept_id,concept_count,subject_count,cohort_id,database_id,domain_field,domain_table
+35208414,1437,479,14909,Eunomia,condition_source_concept_id,condition_occurrence
+192671,1437,479,14909,Eunomia,condition_concept_id,condition_occurrence
+35208414,1437,479,17492,Eunomia,condition_source_concept_id,condition_occurrence
+192671,1437,479,17492,Eunomia,condition_concept_id,condition_occurrence
+35208414,1437,479,17493,Eunomia,condition_source_concept_id,condition_occurrence
+192671,1437,479,17493,Eunomia,condition_concept_id,condition_occurrence
