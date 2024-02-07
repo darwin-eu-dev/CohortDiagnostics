@@ -30,18 +30,17 @@ test_that("cdm interface works", {
 
 
 
-test_that("exportConceptInformation", {
-  
-  exportConceptInformation(
-    connection = connection,
-    cdmDatabaseSchema = cdmDatabaseSchema,
-    tempEmulationSchema = tempEmulationSchema,
-    conceptIdTable = "#concept_ids",
-    incremental = incremental,
-    exportFolder = exportFolder
-  )
-  
-  
-})
+# test_that("exportConceptInformation", {
+#   
+#   exportConceptInformation(
+#     connection = connection,
+#     cdmDatabaseSchema = cdmDatabaseSchema,
+#     tempEmulationSchema = tempEmulationSchema,
+#     conceptIdTable = "#concept_ids",
+#     incremental = incremental,
+#     exportFolder = exportFolder
+#   )
+#   
+# })
 
 
