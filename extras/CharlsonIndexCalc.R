@@ -29,7 +29,6 @@ connectAndExecuteSql <- function(aggregated = TRUE) {
   cdm <- CDMConnector::cdmFromCon(con, cdmSchema = cdmDatabaseSchema, writeSchema = cohortDatabaseSchema, cdmName = databaseId)
   cdm <- CDMConnector::generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
   
-  # aggregated
   CohortDiagnostics:::renderTranslateExecuteSql(con,
                                                 SqlRender::readSql(system.file("sql", "sql_server", "CharlsonIndex.sql", package = "CohortDiagnostics")),
                                                 aggregated = aggregated,
