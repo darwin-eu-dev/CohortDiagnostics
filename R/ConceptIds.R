@@ -17,7 +17,7 @@
 createConceptTable <- function(connection, tempEmulationSchema) {
   ParallelLogger::logTrace("Creating concept ID table for tracking concepts used in diagnostics")
   sql <-
-    SqlRender::loadRenderTranslateSql(
+    loadRenderTranslateSql(
       "CreateConceptIdTable.sql",
       packageName = utils::packageName(),
       dbms = getDbms(connection),

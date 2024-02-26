@@ -212,7 +212,7 @@ executeCohortRelationshipDiagnostics <- function(connection,
     ) %>%
     dplyr::distinct()
   combinationsOfPossibleCohortRelationships <-
-    expend.grid(targetCohortId = allCohortIds$targetCohortId,
+    expand.grid(targetCohortId = allCohortIds$targetCohortId,
                 comparatorCohortId = allCohortIds$targetCohortId) %>% 
     dplyr::tibble() %>% 
     dplyr::left_join(allCohortIds, by = "targetCohortId") %>% 

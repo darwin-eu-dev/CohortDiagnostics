@@ -215,8 +215,6 @@ insertInclusionRuleNames <- function(connection,
   renderTranslateExecuteSql(
     connection = connection,
     sql = "TRUNCATE TABLE @cohort_database_schema.@table;",
-    progressBar = FALSE,
-    reportOverallTime = FALSE,
     cohort_database_schema = cohortDatabaseSchema,
     table = cohortInclusionTable
   )

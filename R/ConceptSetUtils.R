@@ -31,7 +31,7 @@
     connection <- DatabaseConnector::connect(connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
   }
-  sql <- SqlRender::loadRenderTranslateSql(
+  sql <- loadRenderTranslateSql(
     "OrphanCodes.sql",
     packageName = utils::packageName(),
     dbms = getDbms(connection),
@@ -61,7 +61,7 @@
 
   ParallelLogger::logTrace("- Dropping orphan temp tables")
   sql <-
-    SqlRender::loadRenderTranslateSql(
+    loadRenderTranslateSql(
       "DropOrphanConceptTempTables.sql",
       packageName = utils::packageName(),
       dbms = getDbms(connection),

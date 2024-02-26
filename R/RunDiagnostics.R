@@ -974,9 +974,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
         connection = connection,
         sql = sql,
         tempEmulationSchema = tempEmulationSchema,
-        table = "#concept_ids",
-        progressBar = FALSE,
-        reportOverallTime = FALSE
+        table = "#concept_ids"
       )
     }
   )

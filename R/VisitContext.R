@@ -34,7 +34,7 @@ getVisitContext <- function(connectionDetails = NULL,
     on.exit(DatabaseConnector::disconnect(connection))
   }
 
-  sql <- SqlRender::loadRenderTranslateSql(
+  sql <- loadRenderTranslateSql(
     "VisitContext.sql",
     packageName = utils::packageName(),
     dbms = getDbms(connection),
@@ -65,9 +65,7 @@ getVisitContext <- function(connectionDetails = NULL,
       sql = sql,
       tempEmulationSchema = tempEmulationSchema,
       unique_concept_id_table = conceptIdTable,
-      visit_context_table = "#visit_context",
-      progressBar = FALSE,
-      reportOverallTime = FALSE
+      visit_context_table = "#visit_context"
     )
   }
   sql <-
@@ -76,9 +74,7 @@ getVisitContext <- function(connectionDetails = NULL,
     connection = connection,
     sql = sql,
     tempEmulationSchema = tempEmulationSchema,
-    visit_context_table = "#visit_context",
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    visit_context_table = "#visit_context"
   )
 
   delta <- Sys.time() - start

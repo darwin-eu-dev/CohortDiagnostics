@@ -500,7 +500,7 @@ runConceptSetDiagnostics <- function(connection,
         }
         if (nrow(subsetIncluded) > 0) {
           start <- Sys.time()
-            sql <- SqlRender::loadRenderTranslateSql(
+            sql <- loadRenderTranslateSql(
               "CohortSourceCodes.sql",
               packageName = utils::packageName(),
               dbms = getDbms(connection),
@@ -592,9 +592,7 @@ runConceptSetDiagnostics <- function(connection,
                 sql = sql,
                 tempEmulationSchema = tempEmulationSchema,
                 concept_id_table = conceptIdTable,
-                include_source_concept_table = "#inc_src_concepts",
-                progressBar = FALSE,
-                reportOverallTime = FALSE
+                include_source_concept_table = "#inc_src_concepts"
               )
             }
             sql <-
@@ -603,9 +601,7 @@ runConceptSetDiagnostics <- function(connection,
               connection = connection,
               sql = sql,
               tempEmulationSchema = tempEmulationSchema,
-              include_source_concept_table = "#inc_src_concepts",
-              progressBar = FALSE,
-              reportOverallTime = FALSE
+              include_source_concept_table = "#inc_src_concepts"
             )
 
             delta <- Sys.time() - start
@@ -725,7 +721,7 @@ runConceptSetDiagnostics <- function(connection,
             getCounts <- function(row) {
               domain <- domains %>% dplyr::filter(.data$domain == row$domain)
               sql <-
-                SqlRender::loadRenderTranslateSql(
+                loadRenderTranslateSql(
                   "CohortEntryBreakdown.sql",
                   packageName = utils::packageName(),
                   dbms = getDbms(connection),
@@ -771,9 +767,7 @@ runConceptSetDiagnostics <- function(connection,
                   sql = sql,
                   tempEmulationSchema = tempEmulationSchema,
                   concept_id_table = conceptIdTable,
-                  store_table = "#breakdown",
-                  progressBar = FALSE,
-                  reportOverallTime = FALSE
+                  store_table = "#breakdown"
                 )
               }
               sql <-
@@ -782,9 +776,7 @@ runConceptSetDiagnostics <- function(connection,
                 connection = connection,
                 sql = sql,
                 tempEmulationSchema = tempEmulationSchema,
-                store_table = "#breakdown",
-                progressBar = FALSE,
-                reportOverallTime = FALSE
+                store_table = "#breakdown"
               )
               return(counts)
             }
@@ -916,9 +908,7 @@ runConceptSetDiagnostics <- function(connection,
                 sql = sql,
                 tempEmulationSchema = tempEmulationSchema,
                 concept_id_table = conceptIdTable,
-                orphan_concept_table = "#orphan_concepts",
-                progressBar = FALSE,
-                reportOverallTime = FALSE
+                orphan_concept_table = "#orphan_concepts"
               )
             }
           }
@@ -929,9 +919,7 @@ runConceptSetDiagnostics <- function(connection,
           connection = connection,
           sql = sql,
           tempEmulationSchema = tempEmulationSchema,
-          orphan_concept_table = "#orphan_concepts",
-          progressBar = FALSE,
-          reportOverallTime = FALSE
+          orphan_concept_table = "#orphan_concepts"
         )
       }
 
@@ -1016,9 +1004,7 @@ runConceptSetDiagnostics <- function(connection,
     sql = "INSERT INTO #concept_ids (concept_id)
             SELECT DISTINCT concept_id
             FROM #inst_concept_sets;",
-    tempEmulationSchema = tempEmulationSchema,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    tempEmulationSchema = tempEmulationSchema
   )
 
   resolvedConceptIds <-
@@ -1060,9 +1046,7 @@ runConceptSetDiagnostics <- function(connection,
   renderTranslateExecuteSql(
     connection,
     sql,
-    tempEmulationSchema = tempEmulationSchema,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    tempEmulationSchema = tempEmulationSchema
   )
 
 
@@ -1082,9 +1066,7 @@ runConceptSetDiagnostics <- function(connection,
       connection,
       sql,
       tempEmulationSchema = tempEmulationSchema,
-      count_table = countTable,
-      progressBar = FALSE,
-      reportOverallTime = FALSE
+      count_table = countTable
     )
   }
   }

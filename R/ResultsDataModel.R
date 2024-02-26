@@ -52,7 +52,7 @@ getDefaultVocabularyTableNames <- function() {
 .createDataModel <- function(connection, databaseSchema, tablePrefix) {
   sqlParams <- getPrefixedTableNames(tablePrefix)
   sql <- do.call(
-    SqlRender::loadRenderTranslateSql,
+    loadRenderTranslateSql,
     c(
       sqlParams,
       list(
@@ -164,7 +164,7 @@ migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = ""
   migrator$finalize()
 
   ParallelLogger::logInfo("Updating version number")
-  updateVersionSql <- SqlRender::loadRenderTranslateSql("UpdateVersionNumber.sql",
+  updateVersionSql <- loadRenderTranslateSql("UpdateVersionNumber.sql",
     packageName = utils::packageName(),
     database_schema = databaseSchema,
     table_prefix = tablePrefix,

@@ -1,12 +1,5 @@
 test_that("CDMConnector interface works", {
     
-  # Run CohortDiagnostics using CDMConnector
-  
-  library(Eunomia)
-  library(CohortDiagnostics)
-  library(CohortGenerator)
-  library(CDMConnector)
-
   cdmDatabaseSchema <- "main"
   cohortDatabaseSchema <- "main"
   cohortTable <- "mycohort"
@@ -14,43 +7,29 @@ test_that("CDMConnector interface works", {
   outputFolder <- tempfile()
   fs::dir_create(outputFolder)
 
-  databaseId <- "Eunomia"
-  minCellCount <- 5
-
-  # cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-  #   settingsFileName = "Cohorts.csv",
-  #   jsonFolder = "cohorts",
-  #   sqlFolder = "sql/sql_server",
-  #   packageName = "CohortDiagnostics"
-  # )
+  cohortDefinitionSet <- CDMConnector::readCohortSet(system.file("cohorts1", package = "CDMConnector"))
   
-  # expect_true(T)
+  con <- DBI::dbConnect(duckdb::duckdb(dbdir = CDMConnector::eunomia_dir()))
+  cdm <- CDMConnector::cdmFromCon(con, 
+                                  cdmSchema = cdmDatabaseSchema, 
+                                  writeSchema = cohortDatabaseSchema, 
+                                  cdmName = "Eunomia")
   
-  con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
-  cdm <- CDMConnector::cdmFromCon(con, cdmSchema = cdmDatabaseSchema, writeSchema = cohortDatabaseSchema, cdmName = databaseId)
   cdm <- CDMConnector::generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
-  CohortDiagnostics::createConceptCountsTable(connection = attr(cdm, "dbcon"),
+  
+  CohortDiagnostics::createConceptCountsTable(connection = con,
                                               cdmDatabaseSchema = cdmDatabaseSchema,
                                               conceptCountsDatabaseSchema = cdmDatabaseSchema,
                                               conceptCountsTable = conceptCountsTable)
 
+  # debugonce(executeDiagnosticsCdm)
   invisible(capture.output(
-    CohortDiagnostics::executeDiagnosticsCdm(cdm = cdm,
-                                             cohortDefinitionSet = cohortDefinitionSet,
-                                             cohortTable = cohortTable,
-                                             conceptCountsTable = conceptCountsTable,
-                                             exportFolder = outputFolder,
-                                             minCellCount = minCellCount,
-                                             runInclusionStatistics = T,
-                                             runIncludedSourceConcepts = T,
-                                             runOrphanConcepts = T,
-                                             runTimeSeries = T,
-                                             runVisitContext = T,
-                                             runBreakdownIndexEvents = T,
-                                             runIncidenceRate = T,
-                                             runCohortRelationship = T,
-                                             runTemporalCohortCharacterization = T,
-                                             useExternalConceptCountsTable = T)
+    executeDiagnosticsCdm(cdm = cdm,
+                          cohortDefinitionSet = cohortDefinitionSet,
+                          cohortTable = cohortTable,
+                          conceptCountsTable = conceptCountsTable,
+                          exportFolder = outputFolder,
+                          minCellCount = 5)
   ))
 
 
@@ -72,7 +51,6 @@ test_that("CDMConnector interface works", {
   
   # Launch diagnostics explorer shiny app ----
   # CohortDiagnostics::launchDiagnosticsExplorer()
-
 })
  
 

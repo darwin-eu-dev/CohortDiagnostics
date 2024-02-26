@@ -22,22 +22,18 @@
 #' @param snakeCaseToCamelCase snake case to camel case boolean
 #' @param oracleTempSchema oracle temp schema
 #' @param tempEmulationSchema temp emulation schema
-#' @param integerAsNumeric int as numeric boolean
-#' @param integer64AsNumeric int64 as numeric boolean
 #' @param ... parameters that will be used to render the SQL.
 #' 
 #' @return NONE
 renderTranslateExecuteSql <- function(connection,
                                       sql,
-                                      errorReportFile = file.path(getwd(), "errorReportSql.txt"),
-                                      snakeCaseToCamelCase = FALSE,
                                       oracleTempSchema = NULL,
                                       tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
-                                      integerAsNumeric = getOption("databaseConnectorIntegerAsNumeric", default = TRUE),
-                                      integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
                                       ...) {
   sql <- SqlRender::render(sql = sql, ...)
-  sql <- SqlRender::translate(sql = sql, targetDialect = getDbms(connection))
+  sql <- SqlRender::translate(sql = sql, 
+                              targetDialect = CDMConnector::dbms(connection), 
+                              tempEmulationSchema = tempEmulationSchema)
   DBI::dbExecute(conn = connection, statement = sql)
 }
 

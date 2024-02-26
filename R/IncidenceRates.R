@@ -57,7 +57,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
 
   ParallelLogger::logInfo("Calculating incidence rate per year by age and gender")
   sql <-
-    SqlRender::loadRenderTranslateSql(
+    loadRenderTranslateSql(
       sqlFilename = "GetCalendarYearRange.sql",
       packageName = utils::packageName(),
       dbms = getDbms(connection),
@@ -80,7 +80,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
   )
 
   sql <-
-    SqlRender::loadRenderTranslateSql(
+    loadRenderTranslateSql(
       sqlFilename = "ComputeIncidenceRates.sql",
       packageName = utils::packageName(),
       dbms = getDbms(connection),
@@ -109,8 +109,6 @@ getIncidenceRate <- function(connectionDetails = NULL,
   renderTranslateExecuteSql(
     connection = connection,
     sql = sql,
-    progressBar = FALSE,
-    reportOverallTime = FALSE,
     tempEmulationSchema = tempEmulationSchema
   )
 

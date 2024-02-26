@@ -40,20 +40,20 @@ createConceptCountsTable <- function(connectionDetails = NULL,
   if (is.null(connection)) {
     connection <- DatabaseConnector::connect(connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
-  }
-  sql <-
-    SqlRender::loadRenderTranslateSql(
-      "CreateConceptCountTable.sql",
-      packageName = utils::packageName(),
-      dbms = getDbms(connection),
-      tempEmulationSchema = tempEmulationSchema,
+  } 
+  
+  sql <- system.file("sql", "sql_server", "CreateConceptCountTable.sql", package = "CohortDiagnostics") |>
+    SqlRender::readSql() |>
+    SqlRender::render(
       cdm_database_schema = cdmDatabaseSchema,
       work_database_schema = conceptCountsDatabaseSchema,
       concept_counts_table = conceptCountsTable,
       table_is_temp = conceptCountsTableIsTemp,
-      remove_current_table = removeCurrentTable
-    )
-  executeSql(connection, sql)
+      remove_current_table = removeCurrentTable) |>
+    SqlRender::translate(targetDialect = CDMConnector::dbms(connection),
+                         tempEmulationSchema = tempEmulationSchema)
+  
+  DBI::dbExecute(connection, sql)
 }
 
 #' getConceptCountsTableName

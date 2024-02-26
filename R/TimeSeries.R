@@ -188,9 +188,7 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
   ParallelLogger::logTrace(" - Dropping any time_series temporary tables that maybe present at start up.")
   renderTranslateExecuteSql(
     connection = connection,
-    sql = tsSetUpSql,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    sql = tsSetUpSql
   )
   seriesToRun <- NULL
   if (runCohortTimeSeries) {
@@ -215,9 +213,7 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
   ParallelLogger::logTrace("   - Dropping any cohort temporary tables used by time series")
   renderTranslateExecuteSql(
     connection = connection,
-    sql = sqlCohortDrop,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    sql = sqlCohortDrop
   )
   sqlCohort <- "DROP TABLE IF EXISTS #ts_cohort;
                 DROP TABLE IF EXISTS #ts_cohort_first;
@@ -272,9 +268,7 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
       cohort_ids = cohortIds,
       stratify_by_gender = stratifyByGender,
       stratify_by_age_group = stratifyByAgeGroup,
-      cdm_database_schema = cdmDatabaseSchema,
-      progressBar = FALSE,
-      reportOverallTime = FALSE
+      cdm_database_schema = cdmDatabaseSchema
     )
   }
 
@@ -318,28 +312,28 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
       )
     seriesId <- paste0("T", as.character(seriesId))
 
-    sqlAll <- SqlRender::loadRenderTranslateSql(
+    sqlAll <- loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
       packageName = utils::packageName(),
       stratify_by_gender = FALSE,
       stratify_by_age_group = FALSE,
       dbms = getDbms(connection)
     )
-    sqlGender <- SqlRender::loadRenderTranslateSql(
+    sqlGender <- loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
       packageName = utils::packageName(),
       stratify_by_gender = TRUE,
       stratify_by_age_group = FALSE,
       dbms = getDbms(connection)
     )
-    sqlAgeGroup <- SqlRender::loadRenderTranslateSql(
+    sqlAgeGroup <- loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
       packageName = utils::packageName(),
       stratify_by_gender = FALSE,
       stratify_by_age_group = TRUE,
       dbms = getDbms(connection)
     )
-    sqlAgeGroupGender <- SqlRender::loadRenderTranslateSql(
+    sqlAgeGroupGender <- loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
       packageName = utils::packageName(),
       stratify_by_gender = TRUE,
@@ -475,23 +469,17 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
   renderTranslateExecuteSql(
     connection = connection,
     sql = "DROP TABLE IF EXISTS @table;",
-    table = calenderPeriodsTable,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    table = calenderPeriodsTable
   )
   ParallelLogger::logTrace(" - Dropping any time_series temporary tables that maybe present at clean up.")
   renderTranslateExecuteSql(
     connection = connection,
-    sql = tsSetUpSql,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    sql = tsSetUpSql
   )
   ParallelLogger::logTrace("   - Dropping any time series temporary tables at clean up")
   renderTranslateExecuteSql(
     connection = connection,
-    sql = sqlCohortDrop,
-    progressBar = FALSE,
-    reportOverallTime = FALSE
+    sql = sqlCohortDrop
   )
 
   delta <- Sys.time() - start
