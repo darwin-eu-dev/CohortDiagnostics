@@ -25,8 +25,14 @@ cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
 )
 
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
-cdm <- CDMConnector::cdmFromCon(con, cdmSchema = cdmDatabaseSchema, writeSchema = cohortDatabaseSchema, cdmName = databaseId)
+
+cdm <- CDMConnector::cdmFromCon(con, 
+                                cdmSchema = cdmDatabaseSchema, 
+                                writeSchema = cohortDatabaseSchema, 
+                                cdmName = databaseId)
+
 cdm <- CDMConnector::generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
+
 CohortDiagnostics::createConceptCountsTable(connection = attr(cdm, "dbcon"),
                                             cdmDatabaseSchema = cdmDatabaseSchema,
                                             conceptCountsDatabaseSchema = cdmDatabaseSchema,
