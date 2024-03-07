@@ -35,6 +35,10 @@ renderTranslateExecuteSql(
 
 \item{integer64AsNumeric}{int64 as numeric boolean}
 
+\item{reportOverallTime}{ignored}
+
+\item{progressBar}{ignored}
+
 \item{...}{parameters that will be used to render the SQL.}
 }
 \value{

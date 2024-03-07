@@ -24,6 +24,8 @@
 #' @param tempEmulationSchema temp emulation schema
 #' @param integerAsNumeric int as numeric boolean
 #' @param integer64AsNumeric int64 as numeric boolean
+#' @param reportOverallTime ignored
+#' @param progressBar ignored
 #' @param ... parameters that will be used to render the SQL.
 #' 
 #' @return NONE
