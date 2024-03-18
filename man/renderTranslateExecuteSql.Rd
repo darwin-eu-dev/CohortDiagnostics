@@ -15,7 +15,6 @@ renderTranslateExecuteSql(
   integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
   reportOverallTime = FALSE,
   progressBar = FALSE,
-  splitSql = FALSE,
   ...
 )
 }
@@ -39,8 +38,6 @@ renderTranslateExecuteSql(
 \item{reportOverallTime}{ignored}
 
 \item{progressBar}{ignored}
-
-\item{splitSql}{split the Sql before executing?}
 
 \item{...}{parameters that will be used to render the SQL.}
 }

@@ -26,7 +26,6 @@
 #' @param integer64AsNumeric int64 as numeric boolean
 #' @param reportOverallTime ignored
 #' @param progressBar ignored
-#' @param splitSql split the Sql before executing?
 #' @param ... parameters that will be used to render the SQL.
 #' 
 #' @return NONE
@@ -40,16 +39,16 @@ renderTranslateExecuteSql <- function(connection,
                                       integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
                                       reportOverallTime = FALSE,
                                       progressBar = FALSE,
-                                      splitSql = FALSE,
                                       ...) {
   
   sql <- SqlRender::render(sql = sql, ...)
   sql <- SqlRender::translate(sql = sql, targetDialect = getDbms(connection))
 
-  if (splitSql) {
-    purrr::walk(SqlRender::splitSql(sql), ~DBI::dbExecute(conn = connection, statement = .))
-  } else {
+  dbms <- getDbms(connection)
+  if (dbms == "sqlite") {
     DBI::dbExecute(conn = connection, statement = sql)
+  } else {
+    purrr::walk(SqlRender::splitSql(sql), ~DBI::dbExecute(conn = connection, statement = .))
   }
 }
 
@@ -198,7 +197,6 @@ renderTranslateQuerySqlToAndromeda <- function(connection,
 #' @param reportOverallTime if overall time should be reported
 #' @param errorReportFile error report file
 #' @param runAsBatch run as batch?
-#' @param splitSql split the Sql before executing?
 #'
 executeSql <- function(connection,
                        sql,
@@ -206,13 +204,13 @@ executeSql <- function(connection,
                        progressBar = !as.logical(Sys.getenv("TESTTHAT", unset = FALSE)),
                        reportOverallTime = TRUE,
                        errorReportFile = file.path(getwd(), "errorReportSql.txt"),
-                       runAsBatch = FALSE,
-                       splitSql = FALSE) {
+                       runAsBatch = FALSE) {
   # execute
-  if (splitSql) {
-    purrr::walk(SqlRender::splitSql(sql), ~DBI::dbExecute(conn = connection, statement = .))
-  } else {
+  dbms <- getDbms(connection)
+  if (dbms == "sqlite") {
     DBI::dbExecute(conn = connection, statement = sql)
+  } else {
+    purrr::walk(SqlRender::splitSql(sql), ~DBI::dbExecute(conn = connection, statement = .))
   }
 }
 

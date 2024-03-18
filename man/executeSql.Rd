@@ -11,8 +11,7 @@ executeSql(
   progressBar = !as.logical(Sys.getenv("TESTTHAT", unset = FALSE)),
   reportOverallTime = TRUE,
   errorReportFile = file.path(getwd(), "errorReportSql.txt"),
-  runAsBatch = FALSE,
-  splitSql = FALSE
+  runAsBatch = FALSE
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ executeSql(
 \item{errorReportFile}{error report file}
 
 \item{runAsBatch}{run as batch?}
-
-\item{splitSql}{split the Sql before executing?}
 }
 \description{
 executeSql
