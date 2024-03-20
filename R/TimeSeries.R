@@ -166,7 +166,7 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
     dplyr::mutate(timeId = dplyr::row_number())
 
   ParallelLogger::logTrace(" - Inserting calendar periods")
-  calenderPeriodsTable <- ifelse(dbms(connection) == "duckdb", "calendar_periods", "#calendar_periods")
+  calenderPeriodsTable <- "calendar_periods"
   insertTable(
     connection = connection,
     tableName = calenderPeriodsTable,
@@ -174,7 +174,7 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
     dropTableIfExists = TRUE,
     createTable = TRUE,
     progressBar = FALSE,
-    tempTable = TRUE,
+    tempTable = FALSE,
     tempEmulationSchema = tempEmulationSchema,
     camelCaseToSnakeCase = TRUE
   )
