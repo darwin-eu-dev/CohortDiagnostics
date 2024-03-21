@@ -166,15 +166,15 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
     dplyr::mutate(timeId = dplyr::row_number())
 
   ParallelLogger::logTrace(" - Inserting calendar periods")
-  calenderPeriodsTable <- "calendar_periods"
+  calendarPeriodsTable <- ifelse(getDbms(connection) == "sqlite", "#calendar_periods", "calendar_periods")
   insertTable(
     connection = connection,
-    tableName = calenderPeriodsTable,
+    tableName = calendarPeriodsTable,
     data = calendarPeriods,
     dropTableIfExists = TRUE,
     createTable = TRUE,
     progressBar = FALSE,
-    tempTable = FALSE,
+    tempTable = startsWith(calendarPeriodsTable, "#"),
     tempEmulationSchema = tempEmulationSchema,
     camelCaseToSnakeCase = TRUE
   )
@@ -475,7 +475,7 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
   renderTranslateExecuteSql(
     connection = connection,
     sql = "DROP TABLE IF EXISTS @table;",
-    table = calenderPeriodsTable,
+    table = calendarPeriodsTable,
     progressBar = FALSE,
     reportOverallTime = FALSE
   )

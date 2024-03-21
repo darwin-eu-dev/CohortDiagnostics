@@ -67,14 +67,14 @@ getIncidenceRate <- function(connectionDetails = NULL,
 
   calendarYears <-
     dplyr::tibble(calendarYear = as.integer(seq(yearRange$startYear, yearRange$endYear, by = 1)))
-  calenderYearsTable <- "calendar_years"
+  calendarYearsTable <- ifelse(getDbms(connection) == "sqlite", "#calendar_years", "calendar_years")
   insertTable(
     connection = connection,
-    tableName = calenderYearsTable,
+    tableName = calendarYearsTable,
     data = calendarYears,
     dropTableIfExists = TRUE,
     createTable = TRUE,
-    tempTable = FALSE,
+    tempTable = startsWith(calendarYearsTable, "#"),
     tempEmulationSchema = tempEmulationSchema,
     camelCaseToSnakeCase = TRUE
   )
