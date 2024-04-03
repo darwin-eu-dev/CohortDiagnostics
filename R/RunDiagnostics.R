@@ -974,7 +974,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   # Writing metadata file
   ParallelLogger::logInfo("Retrieving metadata information and writing metadata")
 
-  packageName <- utils::packageName()
+  packageName <- "CohortDiagnostics"
   packageVersion <- if (!methods::getPackageName() == ".GlobalEnv") {
     as.character(utils::packageVersion(packageName))
   } else {

@@ -24,6 +24,8 @@
 #' @param tempEmulationSchema temp emulation schema
 #' @param integerAsNumeric int as numeric boolean
 #' @param integer64AsNumeric int64 as numeric boolean
+#' @param reportOverallTime ignored
+#' @param progressBar ignored
 #' @param ... parameters that will be used to render the SQL.
 #' 
 #' @return NONE
@@ -35,10 +37,19 @@ renderTranslateExecuteSql <- function(connection,
                                       tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
                                       integerAsNumeric = getOption("databaseConnectorIntegerAsNumeric", default = TRUE),
                                       integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
+                                      reportOverallTime = FALSE,
+                                      progressBar = FALSE,
                                       ...) {
+  
   sql <- SqlRender::render(sql = sql, ...)
   sql <- SqlRender::translate(sql = sql, targetDialect = getDbms(connection))
-  DBI::dbExecute(conn = connection, statement = sql)
+
+  dbms <- getDbms(connection)
+  if (dbms == "sqlite") {
+    DBI::dbExecute(conn = connection, statement = sql)
+  } else {
+    purrr::walk(SqlRender::splitSql(sql), ~DBI::dbExecute(conn = connection, statement = .))
+  }
 }
 
 #' renderTranslateQuerySql
@@ -195,7 +206,12 @@ executeSql <- function(connection,
                        errorReportFile = file.path(getwd(), "errorReportSql.txt"),
                        runAsBatch = FALSE) {
   # execute
-  DBI::dbExecute(conn = connection, statement = sql)
+  dbms <- getDbms(connection)
+  if (dbms == "sqlite") {
+    DBI::dbExecute(conn = connection, statement = sql)
+  } else {
+    purrr::walk(SqlRender::splitSql(sql), ~DBI::dbExecute(conn = connection, statement = .))
+  }
 }
 
 

@@ -119,7 +119,7 @@ runCohortRelationshipDiagnostics <-
             "sql",
             "sql_server",
             "CohortRelationship.sql",
-            package = utils::packageName()
+            package = "CohortDiagnostics"
           )
         )
 

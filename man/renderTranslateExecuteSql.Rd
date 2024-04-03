@@ -13,6 +13,8 @@ renderTranslateExecuteSql(
   tempEmulationSchema = getOption("sqlRenderTempEmulationSchema"),
   integerAsNumeric = getOption("databaseConnectorIntegerAsNumeric", default = TRUE),
   integer64AsNumeric = getOption("databaseConnectorInteger64AsNumeric", default = TRUE),
+  reportOverallTime = FALSE,
+  progressBar = FALSE,
   ...
 )
 }
@@ -32,6 +34,10 @@ renderTranslateExecuteSql(
 \item{integerAsNumeric}{int as numeric boolean}
 
 \item{integer64AsNumeric}{int64 as numeric boolean}
+
+\item{reportOverallTime}{ignored}
+
+\item{progressBar}{ignored}
 
 \item{...}{parameters that will be used to render the SQL.}
 }

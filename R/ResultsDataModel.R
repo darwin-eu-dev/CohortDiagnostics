@@ -24,7 +24,7 @@
 getResultsDataModelSpecifications <- function() {
   readr::local_edition(1)
   pathToCsv <-
-    system.file("settings", "resultsDataModelSpecification.csv", package = utils::packageName())
+    system.file("settings", "resultsDataModelSpecification.csv", package = "CohortDiagnostics")
   resultsDataModelSpecifications <-
     readr::read_csv(file = pathToCsv, col_types = readr::cols())
 
@@ -57,7 +57,7 @@ getDefaultVocabularyTableNames <- function() {
       sqlParams,
       list(
         sqlFilename = "CreateResultsDataModel.sql",
-        packageName = utils::packageName(),
+        packageName = "CohortDiagnostics",
         dbms = getDbms(connection),
         results_schema = databaseSchema
       )
@@ -165,7 +165,7 @@ migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = ""
 
   ParallelLogger::logInfo("Updating version number")
   updateVersionSql <- SqlRender::loadRenderTranslateSql("UpdateVersionNumber.sql",
-    packageName = utils::packageName(),
+    packageName = "CohortDiagnostics",
     database_schema = databaseSchema,
     table_prefix = tablePrefix,
     dbms = connectionDetails$dbms
@@ -194,6 +194,6 @@ getDataMigrator <- function(connectionDetails, databaseSchema, tablePrefix = "")
     databaseSchema = databaseSchema,
     tablePrefix = tablePrefix,
     migrationPath = "migrations",
-    packageName = utils::packageName()
+    packageName = "CohortDiagnostics"
   )
 }

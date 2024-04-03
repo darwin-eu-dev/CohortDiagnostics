@@ -44,8 +44,8 @@ Imports:
   DBI,
   bit64,
   jsonlite,
-  rJava
-Suggests:
+  rJava,
+  purrr,
   Eunomia,
   ROhdsiWebApi (>= 1.2.0),
   RSQLite (>= 2.2.1),

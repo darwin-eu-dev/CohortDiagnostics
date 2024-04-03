@@ -1,7 +1,6 @@
-skipConceptCountsTable <- FALSE
-if (Sys.getenv("CDM5_POSTGRESQL_SERVER") == "") {
-  skipConceptCountsTable <- TRUE
-} else {
+skipConceptCountsTableTest <- TRUE
+if (dbms == "postgresql") {
+  skipConceptCountsTableTest <- FALSE
   postgresConnectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "postgresql",
     user = Sys.getenv("CDM5_POSTGRESQL_USER"),
@@ -27,7 +26,7 @@ if (Sys.getenv("CDM5_POSTGRESQL_SERVER") == "") {
 }
 
 test_that("Create concept counts table", {
-  skip_if(skipConceptCountsTable | skipCdmTests, 'create concept counts test not set')
+  skip_if(skipConceptCountsTableTest | skipCdmTests, 'create concept counts test not set')
   
   pgConnection <- DatabaseConnector::connect(connectionDetails = postgresConnectionDetails)
   with_dbc_connection(pgConnection, {
