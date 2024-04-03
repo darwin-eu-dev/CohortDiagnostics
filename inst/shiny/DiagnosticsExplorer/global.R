@@ -103,3 +103,6 @@ resultDatabaseSettings <- list(
 dataSource <-
   OhdsiShinyModules::createCdDatabaseDataSource(connectionHandler = connectionHandler,
                                                 resultDatabaseSettings = resultDatabaseSettings)
+if (ncol(dataSource$conceptSets) == 0) {
+  dataSource$conceptSets <- data.frame(cohortId = character(0), conceptSetName = character(0))
+}

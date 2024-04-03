@@ -36,7 +36,7 @@ getVisitContext <- function(connectionDetails = NULL,
 
   sql <- SqlRender::loadRenderTranslateSql(
     "VisitContext.sql",
-    packageName = utils::packageName(),
+    packageName = "CohortDiagnostics",
     dbms = getDbms(connection),
     tempEmulationSchema = tempEmulationSchema,
     visit_context_table = "#visit_context",

@@ -320,28 +320,28 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
 
     sqlAll <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = FALSE,
       stratify_by_age_group = FALSE,
       dbms = getDbms(connection)
     )
     sqlGender <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = TRUE,
       stratify_by_age_group = FALSE,
       dbms = getDbms(connection)
     )
     sqlAgeGroup <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = FALSE,
       stratify_by_age_group = TRUE,
       dbms = getDbms(connection)
     )
     sqlAgeGroupGender <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = TRUE,
       stratify_by_age_group = TRUE,
       dbms = getDbms(connection)

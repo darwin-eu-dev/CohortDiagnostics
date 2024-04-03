@@ -33,7 +33,7 @@
   }
   sql <- SqlRender::loadRenderTranslateSql(
     "OrphanCodes.sql",
-    packageName = utils::packageName(),
+    packageName = "CohortDiagnostics",
     dbms = getDbms(connection),
     tempEmulationSchema = tempEmulationSchema,
     vocabulary_database_schema = vocabularyDatabaseSchema,
@@ -63,7 +63,7 @@
   sql <-
     SqlRender::loadRenderTranslateSql(
       "DropOrphanConceptTempTables.sql",
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       dbms = getDbms(connection),
       tempEmulationSchema = tempEmulationSchema
     )

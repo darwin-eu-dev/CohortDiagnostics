@@ -59,7 +59,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
   sql <-
     SqlRender::loadRenderTranslateSql(
       sqlFilename = "GetCalendarYearRange.sql",
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       dbms = getDbms(connection),
       cdm_database_schema = cdmDatabaseSchema
     )
@@ -82,7 +82,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
   sql <-
     SqlRender::loadRenderTranslateSql(
       sqlFilename = "ComputeIncidenceRates.sql",
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       dbms = getDbms(connection),
       tempEmulationSchema = tempEmulationSchema,
       cohort_database_schema = cohortDatabaseSchema,
