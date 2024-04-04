@@ -10,7 +10,7 @@ cohortDatabaseSchema <- Sys.getenv("LOCAL_POSTGRESQL_OHDSI_SCHEMA")
 tablePrefix <- "cdd_"
 cohortTable <- "mycohort"
 conceptCountsTable <- "concept_counts"
-outputFolder <- "export"
+outputFolder <- "export_pg"
 databaseId <- "Local_PG"
 minCellCount <- 5
 
@@ -77,6 +77,6 @@ CohortDiagnostics::executeDiagnosticsCdm(cdm = cdm,
                                          useExternalConceptCountsTable = T)
 
 # package results ----
-CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, overwrite = TRUE)
+CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, sqliteDbPath = "DB_pg.sqlite", overwrite = TRUE)
 # Launch diagnostics explorer shiny app ----
-CohortDiagnostics::launchDiagnosticsExplorer()
+CohortDiagnostics::launchDiagnosticsExplorer(sqliteDbPath = "DB_pg.sqlite")

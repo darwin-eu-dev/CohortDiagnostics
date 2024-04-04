@@ -7,7 +7,7 @@ library(CDMConnector)
 
 cdmDatabaseSchema <- "main"
 cohortDatabaseSchema <- "main"
-tablePrefix <- "prefix_"
+tablePrefix <- "pre_"
 cohortTable <- "mycohort"
 conceptCountsTable <- "concept_counts"
 outputFolder <- "export"
@@ -61,6 +61,6 @@ CohortDiagnostics::executeDiagnosticsCdm(cdm = cdm,
                                          useExternalConceptCountsTable = T)
 
 # package results ----
-CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, overwrite = TRUE)
+CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder,sqliteDbPath = "DB.sqlite", overwrite = TRUE)
 # Launch diagnostics explorer shiny app ----
-CohortDiagnostics::launchDiagnosticsExplorer()
+CohortDiagnostics::launchDiagnosticsExplorer(sqliteDbPath = "DB.sqlite")
