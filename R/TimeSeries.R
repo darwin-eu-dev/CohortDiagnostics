@@ -166,15 +166,15 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
     dplyr::mutate(timeId = dplyr::row_number())
 
   ParallelLogger::logTrace(" - Inserting calendar periods")
-  calenderPeriodsTable <- ifelse(dbms(connection) == "duckdb", "calendar_periods", "#calendar_periods")
+  calendarPeriodsTable <- ifelse(getDbms(connection) == "sqlite", "#calendar_periods", "calendar_periods")
   insertTable(
     connection = connection,
-    tableName = calenderPeriodsTable,
+    tableName = calendarPeriodsTable,
     data = calendarPeriods,
     dropTableIfExists = TRUE,
     createTable = TRUE,
     progressBar = FALSE,
-    tempTable = TRUE,
+    tempTable = startsWith(calendarPeriodsTable, "#"),
     tempEmulationSchema = tempEmulationSchema,
     camelCaseToSnakeCase = TRUE
   )
@@ -320,28 +320,28 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
 
     sqlAll <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = FALSE,
       stratify_by_age_group = FALSE,
       dbms = getDbms(connection)
     )
     sqlGender <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = TRUE,
       stratify_by_age_group = FALSE,
       dbms = getDbms(connection)
     )
     sqlAgeGroup <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = FALSE,
       stratify_by_age_group = TRUE,
       dbms = getDbms(connection)
     )
     sqlAgeGroupGender <- SqlRender::loadRenderTranslateSql(
       sqlFilename = seriesToRun[[i]],
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       stratify_by_gender = TRUE,
       stratify_by_age_group = TRUE,
       dbms = getDbms(connection)
@@ -475,7 +475,7 @@ runCohortTimeSeriesDiagnostics <- function(connectionDetails = NULL,
   renderTranslateExecuteSql(
     connection = connection,
     sql = "DROP TABLE IF EXISTS @table;",
-    table = calenderPeriodsTable,
+    table = calendarPeriodsTable,
     progressBar = FALSE,
     reportOverallTime = FALSE
   )

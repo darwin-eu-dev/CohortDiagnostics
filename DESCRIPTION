@@ -1,8 +1,8 @@
 Package: CohortDiagnostics
 Type: Package
 Title: Diagnostics for OHDSI Cohorts
-Version: 3.4.0
-Date: 2024-02-02
+Version: 3.4.1
+Date: 2024-04-29
 Authors@R: c(
     person("Jamie", "Gilbert", email = "gilbert@ohdsi.org", role = c("aut", "cre")),
     person("Gowtham", "Rao", role = c("aut")),
@@ -44,9 +44,9 @@ Imports:
   DBI,
   bit64,
   jsonlite,
-  rJava
-Suggests:
-  Eunomia,
+  rJava,
+  purrr,
+  Eunomia (>= 2.0.0),
   ROhdsiWebApi (>= 1.2.0),
   RSQLite (>= 2.2.1),
   scales,
@@ -59,7 +59,6 @@ Suggests:
   rsconnect,
   yaml
 Remotes:
-  ohdsi/Eunomia,
   ohdsi/FeatureExtraction,
   ohdsi/ResultModelManager,
   ohdsi/ROhdsiWebApi,
@@ -71,7 +70,7 @@ License: Apache License
 VignetteBuilder: knitr
 URL: https://ohdsi.github.io/CohortDiagnostics, https://github.com/OHDSI/CohortDiagnostics
 BugReports: https://github.com/OHDSI/CohortDiagnostics/issues
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Encoding: UTF-8
 Language: en-US
 StagedInstall: no

@@ -59,7 +59,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
   sql <-
     SqlRender::loadRenderTranslateSql(
       sqlFilename = "GetCalendarYearRange.sql",
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       dbms = getDbms(connection),
       cdm_database_schema = cdmDatabaseSchema
     )
@@ -67,14 +67,14 @@ getIncidenceRate <- function(connectionDetails = NULL,
 
   calendarYears <-
     dplyr::tibble(calendarYear = as.integer(seq(yearRange$startYear, yearRange$endYear, by = 1)))
-  calenderYearsTable <- ifelse(dbms(connection) == "duckdb", "calendar_years", "#calendar_years")
+  calendarYearsTable <- ifelse(getDbms(connection) == "sqlite", "#calendar_years", "calendar_years")
   insertTable(
     connection = connection,
-    tableName = calenderYearsTable,
+    tableName = calendarYearsTable,
     data = calendarYears,
     dropTableIfExists = TRUE,
     createTable = TRUE,
-    tempTable = TRUE,
+    tempTable = startsWith(calendarYearsTable, "#"),
     tempEmulationSchema = tempEmulationSchema,
     camelCaseToSnakeCase = TRUE
   )
@@ -82,7 +82,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
   sql <-
     SqlRender::loadRenderTranslateSql(
       sqlFilename = "ComputeIncidenceRates.sql",
-      packageName = utils::packageName(),
+      packageName = "CohortDiagnostics",
       dbms = getDbms(connection),
       tempEmulationSchema = tempEmulationSchema,
       cohort_database_schema = cohortDatabaseSchema,

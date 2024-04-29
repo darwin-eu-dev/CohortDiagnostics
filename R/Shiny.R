@@ -119,7 +119,7 @@ launchDiagnosticsExplorer <- function(sqliteDbPath = "MergedCohortDiagnosticsDat
   }
 
   appDir <-
-    system.file("shiny", "DiagnosticsExplorer", package = utils::packageName())
+    system.file("shiny", "DiagnosticsExplorer", package = "CohortDiagnostics")
 
   if (makePublishable) {
     if (dir.exists(publishDir) && !overwritePublishDir) {

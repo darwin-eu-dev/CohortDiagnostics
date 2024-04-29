@@ -502,7 +502,7 @@ runConceptSetDiagnostics <- function(connection,
           start <- Sys.time()
             sql <- SqlRender::loadRenderTranslateSql(
               "CohortSourceCodes.sql",
-              packageName = utils::packageName(),
+              packageName = "CohortDiagnostics",
               dbms = getDbms(connection),
               tempEmulationSchema = tempEmulationSchema,
               cdm_database_schema = cdmDatabaseSchema,
@@ -635,7 +635,7 @@ runConceptSetDiagnostics <- function(connection,
       readr::local_edition(1)
       domains <-
         readr::read_csv(
-          system.file("csv", "domains.csv", package = utils::packageName()),
+          system.file("csv", "domains.csv", package = "CohortDiagnostics"),
           col_types = readr::cols(),
           guess_max = min(1e7)
         )
@@ -727,7 +727,7 @@ runConceptSetDiagnostics <- function(connection,
               sql <-
                 SqlRender::loadRenderTranslateSql(
                   "CohortEntryBreakdown.sql",
-                  packageName = utils::packageName(),
+                  packageName = "CohortDiagnostics",
                   dbms = getDbms(connection),
                   tempEmulationSchema = tempEmulationSchema,
                   cdm_database_schema = cdmDatabaseSchema,

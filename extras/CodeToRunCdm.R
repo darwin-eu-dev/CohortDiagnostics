@@ -7,6 +7,7 @@ library(CDMConnector)
 
 cdmDatabaseSchema <- "main"
 cohortDatabaseSchema <- "main"
+tablePrefix <- "pre_"
 cohortTable <- "mycohort"
 conceptCountsTable <- "concept_counts"
 outputFolder <- "export"
@@ -25,8 +26,18 @@ cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
 )
 
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = CDMConnector::eunomia_dir())
-cdm <- CDMConnector::cdmFromCon(con, cdmSchema = cdmDatabaseSchema, writeSchema = cohortDatabaseSchema, cdmName = databaseId)
+
+cdm <- CDMConnector::cdmFromCon(con, 
+                                cdmSchema = cdmDatabaseSchema, 
+                                writeSchema = c(schema = cohortDatabaseSchema, prefix = tablePrefix), 
+                                cdmName = databaseId)
+
 cdm <- CDMConnector::generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
+
+# only CDMConnector functions use prefix directly, for other functions, we need to add it
+cohortTable <- paste0(tablePrefix, "mycohort")
+conceptCountsTable <- paste0(tablePrefix, "concept_counts")
+
 CohortDiagnostics::createConceptCountsTable(connection = attr(cdm, "dbcon"),
                                             cdmDatabaseSchema = cdmDatabaseSchema,
                                             conceptCountsDatabaseSchema = cdmDatabaseSchema,
@@ -50,6 +61,6 @@ CohortDiagnostics::executeDiagnosticsCdm(cdm = cdm,
                                          useExternalConceptCountsTable = T)
 
 # package results ----
-CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, overwrite = TRUE)
+CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder,sqliteDbPath = "DB.sqlite", overwrite = TRUE)
 # Launch diagnostics explorer shiny app ----
-CohortDiagnostics::launchDiagnosticsExplorer()
+CohortDiagnostics::launchDiagnosticsExplorer(sqliteDbPath = "DB.sqlite")
