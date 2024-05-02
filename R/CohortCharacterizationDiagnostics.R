@@ -44,7 +44,7 @@ getCohortCharacteristics <- function(connectionDetails = NULL,
           cohortDatabaseSchema = cohortDatabaseSchema,
           cdmVersion = cdmVersion,
           cohortTable = cohortTable,
-          cohortId = cohortIds,
+          cohortIds = cohortIds,
           covariateSettings = covariateSettings,
           aggregated = TRUE
         )
@@ -98,7 +98,7 @@ getCohortCharacteristics <- function(connectionDetails = NULL,
     covariates <- covariates %>%
       dplyr::mutate(sd = sqrt(p * (1 - p))) %>%
       dplyr::select(-p) %>%
-      dplyr::rename("mean" = "averageValue") %>%
+      dplyr::rename(mean = .data$averageValue) %>%
       dplyr::select(-populationSize)
 
     if (FeatureExtraction::isTemporalCovariateData(featureExtractionOutput)) {
@@ -144,9 +144,9 @@ getCohortCharacteristics <- function(connectionDetails = NULL,
     dplyr::pull(dplyr::count(featureExtractionOutput$covariatesContinuous)) > 0) {
     covariates <- featureExtractionOutput$covariatesContinuous %>%
       dplyr::rename(
-        mean = averageValue,
-        sd = standardDeviation,
-        cohortId = cohortDefinitionId
+        mean = .data$averageValue,
+        sd = .data$standardDeviation,
+        cohortId = .data$cohortDefinitionId
       )
     covariatesContinuous <- covariates
     if (FeatureExtraction::isTemporalCovariateData(featureExtractionOutput)) {

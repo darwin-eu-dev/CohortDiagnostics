@@ -21,7 +21,7 @@ Description: CohortDiagnostics is an R utility package for the development and e
     definitions across one or more data sources, facilitating reproducible research.
 Depends:
 	DatabaseConnector (>= 5.0.0),
-	FeatureExtraction (>= 3.2.0),
+	FeatureExtraction (>= 3.5.2),
 	R (>= 4.1.0)
 Imports:
   Andromeda (>= 0.6.0),
@@ -39,6 +39,7 @@ Imports:
   stringr,
   tidyr (>= 1.2.0),
   CohortGenerator (>= 0.8.0),
+  CirceR,
   remotes,
   CDMConnector (>= 1.2.1),
   DBI,
@@ -46,20 +47,20 @@ Imports:
   jsonlite,
   rJava,
   purrr,
-  Eunomia (>= 2.0.0),
-  ROhdsiWebApi (>= 1.2.0),
-  RSQLite (>= 2.2.1),
   scales,
-  testthat,
-  withr,
   zip,
-  knitr,
   shiny,
-  OhdsiShinyModules,
   rsconnect,
   yaml
+Suggests:
+  Eunomia (>= 2.0.0),
+  OhdsiShinyModules,
+  ROhdsiWebApi (>= 1.2.0),
+  RSQLite (>= 2.2.1),
+  knitr,
+  testthat,
+  withr
 Remotes:
-  ohdsi/FeatureExtraction,
   ohdsi/ResultModelManager,
   ohdsi/ROhdsiWebApi,
   ohdsi/CirceR,

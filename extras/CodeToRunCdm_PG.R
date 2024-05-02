@@ -4,6 +4,7 @@ library(Eunomia)
 library(CohortDiagnostics)
 library(CohortGenerator)
 library(CDMConnector)
+library(CirceR)
 
 cdmDatabaseSchema <- Sys.getenv("LOCAL_POSTGRESQL_CDM_SCHEMA")
 cohortDatabaseSchema <- Sys.getenv("LOCAL_POSTGRESQL_OHDSI_SCHEMA")
@@ -13,28 +14,14 @@ conceptCountsTable <- "concept_counts"
 outputFolder <- "export_pg"
 databaseId <- "Local_PG"
 minCellCount <- 5
+sqlDBPath <- "DB_pg.sqlite"
 
 if (!dir.exists(outputFolder)) {
   dir.create(outputFolder)
 }
 
-# First construct a cohort definition set: an empty 
-# data frame with the cohorts to generate
-cohortDefinitionSet <- CohortGenerator::createEmptyCohortDefinitionSet()
-cohortJsonFiles <- list.files(path = system.file("cohorts", package = "CohortDiagnostics"), full.names = TRUE)
-for (i in 1:length(cohortJsonFiles)) {
-  cohortJsonFileName <- cohortJsonFiles[i]
-  cohortName <- tools::file_path_sans_ext(basename(cohortJsonFileName))
-  # Here we read in the JSON in order to create the SQL
-  cohortJson <- readChar(cohortJsonFileName, file.info(cohortJsonFileName)$size)
-  cohortExpression <- CirceR::cohortExpressionFromJson(cohortJson)
-  cohortSql <- CirceR::buildCohortQuery(cohortExpression, options = CirceR::createGenerateOptions(generateStats = FALSE))
-  cohortDefinitionSet <- rbind(cohortDefinitionSet, data.frame(cohortId = as.numeric(i),
-                                                               cohortName = cohortName,
-                                                               sql = cohortSql,
-                                                               json = cohortJson,
-                                                               stringsAsFactors = FALSE))
-}
+# First construct a cohort definition set
+cohortDefinitionSet <- CohortDiagnostics::createCohortDefinitionSet(system.file("cohorts", package = "CohortDiagnostics"))
 
 con <- DBI::dbConnect(RPostgres::Postgres(),
                       dbname = "synthea10",
@@ -51,8 +38,8 @@ cdm <- CDMConnector::cdm_from_con(con,
 cdm <- CDMConnector::generateCohortSet(cdm, cohortDefinitionSet, name = cohortTable)
 
 # only CDMConnector functions use prefix directly, for other functions, we need to add it
-cohortTable <- paste0(tablePrefix, "mycohort")
-conceptCountsTable <- paste0(tablePrefix, "concept_counts")
+cohortTable <- paste0(tablePrefix, cohortTable)
+conceptCountsTable <- paste0(tablePrefix, conceptCountsTable)
 
 CohortDiagnostics::createConceptCountsTable(connection = attr(cdm, "dbcon"),
                                             cdmDatabaseSchema = cdmDatabaseSchema,
@@ -75,8 +62,9 @@ CohortDiagnostics::executeDiagnosticsCdm(cdm = cdm,
                                          runCohortRelationship = T,
                                          runTemporalCohortCharacterization = T,
                                          useExternalConceptCountsTable = T)
+CDMConnector::cdmDisconnect(cdm)
 
 # package results ----
-CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, sqliteDbPath = "DB_pg.sqlite", overwrite = TRUE)
+CohortDiagnostics::createMergedResultsFile(dataFolder = outputFolder, sqliteDbPath = sqlDBPath, overwrite = TRUE)
 # Launch diagnostics explorer shiny app ----
-CohortDiagnostics::launchDiagnosticsExplorer(sqliteDbPath = "DB_pg.sqlite")
+CohortDiagnostics::launchDiagnosticsExplorer(sqliteDbPath = sqlDBPath)

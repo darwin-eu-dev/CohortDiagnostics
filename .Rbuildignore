@@ -29,5 +29,7 @@ deploy.sh
 compare_versions
 ^doc$
 ^Meta$
+inst/shiny/DiagnosticsExplorer/data
 inst/shiny/DiagnosticsExplorer/renv
+inst/shiny/DiagnosticsExplorer/rsconnect
 results/

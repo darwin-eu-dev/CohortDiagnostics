@@ -25,5 +25,6 @@ renv.lock
 *.sqlite
 MergedCohortDiagnosticsData.7z
 inst/shiny/DiagnosticsExplorer/UserCredentials.csv
+inst/shiny/DiagnosticsExplorer/rsconnect/
 inst/doc
 results/
