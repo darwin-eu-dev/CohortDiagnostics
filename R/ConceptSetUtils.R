@@ -84,15 +84,11 @@ createConceptCountsTable <- function(connectionDetails = NULL,
                                      conceptCountsTable = "concept_counts",
                                      conceptCountsTableIsTemp = FALSE,
                                      useAchilles = FALSE,
-                                     resultsDatabaseSchema) {
+                                     achillesDatabaseSchema = cdmDatabaseSchema) {
   ParallelLogger::logInfo("Creating internal concept counts table")
   if (is.null(connection)) {
     connection <- DatabaseConnector::connect(connectionDetails)
     on.exit(DatabaseConnector::disconnect(connection))
-  }
-  
-  if (isTRUE(useAchilles)) {
-    checkmate::assert_character(resultsDatabaseSchema, min.chars = 1, len = 1, any.missing = FALSE)
   }
   
   sql <-

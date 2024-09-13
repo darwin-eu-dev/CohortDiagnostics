@@ -153,7 +153,9 @@ getDefaultCovariateSettings <- function() {
 #'                                   Default is "cohortId * 1000 + seed", which ensures unique identifiers
 #'                                   as long as there are fewer than 1000 cohorts.
 #'                                   
-#' @param useAchilles                Logical. Should the pre-computed Achilles analyses be used to get concept counts? TRUE or FALSE (default)
+#' @param useAchilles                Logical. Should the pre-computed Achilles analyses be used to get concept counts? TRUE or FALSE (default).
+#'                                   Achilles tables with pre-computed analyses are created by the Achilles R package. 
+#'                                   See \url{https://ohdsi.github.io/Achilles/} for details about Achilles tables and how to populate them.
 #'
 #' @param achillesDatabaseSchema     Character. The name of the schema where the Achilles results tables are located. 
 #'                                   Require if `useAchilles` is TRUE and ignored otherwise.
@@ -238,7 +240,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
                                seedArgs = NULL,
                                sampleIdentifierExpression = "cohortId * 1000 + seed",
                                useAchilles = FALSE, 
-                               achillesDatabaseSchema) {
+                               achillesDatabaseSchema = cdmDatabaseSchema) {
   # collect arguments that were passed to cohort diagnostics at initiation
   callingArgs <- formals(executeDiagnostics)
   callingArgsJson <-
@@ -764,7 +766,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
           conceptIdTable = "#concept_ids",
           recordKeepingFile = recordKeepingFile,
           useAchilles = useAchilles,
-          resultsDatabaseSchema = resultsDatabaseSchema
+          achillesDatabaseSchema = achillesDatabaseSchema
         )
       }
     )
