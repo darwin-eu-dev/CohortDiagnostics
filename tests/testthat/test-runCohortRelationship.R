@@ -1,427 +1,432 @@
-test_that("Testing executeCohortRelationshipDiagnostics", {
-  skip_if(skipCdmTests, "cdm settings not configured")
 
-  # manually create cohort table and load to table
-  # for the logic to work - there has to be some overlap of the comparator cohort over target cohort
-  # note - we will not be testing offset in this test. it is expected to work as it is a simple substraction
+for (nm in names(testServers)) {
 
-  temporalStartDays <- c(0)
-  temporalEndDays <- c(0)
+  server <- testServers[[nm]]
 
-  targetCohort <- dplyr::tibble(
-    cohortDefinitionId = c(1),
-    subjectId = c(1),
-    cohortStartDate = c(as.Date("1900-01-15")),
-    cohortEndDate = c(as.Date("1900-01-31"))
-  ) # target cohort always one row
+  connectionDetails <- server$connectionDetails
 
-  comparatorCohort <- # all records here overlap with targetCohort
-    dplyr::tibble(
-      cohortDefinitionId = c(10, 10, 10),
-      subjectId = c(1, 1, 1),
-      cohortStartDate = c(
-        as.Date("1900-01-01"),
-        # starts before target cohort start
-        as.Date("1900-01-22"),
-        # starts during target cohort period and ends during target cohort period
-        as.Date("1900-01-31")
-      ),
-      cohortEndDate = c(
-        as.Date("1900-01-20"),
-        as.Date("1900-01-29"),
-        as.Date("1900-01-31")
-      )
-    )
+  test_that("Testing runCohortRelationship", {
+    skip_if(skipCdmTests, "cdm settings not configured")
 
-  cohort <- dplyr::bind_rows(
-    targetCohort,
-    comparatorCohort,
-    targetCohort %>%
-      dplyr::mutate(cohortDefinitionId = 2),
-    comparatorCohort %>%
-      dplyr::mutate(cohortDefinitionId = 20)
-  )
+    # manually create cohort table and load to table
+    # for the logic to work - there has to be some overlap of the comparator cohort over target cohort
+    # note - we will not be testing offset in this test. it is expected to work as it is a simple substraction
 
-  connectionCohortRelationship <-
-    DatabaseConnector::connect(connectionDetails)
+    temporalStartDays <- c(0)
+    temporalEndDays <- c(0)
 
-  # to do - with incremental = FALSE
-  with_dbc_connection(connectionCohortRelationship, {
-    sysTime <- as.numeric(Sys.time()) * 100000
-    tableName <- paste0("cr", sysTime)
-    observationTableName <- paste0("op", sysTime)
+    targetCohort <- dplyr::tibble(
+      cohortDefinitionId = c(1),
+      subjectId = c(1),
+      cohortStartDate = c(as.Date("1900-01-15")),
+      cohortEndDate = c(as.Date("1900-01-31"))
+    ) # target cohort always one row
 
-    DatabaseConnector::insertTable(
-      connection = connectionCohortRelationship,
-      databaseSchema = cohortDatabaseSchema,
-      tableName = tableName,
-      data = cohort,
-      dropTableIfExists = TRUE,
-      createTable = TRUE,
-      tempTable = FALSE,
-      camelCaseToSnakeCase = TRUE,
-      progressBar = FALSE
-    )
-
-    cohortDefinitionSet <-
-      cohort %>%
-      dplyr::select(cohortDefinitionId) %>%
-      dplyr::distinct() %>%
-      dplyr::rename("cohortId" = "cohortDefinitionId") %>%
-      dplyr::rowwise() %>%
-      dplyr::mutate(json = RJSONIO::toJSON(list(
-        cohortId = cohortId,
-        randomString = c(
-          sample(x = LETTERS, 5, replace = TRUE),
-          sample(x = LETTERS, 4, replace = TRUE),
-          sample(LETTERS, 1, replace = TRUE)
+    comparatorCohort <- # all records here overlap with targetCohort
+      dplyr::tibble(
+        cohortDefinitionId = c(10, 10, 10),
+        subjectId = c(1, 1, 1),
+        cohortStartDate = c(
+          as.Date("1900-01-01"),
+          # starts before target cohort start
+          as.Date("1900-01-22"),
+          # starts during target cohort period and ends during target cohort period
+          as.Date("1900-01-31")
+        ),
+        cohortEndDate = c(
+          as.Date("1900-01-20"),
+          as.Date("1900-01-29"),
+          as.Date("1900-01-31")
         )
-      ))) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(
-        sql = json,
-        checksum = CohortDiagnostics:::computeChecksum(json)
       )
 
-
-    exportFolder <- tempdir()
-    exportFile <- tempfile()
-
-    unlink(
-      x = exportFolder,
-      recursive = TRUE,
-      force = TRUE
-    )
-    dir.create(
-      path = exportFolder,
-      showWarnings = FALSE,
-      recursive = TRUE
+    cohort <- dplyr::bind_rows(
+      targetCohort,
+      comparatorCohort,
+      targetCohort %>%
+        dplyr::mutate(cohortDefinitionId = 2),
+      comparatorCohort %>%
+        dplyr::mutate(cohortDefinitionId = 20)
     )
 
-    CohortDiagnostics:::executeCohortRelationshipDiagnostics(
-      connection = connectionCohortRelationship,
-      databaseId = "testDataSourceName",
-      exportFolder = exportFolder,
-      cohortDatabaseSchema = cohortDatabaseSchema,
-      cdmDatabaseSchema = cdmDatabaseSchema,
-      cohortTable = tableName,
-      tempEmulationSchema = NULL,
-      cohortDefinitionSet = cohortDefinitionSet %>%
-        dplyr::filter(cohortId %in% c(1, 10)),
-      temporalCovariateSettings = list(
-        temporalStartDays = c(-365, -30),
-        temporalEndDays = c(-31, -1)
-      ),
-      minCellCount = 0,
-      recordKeepingFile = paste0(exportFile, "recordKeeping"),
-      incremental = TRUE,
-      batchSize = 2
-    )
+    connectionCohortRelationship <-
+      DatabaseConnector::connect(connectionDetails)
 
-    recordKeepingFileData <-
-      readr::read_csv(
-        file = paste0(exportFile, "recordKeeping"),
-        col_types = readr::cols()
+    # to do - with incremental = FALSE
+    with_dbc_connection(connectionCohortRelationship, {
+      sysTime <- as.numeric(Sys.time()) * 100000
+      tableName <- paste0("cr", sysTime)
+      observationTableName <- paste0("op", sysTime)
+
+      DatabaseConnector::insertTable(
+        connection = connectionCohortRelationship,
+        databaseSchema = server$cohortDatabaseSchema,
+        tableName = tableName,
+        data = cohort,
+        dropTableIfExists = TRUE,
+        createTable = TRUE,
+        tempTable = FALSE,
+        camelCaseToSnakeCase = TRUE,
+        progressBar = FALSE
       )
 
-    # testing if check sum if written to field called targetChecksum
-    testthat::expect_true("targetChecksum" %in% colnames(recordKeepingFileData))
-    testthat::expect_true("comparatorChecksum" %in% colnames(recordKeepingFileData))
-    testthat::expect_true("checksum" %in% colnames(recordKeepingFileData))
-
-    testthat::expect_equal(
-      object = recordKeepingFileData %>%
-        dplyr::filter(cohortId == 1) %>%
-        dplyr::filter(comparatorId == 10) %>%
-        dplyr::select(checksum) %>%
-        dplyr::pull(checksum),
-      expected = recordKeepingFileData %>%
-        dplyr::filter(cohortId == 1) %>%
-        dplyr::filter(comparatorId == 10) %>%
+      cohortDefinitionSet <-
+        cohort %>%
+        dplyr::select(cohortDefinitionId) %>%
+        dplyr::distinct() %>%
+        dplyr::rename("cohortId" = "cohortDefinitionId") %>%
+        dplyr::rowwise() %>%
+        dplyr::mutate(json = RJSONIO::toJSON(list(
+          cohortId = cohortId,
+          randomString = c(
+            sample(x = LETTERS, 5, replace = TRUE),
+            sample(x = LETTERS, 4, replace = TRUE),
+            sample(LETTERS, 1, replace = TRUE)
+          )
+        ))) %>%
+        dplyr::ungroup() %>%
         dplyr::mutate(
-          checksum2 = paste0(
-            targetChecksum,
-            comparatorChecksum
-          )
-        ) %>%
-        dplyr::pull(checksum2)
-    )
+          sql = json,
+          checksum = CohortDiagnostics:::computeChecksum(json)
+        )
 
 
+      exportFolder <- tempdir()
+      exportFile <- tempfile()
 
-    ## testing if subset works
-    allCohortIds <- cohortDefinitionSet %>%
-      dplyr::filter(cohortId %in% c(1, 10, 2)) %>%
-      dplyr::select(cohortId, checksum) %>%
-      dplyr::rename(
-        targetCohortId = cohortId,
-        targetChecksum = checksum
-      ) %>%
-      dplyr::distinct()
+      unlink(
+        x = exportFolder,
+        recursive = TRUE,
+        force = TRUE
+      )
+      dir.create(
+        path = exportFolder,
+        showWarnings = FALSE,
+        recursive = TRUE
+      )
 
-    combinationsOfPossibleCohortRelationships <- allCohortIds %>%
-      tidyr::crossing(
-        allCohortIds %>%
-          dplyr::rename(
-            comparatorCohortId = targetCohortId,
-            comparatorChecksum = targetChecksum
-          )
-      ) %>%
-      dplyr::filter(targetCohortId != comparatorCohortId) %>%
-      dplyr::arrange(targetCohortId, comparatorCohortId) %>%
-      dplyr::mutate(checksum = paste0(targetChecksum, comparatorChecksum))
+      CohortDiagnostics:::runCohortRelationship(
+        connection = connectionCohortRelationship,
+        databaseId = nm,
+        exportFolder = exportFolder,
+        cohortDatabaseSchema = server$cohortDatabaseSchema,
+        cdmDatabaseSchema = server$cdmDatabaseSchema,
+        cohortTable = tableName,
+        tempEmulationSchema = server$tempEmulationSchema,
+        cohortDefinitionSet = cohortDefinitionSet %>%
+          dplyr::filter(cohortId %in% c(1, 10)),
+        temporalCovariateSettings = list(
+          temporalStartDays = c(-365, -30),
+          temporalEndDays = c(-31, -1)
+        ),
+        minCellCount = 0,
+        incrementalFolder = paste0(exportFile, "recordKeeping"),
+        incremental = TRUE,
+        batchSize = 2
+      )
 
-    subset <- CohortDiagnostics:::subsetToRequiredCombis(
-      combis = combinationsOfPossibleCohortRelationships,
-      task = "runCohortRelationship",
-      incremental = TRUE,
-      recordKeepingFile = paste0(exportFile, "recordKeeping")
-    ) %>% dplyr::tibble()
+      recordKeepingFileData <-
+        readr::read_csv(
+          file = paste0(exportFile, "recordKeeping"),
+          col_types = readr::cols()
+        )
 
-    ### subset should not have the combinations in record keeping file
-    shouldBeDfOfZeroRows <- subset %>%
-      dplyr::inner_join(
-        recordKeepingFileData %>%
-          dplyr::select(
-            "cohortId",
-            "comparatorId"
+      # testing if check sum if written to field called targetChecksum
+      testthat::expect_true("targetChecksum" %in% colnames(recordKeepingFileData))
+      testthat::expect_true("comparatorChecksum" %in% colnames(recordKeepingFileData))
+      testthat::expect_true("checksum" %in% colnames(recordKeepingFileData))
+
+      testthat::expect_equal(
+        object = recordKeepingFileData %>%
+          dplyr::filter(cohortId == 1) %>%
+          dplyr::filter(comparatorId == 10) %>%
+          dplyr::select(checksum) %>%
+          dplyr::pull(checksum),
+        expected = recordKeepingFileData %>%
+          dplyr::filter(cohortId == 1) %>%
+          dplyr::filter(comparatorId == 10) %>%
+          dplyr::mutate(
+            checksum2 = paste0(
+              targetChecksum,
+              comparatorChecksum
+            )
           ) %>%
-          dplyr::distinct() %>%
-          dplyr::rename(
-            targetCohortId = "cohortId",
-            comparatorCohortId = "comparatorId"
-          ),
-        by = c("targetCohortId", "comparatorCohortId")
+          dplyr::pull(checksum2)
       )
 
-    testthat::expect_equal(
-      object = nrow(shouldBeDfOfZeroRows),
-      expected = 0,
-      info = "Looks like subset and record keeping file did not match."
-    )
+      ## testing if subset works
+      allCohortIds <- cohortDefinitionSet %>%
+        dplyr::filter(cohortId %in% c(1, 10, 2)) %>%
+        dplyr::select(cohortId, checksum) %>%
+        dplyr::rename(
+          targetCohortId = cohortId,
+          targetChecksum = checksum
+        ) %>%
+        dplyr::distinct()
 
+      combinationsOfPossibleCohortRelationships <- allCohortIds %>%
+        tidyr::crossing(
+          allCohortIds %>%
+            dplyr::rename(
+              comparatorCohortId = targetCohortId,
+              comparatorChecksum = targetChecksum
+            )
+        ) %>%
+        dplyr::filter(targetCohortId != comparatorCohortId) %>%
+        dplyr::arrange(targetCohortId, comparatorCohortId) %>%
+        dplyr::mutate(checksum = paste0(targetChecksum, comparatorChecksum))
 
-    ## running again by adding cohort 2, to previously run 1 and 10
-    CohortDiagnostics:::executeCohortRelationshipDiagnostics(
-      connection = connectionCohortRelationship,
-      databaseId = "testDataSourceName",
-      exportFolder = exportFolder,
-      cohortDatabaseSchema = cohortDatabaseSchema,
-      cdmDatabaseSchema = cdmDatabaseSchema,
-      cohortTable = tableName,
-      tempEmulationSchema = NULL,
-      cohortDefinitionSet = cohortDefinitionSet %>%
-        dplyr::filter(cohortId %in% c(1, 10, 2)),
-      temporalCovariateSettings = list(
-        temporalStartDays = c(-365, -30),
-        temporalEndDays = c(-31, -1)
-      ),
-      minCellCount = 0,
-      recordKeepingFile = paste0(exportFile, "recordKeeping"),
-      incremental = TRUE,
-      batchSize = 2
-    )
+      subset <- CohortDiagnostics:::subsetToRequiredCombis(
+        combis = combinationsOfPossibleCohortRelationships,
+        task = "runCohortRelationship",
+        incremental = TRUE,
+        recordKeepingFile = paste0(exportFile, "recordKeeping")
+      ) %>% dplyr::tibble()
 
-    recordKeepingFileData2 <-
-      readr::read_csv(
-        file = paste0(exportFile, "recordKeeping"),
-        col_types = readr::cols()
-      )
-    # record keeping file should have 6 combinations - for 3 cohorts
-    testthat::expect_equal(
-      object = nrow(recordKeepingFileData2),
-      expected = 3 * 2 * 1
-    )
-
-    # record keeping file should have 4 additional combinations
-    testthat::expect_equal(
-      object = recordKeepingFileData2 %>%
-        dplyr::anti_join(
+      ### subset should not have the combinations in record keeping file
+      shouldBeDfOfZeroRows <- subset %>%
+        dplyr::inner_join(
           recordKeepingFileData %>%
             dplyr::select(
-              cohortId,
-              comparatorId
+              "cohortId",
+              "comparatorId"
+            ) %>%
+            dplyr::distinct() %>%
+            dplyr::rename(
+              targetCohortId = "cohortId",
+              comparatorCohortId = "comparatorId"
             ),
-          by = c("cohortId", "comparatorId")
-        ) %>%
-        nrow(),
-      expected = 4
-    )
+          by = c("targetCohortId", "comparatorCohortId")
+        )
+
+      testthat::expect_equal(
+        object = nrow(shouldBeDfOfZeroRows),
+        expected = 0,
+        info = "Looks like subset and record keeping file did not match."
+      )
 
 
-    # check what happens for an unrelated cohort combination
-    allCohortIds <- cohortDefinitionSet %>%
-      dplyr::filter(cohortId %in% c(2, 20)) %>%
-      dplyr::select(cohortId, checksum) %>%
-      dplyr::rename(
-        targetCohortId = cohortId,
-        targetChecksum = checksum
-      ) %>%
-      dplyr::distinct()
+      ## running again by adding cohort 2, to previously run 1 and 10
+      CohortDiagnostics:::runCohortRelationship(
+        connection = connectionCohortRelationship,
+        databaseId = "testDataSourceName",
+        exportFolder = exportFolder,
+        cohortDatabaseSchema = server$cohortDatabaseSchema,
+        cdmDatabaseSchema = server$cdmDatabaseSchema,
+        cohortTable = tableName,
+        tempEmulationSchema = NULL,
+        cohortDefinitionSet = cohortDefinitionSet %>%
+          dplyr::filter(cohortId %in% c(1, 10, 2)),
+        temporalCovariateSettings = list(
+          temporalStartDays = c(-365, -30),
+          temporalEndDays = c(-31, -1)
+        ),
+        minCellCount = 0,
+        incrementalFolder = paste0(exportFile, "recordKeeping"),
+        incremental = TRUE,
+        batchSize = 2
+      )
 
-    combinationsOfPossibleCohortRelationships <- allCohortIds %>%
-      tidyr::crossing(
-        allCohortIds %>%
-          dplyr::rename(
-            comparatorCohortId = targetCohortId,
-            comparatorChecksum = targetChecksum
-          )
-      ) %>%
-      dplyr::filter(targetCohortId != comparatorCohortId) %>%
-      dplyr::arrange(targetCohortId, comparatorCohortId) %>%
-      dplyr::mutate(checksum = paste0(targetChecksum, comparatorChecksum))
+      recordKeepingFileData2 <-
+        readr::read_csv(
+          file = paste0(exportFile, "recordKeeping"),
+          col_types = readr::cols()
+        )
+      # record keeping file should have 6 combinations - for 3 cohorts
+      testthat::expect_equal(
+        object = nrow(recordKeepingFileData2),
+        expected = 3 * 2 * 1
+      )
 
-    subset <- CohortDiagnostics:::subsetToRequiredCombis(
-      combis = combinationsOfPossibleCohortRelationships,
-      task = "runCohortRelationship",
-      incremental = TRUE,
-      recordKeepingFile = paste0(exportFile, "recordKeeping")
-    ) %>% dplyr::tibble()
-
-    ### subset should be two rows in subsets that are not in record keeping file
-    shouldBeTwoRows <- subset %>%
-      dplyr::anti_join(
-        recordKeepingFileData2 %>%
-          dplyr::select(
-            "cohortId",
-            "comparatorId"
+      # record keeping file should have 4 additional combinations
+      testthat::expect_equal(
+        object = recordKeepingFileData2 %>%
+          dplyr::anti_join(
+            recordKeepingFileData %>%
+              dplyr::select(
+                cohortId,
+                comparatorId
+              ),
+            by = c("cohortId", "comparatorId")
           ) %>%
-          dplyr::rename(
-            targetCohortId = cohortId,
-            comparatorCohortId = comparatorId
-          ),
-        by = c("targetCohortId", "comparatorCohortId")
+          nrow(),
+        expected = 4
       )
 
-    testthat::expect_equal(
-      object = nrow(shouldBeTwoRows),
-      expected = 2,
-      info = "Looks like subset and record keeping file did not match, Two new cohorts should have run."
-    )
+
+      # check what happens for an unrelated cohort combination
+      allCohortIds <- cohortDefinitionSet %>%
+        dplyr::filter(cohortId %in% c(2, 20)) %>%
+        dplyr::select(cohortId, checksum) %>%
+        dplyr::rename(
+          targetCohortId = cohortId,
+          targetChecksum = checksum
+        ) %>%
+        dplyr::distinct()
+
+      combinationsOfPossibleCohortRelationships <- allCohortIds %>%
+        tidyr::crossing(
+          allCohortIds %>%
+            dplyr::rename(
+              comparatorCohortId = targetCohortId,
+              comparatorChecksum = targetChecksum
+            )
+        ) %>%
+        dplyr::filter(targetCohortId != comparatorCohortId) %>%
+        dplyr::arrange(targetCohortId, comparatorCohortId) %>%
+        dplyr::mutate(checksum = paste0(targetChecksum, comparatorChecksum))
+
+      subset <- CohortDiagnostics:::subsetToRequiredCombis(
+        combis = combinationsOfPossibleCohortRelationships,
+        task = "runCohortRelationship",
+        incremental = TRUE,
+        recordKeepingFile = paste0(exportFile, "recordKeeping")
+      ) %>% dplyr::tibble()
+
+      ### subset should be two rows in subsets that are not in record keeping file
+      shouldBeTwoRows <- subset %>%
+        dplyr::anti_join(
+          recordKeepingFileData2 %>%
+            dplyr::select(
+              "cohortId",
+              "comparatorId"
+            ) %>%
+            dplyr::rename(
+              targetCohortId = cohortId,
+              comparatorCohortId = comparatorId
+            ),
+          by = c("targetCohortId", "comparatorCohortId")
+        )
+
+      testthat::expect_equal(
+        object = nrow(shouldBeTwoRows),
+        expected = 2,
+        info = "Looks like subset and record keeping file did not match, Two new cohorts should have run."
+      )
+    })
   })
-})
 
 
+  test_that("Testing cohort relationship logic - incremental FALSE", {
+    skip_if(skipCdmTests, "cdm settings not configured")
 
+    # manually create cohort table and load to table
+    # for the logic to work - there has to be some overlap of the comparator cohort over target cohort
+    # note - we will not be testing offset in this test. it is expected to work as it is a simple substraction
 
+    temporalStartDays <- c(0)
+    temporalEndDays <- c(0)
 
-test_that("Testing cohort relationship logic - incremental FALSE", {
-  skip_if(skipCdmTests, "cdm settings not configured")
+    targetCohort <- dplyr::tibble(
+      cohortDefinitionId = c(1),
+      subjectId = c(1),
+      cohortStartDate = c(as.Date("1900-01-15")),
+      cohortEndDate = c(as.Date("1900-01-31"))
+    ) # target cohort always one row
 
-  # manually create cohort table and load to table
-  # for the logic to work - there has to be some overlap of the comparator cohort over target cohort
-  # note - we will not be testing offset in this test. it is expected to work as it is a simple substraction
-
-  temporalStartDays <- c(0)
-  temporalEndDays <- c(0)
-
-  targetCohort <- dplyr::tibble(
-    cohortDefinitionId = c(1),
-    subjectId = c(1),
-    cohortStartDate = c(as.Date("1900-01-15")),
-    cohortEndDate = c(as.Date("1900-01-31"))
-  ) # target cohort always one row
-
-  comparatorCohort <- # all records here overlap with targetCohort
-    dplyr::tibble(
-      cohortDefinitionId = c(10, 10, 10),
-      subjectId = c(1, 1, 1),
-      cohortStartDate = c(
-        as.Date("1900-01-01"), # starts before target cohort start
-        as.Date("1900-01-22"), # starts during target cohort period and ends during target cohort period
-        as.Date("1900-01-31")
-      ),
-      cohortEndDate = c(
-        as.Date("1900-01-20"),
-        as.Date("1900-01-29"),
-        as.Date("1900-01-31")
+    comparatorCohort <- # all records here overlap with targetCohort
+      dplyr::tibble(
+        cohortDefinitionId = c(10, 10, 10),
+        subjectId = c(1, 1, 1),
+        cohortStartDate = c(
+          as.Date("1900-01-01"), # starts before target cohort start
+          as.Date("1900-01-22"), # starts during target cohort period and ends during target cohort period
+          as.Date("1900-01-31")
+        ),
+        cohortEndDate = c(
+          as.Date("1900-01-20"),
+          as.Date("1900-01-29"),
+          as.Date("1900-01-31")
+        )
       )
-    )
 
-  cohort <- dplyr::bind_rows(targetCohort, comparatorCohort)
+    cohort <- dplyr::bind_rows(targetCohort, comparatorCohort)
 
-  connectionCohortRelationship <-
-    DatabaseConnector::connect(connectionDetails)
+    connectionCohortRelationship <-
+      DatabaseConnector::connect(connectionDetails)
 
-  # to do - with incremental = FALSE
-  with_dbc_connection(connectionCohortRelationship, {
-    sysTime <- as.numeric(Sys.time()) * 100000
-    tableName <- paste0("cr", sysTime)
-    observationTableName <- paste0("op", sysTime)
+    # to do - with incremental = FALSE
+    with_dbc_connection(connectionCohortRelationship, {
+      sysTime <- as.numeric(Sys.time()) * 100000
+      tableName <- paste0("cr", sysTime)
+      observationTableName <- paste0("op", sysTime)
 
-    DatabaseConnector::insertTable(
-      connection = connectionCohortRelationship,
-      databaseSchema = cohortDatabaseSchema,
-      tableName = tableName,
-      data = cohort,
-      dropTableIfExists = TRUE,
-      createTable = TRUE,
-      tempTable = FALSE,
-      camelCaseToSnakeCase = TRUE,
-      progressBar = FALSE
-    )
-
-    cohortRelationship <- runCohortRelationshipDiagnostics(
-      connection = connectionCohortRelationship,
-      cohortDatabaseSchema = cohortDatabaseSchema,
-      cohortTable = tableName,
-      targetCohortIds = c(1),
-      comparatorCohortIds = c(10),
-      relationshipDays = dplyr::tibble(
-        startDay = temporalStartDays,
-        endDay = temporalEndDays
+      DatabaseConnector::insertTable(
+        connection = connectionCohortRelationship,
+        databaseSchema = server$cohortDatabaseSchema,
+        tableName = tableName,
+        data = cohort,
+        dropTableIfExists = TRUE,
+        createTable = TRUE,
+        tempTable = FALSE,
+        camelCaseToSnakeCase = TRUE,
+        progressBar = FALSE
       )
-    )
 
-    sqlDrop <-
-      "IF OBJECT_ID('@cohort_database_schema.@cohort_relationship_cohort_table', 'U') IS NOT NULL
-            DROP TABLE @cohort_database_schema.@cohort_relationship_cohort_table;"
-    DatabaseConnector::renderTranslateExecuteSql(
-      connection = connectionCohortRelationship,
-      sql = sqlDrop,
-      cohort_database_schema = cohortDatabaseSchema,
-      cohort_relationship_cohort_table = tableName,
-      profile = FALSE,
-      progressBar = FALSE
-    )
+      cohortRelationship <- getCohortRelationship(
+        connection = connectionCohortRelationship,
+        cohortDatabaseSchema = server$cohortDatabaseSchema,
+        cohortTable = tableName,
+        targetCohortIds = c(1),
+        comparatorCohortIds = c(10),
+        relationshipDays = dplyr::tibble(
+          startDay = temporalStartDays,
+          endDay = temporalEndDays
+        )
+      )
 
-    cohortRelationshipT1C10 <- cohortRelationship %>%
-      dplyr::filter(cohortId == 1) %>%
-      dplyr::filter(comparatorCohortId == 10)
+      sqlDrop <-
+        "IF OBJECT_ID('@cohort_database_schema.@cohort_relationship_cohort_table', 'U') IS NOT NULL
+              DROP TABLE @cohort_database_schema.@cohort_relationship_cohort_table;"
 
-    testthat::expect_equal(
-      object = cohortRelationshipT1C10$subCsBeforeTs,
-      expected = 1
-    ) # there is one subject in comparator that starts before target
+      DatabaseConnector::renderTranslateExecuteSql(
+        connection = connectionCohortRelationship,
+        sql = sqlDrop,
+        cohort_database_schema = server$cohortDatabaseSchema,
+        cohort_relationship_cohort_table = tableName,
+        profile = FALSE,
+        progressBar = FALSE
+      )
 
-    testthat::expect_equal(
-      object = cohortRelationshipT1C10$subCsBeforeTe,
-      expected = 1
-    ) # there is one subject in comparator that starts before target end
+      cohortRelationshipT1C10 <- cohortRelationship %>%
+        dplyr::filter(cohortId == 1) %>%
+        dplyr::filter(comparatorCohortId == 10)
 
-    testthat::expect_equal(
-      object = cohortRelationshipT1C10$subCsAfterTs,
-      expected = 1
-    ) # there is one subject in comparator that starts after target start
+      testthat::expect_equal(
+        object = cohortRelationshipT1C10$subCsBeforeTs,
+        expected = 1
+      ) # there is one subject in comparator that starts before target
 
-    testthat::expect_equal(
-      object = cohortRelationshipT1C10$subCsAfterTs,
-      expected = 1
-    ) # there is one subject in comparator that starts after target start
+      testthat::expect_equal(
+        object = cohortRelationshipT1C10$subCsBeforeTe,
+        expected = 1
+      ) # there is one subject in comparator that starts before target end
 
-    testthat::expect_equal(
-      object = cohortRelationshipT1C10$subCsOnTe,
-      expected = 1
-    ) # there is one subject in comparator that starts on target end
+      testthat::expect_equal(
+        object = cohortRelationshipT1C10$subCsAfterTs,
+        expected = 1
+      ) # there is one subject in comparator that starts after target start
 
-    testthat::expect_equal(
-      object = cohortRelationshipT1C10$subCsWindowT,
-      expected = 1
-    ) # there is one subject in comparator that started within the window of Target cohort
+      testthat::expect_equal(
+        object = cohortRelationshipT1C10$subCsAfterTs,
+        expected = 1
+      ) # there is one subject in comparator that starts after target start
 
-    testthat::expect_equal(
-      object = cohortRelationshipT1C10$subCeWindowT,
-      expected = 1
-    ) # there is one subject in comparator that ended within the window of Target cohort
+      testthat::expect_equal(
+        object = cohortRelationshipT1C10$subCsOnTe,
+        expected = 1
+      ) # there is one subject in comparator that starts on target end
+
+      testthat::expect_equal(
+        object = cohortRelationshipT1C10$subCsWindowT,
+        expected = 1
+      ) # there is one subject in comparator that started within the window of Target cohort
+
+      testthat::expect_equal(
+        object = cohortRelationshipT1C10$subCeWindowT,
+        expected = 1
+      ) # there is one subject in comparator that ended within the window of Target cohort
+    })
   })
-})
+
+}
