@@ -1,5 +1,5 @@
 dbmsToTest <- c(
-  "sqlite",
+  "sqlite"#,
   # "duckdb"#,
   # "postgresql"#,
   # "redshift"#,
