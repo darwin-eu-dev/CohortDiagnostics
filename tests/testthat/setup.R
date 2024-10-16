@@ -1,10 +1,10 @@
 dbmsToTest <- c(
-  #"sqlite"#,
-  #"duckdb"#,
-  #"postgresql"#,
-  #"redshift"#,
-  "sql_server"#,
-  #"oracle"
+  "sqlite"#,
+  # "duckdb",
+  # "postgresql",
+  # "redshift"#,
+  # "sql_server"#,
+  # "oracle"
 )
 
 useAllCovariates <- FALSE
