@@ -60,12 +60,15 @@ loadTestCohortDefinitionSet <- function(cohortIds = NULL, useSubsets = TRUE) {
   }
 
   creationFile <- file.path(cohortPath, "CohortsToCreate.csv")
-  cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
-    settingsFileName = creationFile,
-    sqlFolder = cohortPath,
-    jsonFolder = cohortPath,
-    cohortFileNameValue = c("cohortId")
-  )
+  suppressMessages({
+    cohortDefinitionSet <- CohortGenerator::getCohortDefinitionSet(
+      settingsFileName = creationFile,
+      sqlFolder = cohortPath,
+      jsonFolder = cohortPath,
+      cohortFileNameValue = c("cohortId")
+    )
+  })
+ 
   if (!is.null(cohortIds)) {
     cohortDefinitionSet <- dplyr::filter(cohortDefinitionSet, .data$cohortId %in% cohortIds)
   }
@@ -150,18 +153,19 @@ createCustomCdm <- function(jsonDataFilePath){
     DatabaseConnector::executeSql(connection, paste("delete from ", tbl, ";"), progressBar = FALSE)
   }
   
-  jsonData <- jsonlite::fromJSON(system.file(jsonDataFilePath, package = "CohortDiagnostics"))
+  jsonData <- RJSONIO::fromJSON(system.file(jsonDataFilePath, package = "CohortDiagnostics"))
   
   # Convert the JSON data into a data frame and append it to the blank CDM
   for (tableName in names(jsonData)) {
-    patientData <- as.data.frame(jsonData[[tableName]]) %>% 
-      dplyr::mutate(dplyr::across(dplyr::matches("date$"), ~as.Date(.))) %>% 
-      dplyr::mutate(dplyr::across(dplyr::matches("datetime$"),  ~as.POSIXct(., format = "%Y-%m-%d %H:%M:%S", tz = "UTC")))
     
-    DBI::dbAppendTable(connection, tableName, patientData)
+    patientData <- dplyr::bind_rows(lapply(jsonData[[tableName]], as.data.frame)) %>%
+      dplyr::mutate(dplyr::across(dplyr::matches("date$"), ~as.Date(.))) %>%
+      dplyr::mutate(dplyr::across(dplyr::matches("datetime$"),  ~as.POSIXct(., format = "%Y-%m-%d %H:%M:%S", tz = "UTC")))
+
+    DatabaseConnector::dbAppendTable(connection, tableName, patientData)
   }
 
-  cli::cli_alert_success("Patients pushed to blank CDM successfully")
+  message("Patients pushed to blank CDM successfully")
   
   return(connectionDetails)
   
@@ -170,11 +174,10 @@ createCustomCdm <- function(jsonDataFilePath){
 
 addCohortTable <- function(connection, cohortDataFilePath){
   
-  cohortTableData <- readxl::read_excel(cohortDataFilePath, col_types = c("numeric", "numeric", "date",
-                                                                          "date"))
+  cohortTableData <- readr::read_csv(cohortDataFilePath, col_types = c("iiDD"))
   
-  cohortTableData <- cohortTableData %>% mutate(across(ends_with("DATE"), ~ as.Date(.x, format = "%Y-%m-%d")))
-  
+  cohortTableData <- cohortTableData %>% 
+    mutate(across(ends_with("DATE"), ~ as.Date(.x, format = "%Y-%m-%d")))
   
   DatabaseConnector::insertTable(connection = connection,
                                  tableName = "cohort",

@@ -1,9 +1,8 @@
 
-server <- testServers[[1]]
 
 for (server in testServers) {
   test_that(paste("getResolvedConceptSets works on", server$connectionDetails$dbms), {
-    
+
     connection <- DatabaseConnector::connect(server$connectionDetails)
     result <- getResolvedConceptSets(
       connection = connection,
@@ -11,11 +10,11 @@ for (server in testServers) {
       vocabularyDatabaseSchema = server$vocabularyDatabaseSchema,
       tempEmulationSchema = server$tempEmulationSchema
     )
-    
+
     expect_true(is.data.frame(result))
     expect_named(result, c("cohortId", "conceptSetId", "conceptId"))
-    expect_true(tempTableExists("concept_ids"))
-    expect_true(tempTableExists("inst_concept_sets"))
+    expect_true(tempTableExists(connection, "concept_ids"))
+    expect_true(tempTableExists(connection, "inst_concept_sets"))
     DatabaseConnector::disconnect(connection)
   })
 }
@@ -26,7 +25,7 @@ test_that("runResolvedConceptSets works", {
   connection <- DatabaseConnector::connect(server$connectionDetails)
   exportFolder <- tempfile()
   dir.create(exportFolder)
-  
+
   runResolvedConceptSets(
     connection = connection,
     cohortDefinitionSet = server$cohortDefinitionSet,
@@ -36,7 +35,7 @@ test_that("runResolvedConceptSets works", {
     vocabularyDatabaseSchema = server$vocabularyDatabaseSchema,
     tempEmulationSchema = server$tempEmulationSchema
   )
-  
+
   DatabaseConnector::disconnect(connection)
   result <- readr::read_csv(file.path(exportFolder, "resolved_concepts.csv"), show_col_types = F)
   expect_true(is.data.frame(result))

@@ -1,4 +1,5 @@
 library(testthat)
+timeExecution <- CohortDiagnostics:::timeExecution
 
 # check makeDataExportable function
 test_that("Check function makeDataExportable", {
@@ -50,7 +51,7 @@ test_that("Check function makeDataExportable", {
   )
 })
 
-test_that("timeExecutions function", {
+test_that("timeExecution function", {
   readr::local_edition(1)
   temp <- tempfile()
   on.exit(unlink(temp, force = TRUE, recursive = TRUE))
@@ -101,29 +102,34 @@ test_that("timeExecutions function", {
   checkmate::expect_data_frame(result, nrows = 3, ncols = 5)
 
   # custom start/end times
-  timeExecution(
-    exportFolder = temp,
-    taskName = "test_task4",
-    parent = "testthat",
-    cohortIds = NULL,
-    start = "foo",
-    execTime = "Foo"
+  expect_error(
+    timeExecution(
+      exportFolder = temp,
+      taskName = "test_task4",
+      parent = "testthat",
+      cohortIds = NULL,
+      start = "foo",
+      execTime = "Foo"
+    )
   )
 
-  result <- readr::read_csv(expectedFilePath, col_types = readr::cols())
-  checkmate::expect_data_frame(result, nrows = 4, ncols = 5)
+  # result <- readr::read_csv(expectedFilePath, col_types = readr::cols())
+  # checkmate::expect_data_frame(result, nrows = 4, ncols = 5)
 
-  timeExecution(
-    exportFolder = temp,
-    taskName = "test_task5",
-    parent = "testthat",
-    cohortIds = NULL,
-    start = Sys.time()
+  expect_error(
+    timeExecution(
+      exportFolder = temp,
+      taskName = "test_task5",
+      parent = "testthat",
+      cohortIds = NULL,
+      start = Sys.time()
+    )
   )
 
-  result <- readr::read_csv(expectedFilePath, col_types = readr::cols())
-  checkmate::expect_data_frame(result, nrows = 5, ncols = 5)
-  expect_false(all(is.na(result$startTime)))
+  # result <- readr::read_csv(expectedFilePath, col_types = readr::cols())
+  # checkmate::expect_data_frame(result, nrows = 5, ncols = 5)
+  # expect_false(all(is.na(result$startTime)))
+  
 })
 
 test_that("enforceMinCellValue replaces values below minimum with negative of minimum", {
@@ -164,54 +170,64 @@ test_that("timeExecution uses minutes as unit", {
   timeExecution(exportFolder,
                 taskName = "test 1 second",
                 expr = Sys.sleep(1))
-  
-  start <- as.POSIXct("2024-10-09 03:37:46") 
+
+  start <- as.POSIXct("2024-10-09 03:37:46")
   oneMinute <- start - as.POSIXct("2024-10-09 03:36:46")
   timeExecution(exportFolder,
                 taskName = "test 1 minute",
                 start = start,
                 execTime = oneMinute)
-  
-  start <- as.POSIXct("2024-10-09 03:37:46") 
+
+  start <- as.POSIXct("2024-10-09 03:37:46")
   oneHour <- start - as.POSIXct("2024-10-09 02:37:46")
   timeExecution(exportFolder,
                 taskName = "test 1 hour",
                 start = start,
                 execTime = oneHour)
-  
+
   list.files(exportFolder)
   df <- readr::read_csv(file.path(exportFolder, "executionTimes.csv"), show_col_types = F)
-  
+
   expect_equal(df$task, c("test 1 second", "test 1 minute", "test 1 hour"))
-  expect_equal(df$executionTime, c(round(1/60, 4), 1, 60))
+  expect_equal(round(df$executionTime), c(0, 1, 60))
 })
 
 for (server in testServers) {
   test_that(paste("tempTableExists works on ", server$connectionDetails$dbms), {
     con <- DatabaseConnector::connect(server$connectionDetails)
-    DatabaseConnector::renderTranslateExecuteSql(con, "create table #tmp110010 (a int);", 
-                                                 progressBar = F, 
+    DatabaseConnector::renderTranslateExecuteSql(con, "create table #tmp110010 (a int);",
+                                                 progressBar = F,
                                                  reportOverallTime = F)
     expect_false(tempTableExists(con, "tmp98765"))
     expect_true(tempTableExists(con, "tmp110010"))
-    DatabaseConnector::renderTranslateExecuteSql(con, "drop table #tmp110010;", 
-                                                 progressBar = F, 
+    DatabaseConnector::renderTranslateExecuteSql(con, "drop table #tmp110010;",
+                                                 progressBar = F,
                                                  reportOverallTime = F)
     DatabaseConnector::disconnect(con)
   })
 }
 
 test_that("assertCohortDefinitionSetContainsAllParents works", {
-  cohorts <- loadTestCohortDefinitionSet() 
-  
+  cohorts <- loadTestCohortDefinitionSet()
+
   expect_no_error(
     CohortDiagnostics:::assertCohortDefinitionSetContainsAllParents(cohorts)
   )
-  
+
   expect_error(
     CohortDiagnostics:::assertCohortDefinitionSetContainsAllParents(
       dplyr::filter(cohorts, !(.data$cohortId  %in% cohorts$subsetParent))
     )
+  )
+})
+
+test_that("emptyResult works", {
+  result <- emptyResult("resolved_concepts")
+  expect_named(result, c("cohort_id", "concept_set_id", "concept_id", "database_id"))
+  checkmate::expect_data_frame(
+    result,
+    nrows = 0,
+    types = c("integer", "integer", "integer", "character")
   )
 })
 

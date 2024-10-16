@@ -11,17 +11,15 @@ runInclusionStatistics(
   cohortDefinitionSet,
   cohortDatabaseSchema,
   cohortTableNames,
-  incremental,
   minCellCount,
+  incremental,
   recordKeepingFile
 )
 }
 \arguments{
 \item{connection}{An object of type \code{connection} as created using the
 \code{\link[DatabaseConnector]{connect}} function in the
-DatabaseConnector package. Can be left NULL if \code{connectionDetails}
-is provided, in which case a new connection will be opened at the start
-of the function, and closed when the function finishes.}
+DatabaseConnector package.}
 
 \item{exportFolder}{The folder where the output will be exported to.}
 
@@ -43,9 +41,9 @@ mode such as the 'recordKeepingFile'.}
 
 \item{cohortTableNames}{Cohort Table names used by CohortGenerator package}
 
-\item{incremental}{Create only cohort diagnostics that haven't been created before?}
-
 \item{minCellCount}{The minimum cell count for fields contains person counts or fractions.}
+
+\item{incremental}{Create only cohort diagnostics that haven't been created before?}
 
 \item{recordKeepingFile}{File that keeps a record of cohorts that have been created previously}
 }

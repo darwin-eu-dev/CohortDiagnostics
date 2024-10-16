@@ -1,10 +1,10 @@
 dbmsToTest <- c(
-  "sqlite"#,
-  # "duckdb"#,
-  # "postgresql"#,
-  # "redshift"#,
-  # "sql_server"#,
-  # "oracle"
+  #"sqlite"#,
+  #"duckdb"#,
+  #"postgresql"#,
+  #"redshift"#,
+  "sql_server"#,
+  #"oracle"
 )
 
 useAllCovariates <- FALSE
@@ -37,6 +37,10 @@ if (Sys.getenv("DONT_DOWNLOAD_JDBC_DRIVERS", "") != "TRUE") {
 
 temporalCovariateSettings <- FeatureExtraction::createTemporalCovariateSettings(
   useConditionOccurrence = TRUE,
+  useDrugEraStart = TRUE,
+  useProcedureOccurrence = TRUE,
+  useMeasurement = TRUE,
+  useCharlsonIndex = TRUE,
   temporalStartDays = c(-365, -30, 0, 1, 31),
   temporalEndDays = c(-31, -1, 0, 30, 365)
 )
@@ -186,22 +190,28 @@ for (nm in names(testServers)) {
     cohortDefinitionSet <- loadTestCohortDefinitionSet(server$cohortIds)
 
     cohortTableNames <- CohortGenerator::getCohortTableNames(cohortTable = server$cohortTable)
-
-    CohortGenerator::createCohortTables(
-      connectionDetails = server$connectionDetails,
-      cohortTableNames = cohortTableNames,
-      cohortDatabaseSchema = server$cohortDatabaseSchema,
-      incremental = FALSE
+    
+    suppressMessages(
+      CohortGenerator::createCohortTables(
+        connectionDetails = server$connectionDetails,
+        cohortTableNames = cohortTableNames,
+        cohortDatabaseSchema = server$cohortDatabaseSchema,
+        incremental = FALSE
+      )
     )
 
-    CohortGenerator::generateCohortSet(
-      connectionDetails = server$connectionDetails,
-      cdmDatabaseSchema = server$cdmDatabaseSchema,
-      cohortDatabaseSchema = server$cohortDatabaseSchema,
-      cohortTableNames = cohortTableNames,
-      cohortDefinitionSet = cohortDefinitionSet,
-      incremental = FALSE
+    suppressMessages(
+      CohortGenerator::generateCohortSet(
+        connectionDetails = server$connectionDetails,
+        cdmDatabaseSchema = server$cdmDatabaseSchema,
+        cohortDatabaseSchema = server$cohortDatabaseSchema,
+        cohortTableNames = cohortTableNames,
+        cohortDefinitionSet = cohortDefinitionSet,
+        incremental = FALSE
+      )
     )
+
+   
   } else {
     message(paste("Skipping cohort generation on test server", nm))
   }

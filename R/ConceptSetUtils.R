@@ -104,7 +104,7 @@ extractConceptSetsJsonFromCohortJson <- function(cohortJson) {
 }
 
 getParentCohort <- function(cohort, cohortDefinitionSet) {
-  if (is.null(cohort$subsetParent) || cohort$cohortId == cohort$subsetParent) {
+  if (!("subsetParent" %in% colnames(cohort)) || is.null(cohort$subsetParent) || cohort$cohortId == cohort$subsetParent) {
     return(cohort)
   }
   
@@ -302,5 +302,38 @@ exportConceptSets <- function(cohortDefinitionSet, exportFolder, minCellCount, d
     databaseId = databaseId,
     incremental = FALSE,
     cohortId = conceptSetsExport$cohortId
+  )
+}
+
+addConceptIdsToConceptTempTable <- function(
+    connection,
+    copyFromTempTable,
+    conceptIdFieldName = "concept_id",
+    tempEmulationSchema) {
+  
+  if (!tempTableExists(connection, "concept_ids")) {
+    DatabaseConnector::renderTranslateExecuteSql(
+      connection = connection,
+      sql = "CREATE TABLE #concept_ids (concept_id BIGINT);",
+      tempEmulationSchema = tempEmulationSchema,
+      progressBar = FALSE,
+      reportOverallTime = FALSE
+    )
+  }
+  
+  sql <- "INSERT INTO #concept_ids (concept_id)
+          SELECT DISTINCT a.concept_id
+          FROM @copyFromTempTable a
+          LEFT JOIN #concept_ids b ON a.@conceptIdFieldName = b.concept_id
+          WHERE a.@conceptIdFieldName is not NULL AND b.concept_id is NULL;"
+  
+  DatabaseConnector::renderTranslateExecuteSql(
+    connection = connection,
+    sql = sql,
+    tempEmulationSchema = tempEmulationSchema,
+    copyFromTempTable = copyFromTempTable,
+    conceptIdFieldName = conceptIdFieldName,
+    progressBar = FALSE,
+    reportOverallTime = FALSE
   )
 }

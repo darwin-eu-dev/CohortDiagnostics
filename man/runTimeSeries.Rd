@@ -26,9 +26,7 @@ runTimeSeries(
 \arguments{
 \item{connection}{An object of type \code{connection} as created using the
 \code{\link[DatabaseConnector]{connect}} function in the
-DatabaseConnector package. Can be left NULL if \code{connectionDetails}
-is provided, in which case a new connection will be opened at the start
-of the function, and closed when the function finishes.}
+DatabaseConnector package.}
 
 \item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables. To emulate temp 
 tables, provide a schema with write privileges where temp tables can be created.}
@@ -47,10 +45,7 @@ this should include both the database and schema name, for example
 `CohortGenerator::getCohortDefinitionSet` that must include 
 the columns cohortId, cohortName, json, sql.}
 
-\item{runCohortTimeSeries}{Generate and export the cohort level time series?}
-
-\item{runDataSourceTimeSeries}{Generate and export the Data source level time series? i.e.
-using all persons found in observation period table.}
+\item{runDataSourceTimeSeries}{Generate and export the data source level time series using all persons found in observation period table (T3).}
 
 \item{databaseId}{The databaseId to retrieve the results for. This is a 
 character field values from the `databaseId` field of the `database` table 
@@ -62,7 +57,10 @@ of the results data model.}
 
 \item{instantiatedCohorts}{cohortIds of the cohorts that have been already been instantiated}
 
-\item{incremental}{Create only cohort diagnostics that haven't been created before?}
+\item{incremental}{`TRUE` or `FALSE` (default). If TRUE diagnostics for cohorts in the 
+cohort definition set that have not changed will be skipped and existing results 
+csv files will be updated. If FALSE then diagnostics for all cohorts in the cohort 
+definition set will be executed and pre-existing results files will be deleted.}
 
 \item{observationPeriodDateRange}{}
 
@@ -71,14 +69,27 @@ of the results data model.}
 \item{databaseIds}{A vector one or more databaseIds to retrieve the results for. This is a 
 character field values from the `databaseId` field of the `database` table 
 of the results data model.}
+
+\item{incrementalFolder}{If \code{incremental = TRUE}, specify a folder where records are kept
+of which cohort diagnostics has been executed.}
+
+\item{runCohortTimeSeries.}{Generate and export the cohort level time series (T1 and T2)}
+}
+\value{
+None, it will write the results to a csv file
 }
 \description{
 This function first generates a calendar period table, that has
 calendar intervals between the \code{timeSeriesMinDate} and \code{timeSeriesMaxDate}.
 Calendar Month, Quarter and year are supported.
-For each of the calendar interval, time series data are computed. 
+For each of the calendar interval, time series data are computed. There are 2 different types
+of time series: one related to cohorts and one related to the data source.
+
+Cohort time series: computes time series at the cohort level/table. These have 2 definitions: T1 and T2.
+T1: subjects in the cohort who have at least one cohort day in a calendar period. 
+T2: subjects in the cohort who have at least one observation day in a calendar period.
 
 Data Source time series: computes time series at the data source level i.e. observation
 period table. This output is NOT limited to individuals in the cohort table
-but is for ALL people in the datasource (i.e. present in observation period table)
+but is for ALL people in the data source (i.e. present in observation period table)
 }

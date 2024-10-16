@@ -316,13 +316,16 @@ timeExecution <- function(exportFolder,
 
 # check if a temp table already exists
 tempTableExists <- function(connection, tempTableName) {
+  stopifnot(methods::is(connection, "DatabaseConnectorConnection"), 
+            is.character(tempTableName),
+            length(tempTableName) == 1)
   tryCatch(
     is.data.frame(
       DatabaseConnector::renderTranslateQuerySql(
         connection = connection, 
         sql = "select top 1 * from  #@tempTableName;",
-         tempTableName = tempTableName)
-      ),
+        tempTableName = tempTableName)
+    ),
     error = function(e) {
       if (methods::is(connection, "DatabaseConnectorJdbcConnection") &&
           DatabaseConnector::dbms(connection) %in% c("postgresql", "redshift")) {
@@ -341,7 +344,7 @@ exportDataToCsv <- function(data, tableName, fileName, minCellCount = 5, databas
     minCellCount = minCellCount,
     databaseId = databaseId
   )
-  
+
   if (!is.null(enforceMinCellValueFunc) && nrow(data) > 0) {
     data <- enforceMinCellValueFunc
   }
@@ -354,7 +357,6 @@ exportDataToCsv <- function(data, tableName, fileName, minCellCount = 5, databas
   )
   return(data)
 }
-
 
 assertCohortDefinitionSetContainsAllParents <- function(cohortDefinitionSet) {
   stopifnot(CohortGenerator::isCohortDefinitionSet(cohortDefinitionSet))
@@ -375,3 +377,30 @@ assertCohortDefinitionSetContainsAllParents <- function(cohortDefinitionSet) {
   }
   invisible(NULL)
 }
+
+# returns an empty result dataframe from the result data model
+emptyResult <- function(tableName = NULL) {
+  allSpecs <- getResultsDataModelSpecifications()
+  checkmate::assertChoice(tableName, unique(allSpecs$tableName))
+  
+  unique(allSpecs$dataType)
+  unique(allSpecs$tableName)
+  
+  spec <- dplyr::filter(allSpecs, .data$tableName == .env$tableName) %>% 
+    dplyr::select(columnName, dataType) %>% 
+    dplyr::mutate(rDataType = dplyr::case_when(
+      grepl("varchar", dataType) ~ "character()",
+      dataType == "float" ~ "double()",
+      dataType == "int" ~ "integer()",
+      dataType == "bigint" ~ "integer()",
+      dataType == "Date" ~ "as.Date(integer())",
+      TRUE ~ "character()")
+    )
+  
+  result <- dplyr::tibble()
+  for (row in split(spec, seq_len(nrow(spec)))) {
+    result[[row$columnName]] <- eval(parse(text = row$rDataType))
+  }
+  return(result)
+}
+

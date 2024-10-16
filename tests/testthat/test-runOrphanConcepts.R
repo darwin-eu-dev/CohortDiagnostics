@@ -15,11 +15,7 @@
 # limitations under the License.
 
 for (nm in names(testServers)) {
-  # nm <- "sqlite"
-  # nm <- "duckdb"
-  # nm <- "postgresql"
-  # nm <- "sql_server"
-  # nm <- "oracle"
+  
   server <- testServers[[nm]]
   
   # Params

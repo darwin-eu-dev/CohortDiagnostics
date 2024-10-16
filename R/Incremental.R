@@ -120,12 +120,13 @@ recordTasksDone <-
       recordKeeping <- readr::read_csv(
         file = recordKeepingFile,
         col_types = readr::cols(),
-        guess_max = min(1e7),
+        guess_max = 1e7,
         lazy = FALSE
       )
-
-      recordKeeping$timeStamp <-
-        as.character(recordKeeping$timeStamp)
+      if ("timeStamp" %in% colnames(recordKeeping)){
+        recordKeeping$timeStamp <-
+          as.character(recordKeeping$timeStamp)
+      }
       if ("cohortId" %in% colnames(recordKeeping)) {
         recordKeeping <- recordKeeping %>%
           dplyr::mutate(cohortId = as.double(.data$cohortId))
@@ -305,6 +306,14 @@ subsetToRequiredCohorts <-
            task,
            incremental,
            recordKeepingFile) {
+    
+    cohorts$checksum <- computeChecksum(cohorts$sql)
+    cohorts$parentJson <- vapply(
+      split(cohorts, cohorts$cohortId), 
+      FUN = function(.) getParentCohort(., cohorts)$json,
+      FUN.VALUE = character(1L)
+    )
+    
     if (incremental) {
       tasks <- getRequiredTasks(
         cohortId = cohorts$cohortId,
@@ -312,10 +321,10 @@ subsetToRequiredCohorts <-
         checksum = cohorts$checksum,
         recordKeepingFile = recordKeepingFile
       )
-      return(cohorts[cohorts$cohortId %in% tasks$cohortId, ])
-    } else {
-      return(cohorts)
-    }
+      
+      cohorts <- cohorts[cohorts$cohortId %in% tasks$cohortId, ]
+    } 
+    return(cohorts)
   }
 
 subsetToRequiredCombis <-
