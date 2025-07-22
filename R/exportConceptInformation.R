@@ -1,4 +1,4 @@
-# Copyright 2024 Observational Health Data Sciences and Informatics
+# Copyright 2025 Observational Health Data Sciences and Informatics
 #
 # This file is part of CohortDiagnostics
 #
@@ -15,7 +15,7 @@
 # limitations under the License.
 
 exportConceptInformation <- function(connection = NULL,
-                                     cdmDatabaseSchema,
+                                     vocabularyDatabaseSchema,
                                      tempEmulationSchema,
                                      conceptIdTable,
                                      vocabularyTableNames = getDefaultVocabularyTableNames(),
@@ -29,12 +29,12 @@ exportConceptInformation <- function(connection = NULL,
   vocabularyTableNames <-
     tolower(SqlRender::camelCaseToSnakeCase(vocabularyTableNames))
   tablesInCdmDatabaseSchema <-
-    tolower(DatabaseConnector::getTableNames(connection, cdmDatabaseSchema))
+    tolower(DatabaseConnector::getTableNames(connection, vocabularyDatabaseSchema))
   vocabularyTablesInCdmDatabaseSchema <-
     tablesInCdmDatabaseSchema[tablesInCdmDatabaseSchema %in% vocabularyTableNames]
 
   if (length(vocabularyTablesInCdmDatabaseSchema) == 0) {
-    stop("Vocabulary tables not found in ", cdmDatabaseSchema)
+    stop("Vocabulary tables not found in ", vocabularyDatabaseSchema)
   }
   sql <- "SELECT DISTINCT concept_id FROM @unique_concept_id_table;"
   uniqueConceptIds <-
@@ -90,7 +90,7 @@ exportConceptInformation <- function(connection = NULL,
           connection = connection,
           sql = sql,
           tempEmulationSchema = tempEmulationSchema,
-          cdm_database_schema = cdmDatabaseSchema,
+          cdm_database_schema = vocabularyDatabaseSchema,
           unique_concept_id_table = conceptIdTable,
           table = vocabularyTable,
           snakeCaseToCamelCase = TRUE
@@ -116,7 +116,7 @@ exportConceptInformation <- function(connection = NULL,
           connection = connection,
           sql = sql,
           tempEmulationSchema = tempEmulationSchema,
-          cdm_database_schema = cdmDatabaseSchema,
+          cdm_database_schema = vocabularyDatabaseSchema,
           table = vocabularyTable,
           snakeCaseToCamelCase = TRUE
         )

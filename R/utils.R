@@ -1,4 +1,4 @@
-# Copyright 2024 Observational Health Data Sciences and Informatics
+# Copyright 2025 Observational Health Data Sciences and Informatics
 #
 # This file is part of CohortDiagnostics
 #
@@ -14,23 +14,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-hasData <- function(data) {
-  if (is.null(data)) {
-    return(FALSE)
-  }
-  if (is.data.frame(data)) {
-    if (nrow(data) == 0) {
-      return(FALSE)
+
+createIfNotExist <-
+  function(type,
+           name,
+           recursive = TRUE,
+           errorMessage = NULL) {
+    if (is.null(errorMessage) |
+      !is(errorMessage, "AssertColection")) {
+      errorMessage <- checkmate::makeAssertCollection()
     }
-  } else {
-    if (length(data) == 0) {
-      return(FALSE)
+    if (!is.null(type)) {
+      if (length(name) == 0) {
+        stop(ParallelLogger::logError("Must specify ", name))
+      }
+      if (type %in% c("folder")) {
+        if (!file.exists(gsub("/$", "", name))) {
+          dir.create(name, recursive = recursive)
+          ParallelLogger::logInfo("Created ", type, " at ", name)
+        }
+      }
+      checkmate::assertDirectory(
+        x = name,
+        access = "x",
+        add = errorMessage
+      )
     }
-    if (length(data) == 1 && is.na(data)) {
-        return(FALSE)
-    }
-  }
-  return(TRUE)
+    invisible(errorMessage)
 }
 
 swapColumnContents <-
@@ -264,28 +274,8 @@ getTimeAsInteger <- function(time = Sys.time(),
   return(as.numeric(as.POSIXlt(time, tz = tz)))
 }
 
-
-getPrefixedTableNames <- function(tablePrefix) {
-  if (is.null(tablePrefix)) {
-    tablePrefix <- ""
-  }
-
-  if (grepl(" ", tablePrefix)) {
-    stop("Table prefix cannot include spaces")
-  }
-
-  dataModel <- getResultsDataModelSpecifications()
-  tableNames <- dataModel$tableName %>% unique()
-  resultList <- list()
-
-  for (tableName in tableNames) {
-    resultList[tableName] <- paste0(tablePrefix, tableName)
-  }
-
-  return(resultList)
-}
-
-# Internal utility function for logging execution of variables
+#' Internal utility function for logging execution of variables
+#' @noRd
 timeExecution <- function(exportFolder,
                           taskName,
                           cohortIds = NULL,

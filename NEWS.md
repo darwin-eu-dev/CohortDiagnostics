@@ -1,3 +1,30 @@
+CohortDiagnostics 3.4.1
+=======================
+
+Bug fixes:
+
+1. Fixed issue loading concept sets in index event breakdown - caused by change to jsonlite parser.
+
+CohortDiagnostics 3.4.0
+=======================
+
+Bug Fixes:
+
+1. Exporting concept information now uses the vocabulary database schema, which may be different from the cdm schema
+
+
+CohortDiagnostics 3.3.1
+=======================
+Changes:
+
+1. Added support for different measurements from FeatureExtraction - measurement as value, measurement value as concept id
+and measurement range groups (above range, in normal range, below normal)
+
+Bug fixes:
+
+1. Attempted fix of issue with DATEDIFF overflowing integer on some databse platforms
+
+
 CohortDiagnostics 3.3.0
 =======================
 
