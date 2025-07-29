@@ -1,3 +1,11 @@
+CohortDiagnostics 3.4.2
+=======================
+
+Bug fixes:
+
+1. Resolution for edge case in data migrations for cohort relationships where values are below minimum export threshold
+
+
 CohortDiagnostics 3.4.1
 =======================
 
