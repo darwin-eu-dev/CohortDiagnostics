@@ -41,8 +41,8 @@ SELECT
     CAST (CONCAT(CAST(cr.comparator_cohort_id AS varchar), '@analysis_id') AS bigint) AS covariate_id,
     cr.cohort_id,
     cr.subjects as sum_value, -- total in both cohorts
-    CAST(cr.subjects as FLOAT) / CAST(cc.cohort_subjects as FLOAT) as mean,  -- fraction that overlap, can be used in characterization view
-    sqrt((CAST(cr.subjects as FLOAT) / CAST(cc.cohort_subjects as FLOAT)) * (1 - (CAST(cr.subjects as FLOAT) / CAST(cc.cohort_subjects as FLOAT)))) as sd,
+    abs(CAST(cr.subjects as FLOAT) / CAST(cc.cohort_subjects as FLOAT)) as mean,  -- fraction that overlap, can be used in characterization view
+    sqrt(abs((CAST(cr.subjects as FLOAT) / CAST(cc.cohort_subjects as FLOAT)) * (1 - (CAST(cr.subjects as FLOAT) / CAST(cc.cohort_subjects as FLOAT))))) as sd,
     ttr.time_id
 FROM @database_schema.@table_prefix@cohort_relationships cr
 INNER JOIN @database_schema.@table_prefix@cohort_count cc on cr.cohort_id = cc.cohort_id
