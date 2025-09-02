@@ -837,7 +837,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
 
   # Cohort relationship ---------------------------------------------------------------------------------
   if (runCohortRelationship && nrow(cohortDefinitionSet) > 1) {
-    covariateCohorts <- cohortDefinitionSet |> dplyr::select(cohortId, cohortName)
+    covariateCohorts <- cohortDefinitionSet |> dplyr::select("cohortId", "cohortName")
     analysisId <- as.integer(Sys.getenv("OHDSI_CD_CF_ANALYSIS_ID", unset = 173))
 
     cohortFeSettings <-
