@@ -23,25 +23,27 @@ getDefaultSubsetDefinition <- function() {
     name = "subsequent GI bleed with 365 days prior observation",
     definitionId = 1,
     subsetOperators = list(
-      # here we are saying 'first subset to only those patients in cohort 1778213'
-      CohortGenerator::createCohortSubset(
+      # First subset to only those patients in cohort 14909 (GI bleed) within 30 days of cohort start
+      CohortGenerator::createCohortSubsetOperator(
         name = "with GI bleed within 30 days of cohort start",
         cohortIds = 14909,
         cohortCombinationOperator = "any",
         negate = FALSE,
-        startWindow = CohortGenerator::createSubsetCohortWindow(
-          startDay = 0,
-          endDay = 30,
-          targetAnchor = "cohortStart"
-        ),
-        endWindow = CohortGenerator::createSubsetCohortWindow(
-          startDay = 0,
-          endDay = 9999999,
-          targetAnchor = "cohortStart"
+        windows = list(
+          CohortGenerator::createSubsetCohortWindow(
+            startDay = 0,
+            endDay = 30,
+            targetAnchor = "cohortStart"
+          ),
+          CohortGenerator::createSubsetCohortWindow(
+            startDay = 0,
+            endDay = 9999999,
+            targetAnchor = "cohortStart"
+          )
         )
       ),
       # Next, subset to only those with 365 days of prior observation
-      CohortGenerator::createLimitSubset(
+      CohortGenerator::createLimitSubsetOperator(
         name = "Observation of at least 365 days prior",
         priorTime = 365,
         followUpTime = 0,
@@ -202,6 +204,106 @@ getUniqueTempDir <- function(){
   tempDir <- file.path(tempdir(), paste0(uniqueComponent, random_string, "exp"))
   
   return(tempDir)
+}
+
+#' Create an in-memory DuckDB database with minimal CDM tables and fixture data for SQL unit tests.
+#' DuckDB has native DATE type and runs in-memory. Returns connection and server-like list.
+#' @param observationPeriodOnly If TRUE, only create observation_period (for GetCalendarYearRange, ObservedPerCalendarMonth).
+#' @param emptyObservationPeriod If TRUE (only when observationPeriodOnly=TRUE), create observation_period with 0 rows.
+#' @param fullCdm If TRUE, create person, observation_period, concept, vocabulary, cohort, visit_occurrence, and empty domain tables.
+#' @return list with connectionDetails, connection, path (NULL for in-memory), cdmDatabaseSchema, cohortDatabaseSchema, vocabularyDatabaseSchema, tempEmulationSchema, cohortTable, cohortIds, cohortDefinitionSet (when fullCdm=TRUE).
+createSqlTestFixtureDb <- function(observationPeriodOnly = FALSE, emptyObservationPeriod = FALSE, fullCdm = FALSE) {
+  path <- tempfile(fileext = ".duckdb")
+  connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "duckdb", server = path)
+  con <- DatabaseConnector::connect(connectionDetails)
+  # Use file-based DuckDB so tests that open a second connection (e.g. createResultsDataModel) see the same DB.
+
+  if (observationPeriodOnly || fullCdm) {
+    DatabaseConnector::executeSql(con, "
+      CREATE TABLE observation_period (
+        observation_period_id INTEGER PRIMARY KEY,
+        person_id INTEGER NOT NULL,
+        observation_period_start_date DATE NOT NULL,
+        observation_period_end_date DATE NOT NULL,
+        period_type_concept_id INTEGER
+      );")
+    if (!emptyObservationPeriod) {
+      DatabaseConnector::executeSql(con, "
+        INSERT INTO observation_period (observation_period_id, person_id, observation_period_start_date, observation_period_end_date)
+        VALUES (1, 1, DATE '2020-06-01', DATE '2022-11-15');")
+    }
+  }
+
+  if (fullCdm) {
+    DatabaseConnector::executeSql(con, "
+      CREATE TABLE person (
+        person_id INTEGER PRIMARY KEY,
+        gender_concept_id INTEGER,
+        year_of_birth INTEGER,
+        race_concept_id INTEGER,
+        ethnicity_concept_id INTEGER
+      );
+      INSERT INTO person (person_id, gender_concept_id, year_of_birth) VALUES (1, 8532, 1980);
+      CREATE TABLE concept (
+        concept_id INTEGER PRIMARY KEY,
+        concept_name VARCHAR(255),
+        vocabulary_id VARCHAR(50),
+        standard_concept VARCHAR(1),
+        invalid_reason VARCHAR(1)
+      );
+      INSERT INTO concept (concept_id, concept_name, vocabulary_id, standard_concept, invalid_reason) VALUES
+        (8532, 'Female', 'Gender', 'S', NULL),
+        (8507, 'Male', 'Gender', 'S', NULL);
+      CREATE TABLE vocabulary (vocabulary_id VARCHAR(50) PRIMARY KEY, vocabulary_name VARCHAR(255));
+      INSERT INTO vocabulary VALUES ('Gender', 'Gender');
+      CREATE TABLE cohort (
+        cohort_definition_id INTEGER,
+        subject_id INTEGER,
+        cohort_start_date DATE,
+        cohort_end_date DATE
+      );
+      INSERT INTO cohort (cohort_definition_id, subject_id, cohort_start_date, cohort_end_date)
+      VALUES (17492, 1, DATE '2020-06-01', DATE '2020-06-01');
+      CREATE TABLE visit_occurrence (
+        visit_occurrence_id INTEGER PRIMARY KEY,
+        person_id INTEGER,
+        visit_concept_id INTEGER,
+        visit_source_concept_id INTEGER,
+        visit_start_date DATE,
+        visit_end_date DATE
+      );
+      INSERT INTO visit_occurrence (visit_occurrence_id, person_id, visit_concept_id, visit_source_concept_id, visit_start_date, visit_end_date)
+      VALUES (1, 1, 9201, 0, DATE '2020-05-15', DATE '2020-05-20');
+      CREATE TABLE condition_occurrence (condition_occurrence_id INTEGER, person_id INTEGER, condition_concept_id INTEGER, condition_source_concept_id INTEGER, condition_start_date DATE);
+      CREATE TABLE drug_exposure (drug_exposure_id INTEGER, person_id INTEGER, drug_concept_id INTEGER, drug_source_concept_id INTEGER, drug_exposure_start_date DATE);
+      CREATE TABLE procedure_occurrence (procedure_occurrence_id INTEGER, person_id INTEGER, procedure_concept_id INTEGER, procedure_source_concept_id INTEGER, procedure_date DATE);
+      CREATE TABLE measurement (measurement_id INTEGER, person_id INTEGER, measurement_concept_id INTEGER, measurement_source_concept_id INTEGER, measurement_date DATE);
+      CREATE TABLE observation (observation_id INTEGER, person_id INTEGER, observation_concept_id INTEGER, observation_source_concept_id INTEGER, observation_date DATE);
+      CREATE TABLE concept_ancestor (ancestor_concept_id INTEGER, descendant_concept_id INTEGER);
+      CREATE TABLE concept_relationship (concept_id_1 INTEGER, concept_id_2 INTEGER, relationship_id VARCHAR(50));
+      CREATE TABLE concept_synonym (concept_id INTEGER, concept_synonym_name VARCHAR(1000));
+    ")
+    cohortDefinitionSet <- loadTestCohortDefinitionSet(c(17492L, 17493L), useSubsets = FALSE)
+    if (!is.null(cohortDefinitionSet) && nrow(cohortDefinitionSet) > 0) {
+      if (!"isSubset" %in% names(cohortDefinitionSet)) cohortDefinitionSet$isSubset <- FALSE
+    }
+  } else {
+    cohortDefinitionSet <- NULL
+  }
+
+  out <- list(
+    connectionDetails = connectionDetails,
+    connection = con,
+    path = path,
+    cdmDatabaseSchema = "main",
+    cohortDatabaseSchema = "main",
+    vocabularyDatabaseSchema = "main",
+    tempEmulationSchema = NULL,
+    cohortTable = "cohort",
+    cohortIds = c(17492L, 17493L),
+    cohortDefinitionSet = cohortDefinitionSet
+  )
+  return(out)
 }
 
 
