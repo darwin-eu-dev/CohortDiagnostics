@@ -61,7 +61,7 @@ getCdmDataSourceInformation <-
     sqlCdmDataSource <-
       "select * from @cdm_database_schema.cdm_source;"
     cdmDataSource <-
-      renderTranslateQuerySql(
+      DatabaseConnector::renderTranslateQuerySql(
         connection = connection,
         sql = sqlCdmDataSource,
         cdm_database_schema = cdmDatabaseSchema,
@@ -81,12 +81,12 @@ getCdmDataSourceInformation <-
 
     sourceDescription <- as.character(NA)
     if ("sourceDescription" %in% colnames(cdmDataSource)) {
-      sourceDescription <- max(cdmDataSource$sourceDescription)
+      sourceDescription <- safeMax(cdmDataSource$sourceDescription)
     }
 
     cdmSourceName <- as.character(NA)
     if ("cdmSourceName" %in% colnames(cdmDataSource)) {
-      cdmSourceName <- max(cdmDataSource$cdmSourceName)
+      cdmSourceName <- safeMax(cdmDataSource$cdmSourceName)
     }
 
     sourceReleaseDate <- as.Date(NA)
@@ -94,33 +94,33 @@ getCdmDataSourceInformation <-
       if (!is(cdmDataSource$sourceReleaseDate, "Date")) {
         try(
           sourceReleaseDate <-
-            max(as.Date(cdmDataSource$sourceReleaseDate)),
+            safeMax(as.Date(cdmDataSource$sourceReleaseDate)),
           silent = TRUE
         )
       } else {
-        sourceReleaseDate <- max(as.Date(cdmDataSource$sourceReleaseDate))
+        sourceReleaseDate <- safeMax(as.Date(cdmDataSource$sourceReleaseDate))
       }
     }
 
     cdmReleaseDate <- as.Date(NA)
     if ("cdmReleaseDate" %in% colnames(cdmDataSource)) {
       if (!is(cdmDataSource$cdmReleaseDate, "Date")) {
-        try(cdmReleaseDate <- max(as.Date(cdmDataSource$cdmReleaseDate)),
+        try(cdmReleaseDate <- safeMax(as.Date(cdmDataSource$cdmReleaseDate)),
           silent = TRUE
         )
       } else {
-        cdmReleaseDate <- max(as.Date(cdmDataSource$cdmReleaseDate))
+        cdmReleaseDate <- safeMax(as.Date(cdmDataSource$cdmReleaseDate))
       }
     }
 
     cdmVersion <- as.character(NA)
     if ("cdmVersion" %in% colnames(cdmDataSource)) {
-      cdmVersion <- max(cdmDataSource$cdmVersion)
+      cdmVersion <- safeMax(cdmDataSource$cdmVersion)
     }
 
     vocabularyVersion <- as.character(NA)
     if ("vocabularyVersion" %in% colnames(cdmDataSource)) {
-      vocabularyVersion <- max(cdmDataSource$vocabularyVersion)
+      vocabularyVersion <- safeMax(cdmDataSource$vocabularyVersion)
     }
 
     return(

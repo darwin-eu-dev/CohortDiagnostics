@@ -72,8 +72,8 @@ getIncludedSourceConcepts <- function(connection,
       .data$sourceConceptId
     ) %>%
     dplyr::summarise(
-      conceptCount = max(.data$conceptCount),
-      conceptSubjects = max(.data$conceptSubjects)
+      conceptCount = safeMax(.data$conceptCount),
+      conceptSubjects = safeMax(.data$conceptSubjects)
     ) %>%
     dplyr::ungroup()
     

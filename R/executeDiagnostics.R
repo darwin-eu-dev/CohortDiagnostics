@@ -165,6 +165,11 @@ getDefaultCovariateSettings <- function() {
 #'
 #' @param seedArgs                    List. Additional arguments to pass to the sampling function.
 #'                                    This can be used to control aspects of the sampling process beyond the seed and sample size.
+#'
+#' @details
+#' Logging is written to the export folder (e.g. \code{log.txt}). Console logging can be disabled by
+#' setting \code{options(CohortDiagnostics.logToConsole = FALSE)}.
+#'
 #' @examples
 #' \dontrun{
 #' # Load cohorts (assumes that they have already been instantiated)
@@ -268,6 +273,10 @@ executeDiagnostics <- function(cohortDefinitionSet,
   executionTimePath <- file.path(exportFolder, "taskExecutionTimes.csv")
   ParallelLogger::addDefaultFileLogger(file.path(exportFolder, "log.txt"), name = "CD_LOGGER")
   ParallelLogger::addDefaultErrorReportLogger(file.path(exportFolder, "errorReportR.txt"), name = "CD_ERROR_LOGGER")
+  logToConsole <- getOption("CohortDiagnostics.logToConsole", TRUE)
+  if (!logToConsole) {
+    ParallelLogger::unregisterLogger("SIMPLE", silent = TRUE)
+  }
   on.exit(
     {
       ParallelLogger::unregisterLogger("CD_LOGGER", silent = TRUE)
@@ -361,7 +370,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   checkmate::reportAssertions(collection = errorMessage)
   
   # All temporal covariate settings objects must be covariateSettings
-  checkmate::assert_true(all_covariate_settings(temporalCovariateSettings), add = errorMessage)
+  checkmate::assert_true(allCovariateCettings(temporalCovariateSettings), add = errorMessage)
 
   if (runTemporalCohortCharacterization) {
     requiredCharacterisationSettings <- c(
@@ -600,13 +609,18 @@ executeDiagnostics <- function(cohortDefinitionSet,
     }
   )
   # Database metadata ---------------------------------------------
+  vocabularyVersionCdm <- if (!is.null(cdmSourceInformation)) {
+    cdmSourceInformation$vocabularyVersion
+  } else {
+    NA_character_
+  }
   saveDatabaseMetaData(
     databaseId = databaseId,
     databaseName = databaseName,
     databaseDescription = databaseDescription,
     exportFolder = exportFolder,
     minCellCount = minCellCount,
-    vocabularyVersionCdm = cdmSourceInformation$vocabularyVersion,
+    vocabularyVersionCdm = vocabularyVersionCdm,
     vocabularyVersion = vocabularyVersion
   )
   
@@ -1080,28 +1094,36 @@ executeDiagnostics <- function(cohortDefinitionSet,
     as.character(nullToEmpty(packageVersion)),
     # 8
     as.character(nullToEmpty(
-      cdmSourceInformation$sourceDescription
+      if (!is.null(cdmSourceInformation)) cdmSourceInformation$sourceDescription else ""
     )),
     # 9
-    as.character(nullToEmpty(cdmSourceInformation$cdmSourceName)),
+    as.character(nullToEmpty(
+      if (!is.null(cdmSourceInformation)) cdmSourceInformation$cdmSourceName else ""
+    )),
     # 10
     as.character(nullToEmpty(
-      cdmSourceInformation$sourceReleaseDate
+      if (!is.null(cdmSourceInformation)) cdmSourceInformation$sourceReleaseDate else ""
     )),
     # 11
-    as.character(nullToEmpty(cdmSourceInformation$cdmVersion)),
+    as.character(nullToEmpty(
+      if (!is.null(cdmSourceInformation)) cdmSourceInformation$cdmVersion else ""
+    )),
     # 12
-    as.character(nullToEmpty(cdmSourceInformation$cdmReleaseDate)),
+    as.character(nullToEmpty(
+      if (!is.null(cdmSourceInformation)) cdmSourceInformation$cdmReleaseDate else ""
+    )),
     # 13
     as.character(nullToEmpty(
-      cdmSourceInformation$vocabularyVersion
+      if (!is.null(cdmSourceInformation)) cdmSourceInformation$vocabularyVersion else ""
     )),
     # 14
     as.character(databaseName),
     # 15
     as.character(databaseDescription),
     # 16
-    as.character(nullToEmpty(cdmSourceInformation$vocabularyVersion)),
+    as.character(nullToEmpty(
+      if (!is.null(cdmSourceInformation)) cdmSourceInformation$vocabularyVersion else ""
+    )),
     # 17
     as.character(observationPeriodDateRange$observationPeriodMinDate),
     # 18

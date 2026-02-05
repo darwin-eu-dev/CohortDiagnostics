@@ -322,8 +322,8 @@ runOrphanConcepts <- function(connection,
         .data$conceptId
       ) %>%
       dplyr::summarise(
-        conceptCount = max(.data$conceptCount),
-        conceptSubjects = max(.data$conceptSubjects)
+        conceptCount = safeMax(.data$conceptCount),
+        conceptSubjects = safeMax(.data$conceptSubjects)
       ) %>%
       dplyr::ungroup()
     

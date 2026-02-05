@@ -19,7 +19,7 @@ createCalendarPeriodsTable <- function(connection, tempEmulationSchema, timeSeri
   # note calendar span is created based on all dates in observation period table,
   # with 1980 cut off/left censor (arbitrary choice)
   minYear <-
-    (max(
+    (safeMax(
       clock::get_year(timeSeriesMinDate),
       1980
     ) %>% as.integer())

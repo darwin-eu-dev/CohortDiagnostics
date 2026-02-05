@@ -6,7 +6,7 @@ readLog <- function(path) {
     dplyr::tibble() %>%
     dplyr::mutate(
       time = as.POSIXct(x = .data$time, format = "%Y-%m-%d %H:%M:%OS"),
-      time_normalized = difftime(.data$time, max(.data$time), units = "secs"),
+      time_normalized = difftime(.data$time, safeMax(.data$time), units = "secs"),
       time_normalized = .data$time_normalized - min(.data$time_normalized)
     )
 }

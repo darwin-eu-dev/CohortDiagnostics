@@ -14,12 +14,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#' Maximum value without warning on all-missing input
+#'
+#' Returns the maximum of the input values, or \code{NA} when there are no
+#' values or all values are missing (no warning).
+#'
+#' @param x A numeric, Date, or character vector (or \code{...} when \code{x} is omitted).
+#' @param ... Additional values to include (when \code{x} is a single value).
+#' @param na.rm Logical: remove \code{NA} before computing max (default \code{TRUE}).
+#' @return The maximum value, or \code{NA} if \code{length(x)} is 0 or all values are \code{NA}.
+#' @export
+safeMax <- function(x, ..., na.rm = TRUE) {
+  if (missing(x)) {
+    x <- c(...)
+  } else {
+    x <- c(x, ...)
+  }
+  if (length(x) == 0L || all(is.na(x))) {
+    return(NA)
+  }
+  max(x, na.rm = TRUE)
+}
+
 #' Check that all elements are covariateSettings objects
 #'
 #' @param x A single \code{covariateSettings} object or a list of such objects.
 #' @return \code{TRUE} if \code{x} is a single covariateSettings object or a list of covariateSettings objects.
 #' @keywords internal
-all_covariate_settings <- function(x) {
+allCovariateSettings <- function(x) {
   if (is(x, "covariateSettings")) return(TRUE)
   if (!is.list(x)) return(FALSE)
   all(vapply(x, function(s) "covariateSettings" %in% class(s), logical(1)))
@@ -368,7 +390,7 @@ exportDataToCsv <- function(data, tableName, fileName, minCellCount = 5, databas
   )
 
   if (!is.null(enforceMinCellValueFunc) && nrow(data) > 0) {
-    data <- enforceMinCellValueFunc
+    data <- enforceMinCellValueFunc(data)
   }
   
   writeToCsv(

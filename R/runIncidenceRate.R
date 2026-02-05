@@ -64,7 +64,7 @@ getIncidenceRate <- function(connection = NULL,
     DatabaseConnector::querySql(connection, sql, snakeCaseToCamelCase = TRUE)
 
   calendarYears <-
-    data.frame(calendarYear = as.integer(seq(yearRange$startYear, yearRange$endYear, by = 1)))
+    data.frame(calendarYear = as.integer(seq(as.numeric(yearRange$startYear), as.numeric(yearRange$endYear), by = 1)))
   DatabaseConnector::insertTable(
     connection = connection,
     tableName = "#calendar_years",
@@ -301,7 +301,7 @@ runIncidenceRate <- function(connection,
     data <- dplyr::bind_rows(data)
     data <- dplyr::mutate(data, databaseId = databaseId)
 
-    data <- data %>% dplyr::select("cohortCount", "personYears", "gender", "gender", "ageGroup",
+    data <- data %>% dplyr::select("cohortCount", "personYears", "gender", "ageGroup",
                                   "calendarYear", "incidenceRate", "cohortId", "databaseId")
     exportDataToCsv(
       data = data,
@@ -310,12 +310,12 @@ runIncidenceRate <- function(connection,
       minCellCount = minCellCount,
       databaseId = databaseId,
       incremental = incremental,
-      # incidenceRate field is a calculated field that does not follow the same pattern as others for minCellValue
-      enforceMinCellValueFunc = enforceMinCellValue(
-        data,
-        "incidenceRate",
-        1000 * minCellCount / as.numeric(data$personYears)
-      ),
+      # incidenceRate is 1000 * count / personYears; censor when implied count < minCellCount
+      enforceMinCellValueFunc = function(data) {
+        minRateThreshold <- 1000 * minCellCount / as.numeric(data$personYears)
+        minRateThreshold[!is.finite(minRateThreshold)] <- Inf
+        enforceMinCellValue(data, "incidenceRate", minRateThreshold)
+      },
       cohortId = subset$cohortId
     )
   }
