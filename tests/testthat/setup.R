@@ -1,3 +1,15 @@
+# Disable logging to console when running tests
+options(CohortDiagnostics.logToConsole = FALSE)
+# Silence ResultModelManager "Migration complete ..." messages during tests
+options(CohortDiagnostics.suppressMigrationMessages = TRUE)
+if (testthat::is_testing()) {
+  # Suppress all message() and warning() output from package/dependencies; only testthat output is shown
+  sink(file = file(nullfile(), open = "wt"), type = "message")
+  # Register a file logger so default console logger is not used; then remove console
+  ParallelLogger::addDefaultFileLogger(tempfile(), name = "CD_TEST_FILE")
+  ParallelLogger::unregisterLogger("SIMPLE", silent = TRUE)
+}
+
 dbmsToTest <- c(
   "sqlite"#,
   # "duckdb",

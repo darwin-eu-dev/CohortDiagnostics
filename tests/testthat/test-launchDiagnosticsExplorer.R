@@ -10,7 +10,6 @@ test_that("launchDiagnosticsExplorer starts without error with minimal SQLite", 
 
   connectionDetails <- DatabaseConnector::createConnectionDetails(dbms = "sqlite", server = sqlitePath)
   connection <- DatabaseConnector::connect(connectionDetails)
-  on.exit(DatabaseConnector::disconnect(connection), add = TRUE)
 
   CohortDiagnostics::createResultsDataModel(
     connectionDetails = connectionDetails,

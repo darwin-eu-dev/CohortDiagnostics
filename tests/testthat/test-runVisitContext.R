@@ -1,4 +1,4 @@
-library(dplyr)
+suppressWarnings(library(dplyr)) 
 
 
 for (nm in names(testServers)) {
