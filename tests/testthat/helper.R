@@ -136,10 +136,19 @@ createTestShinyDb <- function(connectionDetails = Eunomia::getEunomiaConnectionD
 
 
 
-createCustomCdm <- function(jsonDataFilePath){
-  
-  connectionDetails <- Eunomia::getEunomiaConnectionDetails()
-  
+createCustomCdm <- function(jsonDataFilePath) {
+  connectionDetails <- tryCatch(
+    Eunomia::getEunomiaConnectionDetails(),
+    error = function(e) {
+      message("Eunomia data not available (getEunomiaConnectionDetails/loadDataFiles failed). ",
+              "Use downloadEunomiaData() or set EUNOMIA_DATA_FOLDER. Error: ", conditionMessage(e))
+      return(NULL)
+    }
+  )
+  if (is.null(connectionDetails)) {
+    return(NULL)
+  }
+
   tablesToTruncate <- c("person", "observation_period", "visit_occurrence", "visit_detail", 
                         "condition_occurrence", "drug_exposure", "procedure_occurrence", 
                         "device_exposure", "measurement", "observation", "death", "note", 

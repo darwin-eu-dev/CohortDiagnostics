@@ -81,22 +81,37 @@ if (FALSE) {
 
 connectionHandler <- ResultModelManager::PooledConnectionHandler$new(shinySettings$connectionDetails)
 
-if (packageVersion("OhdsiShinyModules") <= as.numeric_version("2.0.0")) {
-  stop("OhdsiShinyModules version no longer supported.
-  Update to a newer version with remotes::install_github('OhdsiShinyModules')")
+# Source embedded cohort diagnostics modules (order: helpers, components, shared, views, main)
+modulesDir <- system.file("shiny", "DiagnosticsExplorer", "modules", package = "CohortDiagnostics")
+if (dir.exists(modulesDir)) {
+  moduleFiles <- c(
+    "helpers-elements.R", "helpers-emptyPlotly.R", "helpers-getHelp.R", "helpers-logo.R", "helpers-migrations.R",
+    "component-tableSelect.R", "components-data-viewer.R", "components-helpInfo.R", "components-inputselection.R", "components-largeTableViewer.R",
+    "cohort-diagnostics-shared.R",
+    "cohort-diagnostics-definition.R", "cohort-diagnostics-counts.R", "cohort-diagnostics-databaseInformation.R",
+    "cohort-diagnostics-conceptsInDataSource.R", "cohort-diagnostics-orphanConcepts.R", "cohort-diagnostics-indexEventBreakdown.R",
+    "cohort-diagnostics-visitContext.R", "cohort-diagnostics-cohort-overlap.R", "cohort-diagnostics-timeDistributions.R",
+    "cohort-diagnostics-characterization.R", "cohort-diagnostics-compareCharacterization.R", "cohort-diagnostics-inclusionRules.R",
+    "cohort-diagnostics-incidenceRates.R", "cohort-diagnostics-main-ui.R", "cohort-diagnostics-main.R"
+  )
+  for (f in moduleFiles) {
+    fpath <- file.path(modulesDir, f)
+    if (file.exists(fpath)) source(fpath, local = FALSE)
+  }
 }
 
 resultDatabaseSettings <- list(
   schema = shinySettings$resultsDatabaseSchema,
-  vocabularyDatabaseSchema = shinySettings$vocabularyDatabaseSchema,
+  vocabularyDatabaseSchemas = shinySettings$vocabularyDatabaseSchemas,
   cdTablePrefix = shinySettings$tablePrefix,
   cgTable = shinySettings$cohortTableName,
   databaseTable = shinySettings$databaseTableName
 )
 
-dataSource <-
-  OhdsiShinyModules::createCdDatabaseDataSource(connectionHandler = connectionHandler,
-                                                resultDatabaseSettings = resultDatabaseSettings)
+dataSource <- createCdDatabaseDataSource(
+  connectionHandler = connectionHandler,
+  resultDatabaseSettings = resultDatabaseSettings
+)
 
 
 
