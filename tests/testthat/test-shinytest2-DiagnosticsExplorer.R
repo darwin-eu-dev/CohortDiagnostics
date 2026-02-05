@@ -54,6 +54,15 @@ test_that("Diagnostics Explorer loads with minimal SQLite (shinytest2)", {
   file.copy(list.files(appDir, full.names = TRUE, no.. = TRUE), testAppDir, recursive = TRUE)
   dir.create(file.path(testAppDir, "data"), showWarnings = FALSE)
   file.copy(sqlitePath, file.path(testAppDir, "data", "MergedCohortDiagnosticsData.sqlite"))
+  # Copy ref and www dirs so app can find them when run from copy (system.file returns "" in subprocess)
+  refDir <- system.file("cohort-diagnostics-ref", package = "CohortDiagnostics")
+  if (dir.exists(refDir)) {
+    file.copy(refDir, testAppDir, recursive = TRUE)
+  }
+  wwwDir <- system.file("cohort-diagnostics-www", package = "CohortDiagnostics")
+  if (dir.exists(wwwDir)) {
+    file.copy(wwwDir, testAppDir, recursive = TRUE)
+  }
 
   # Launch app with shinytest2 and take a snapshot of initial state
   app <- shinytest2::AppDriver$new(
