@@ -15,9 +15,10 @@
 # limitations under the License.
 
 computeChecksum <- function(column) {
-  return(sapply(
+  return(vapply(
     as.character(column),
     digest::digest,
+    character(1),
     algo = "md5",
     serialize = FALSE
   ))

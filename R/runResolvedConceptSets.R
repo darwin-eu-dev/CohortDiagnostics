@@ -36,7 +36,7 @@ getResolvedConceptSets <- function(connection,
     conceptSets[!duplicated(conceptSets$uniqueConceptSetId), ] %>%
     dplyr::select(-"cohortId", -"conceptSetId")
   
-  sql <- sapply(
+  sql <- vapply(
     split(uniqueConceptSets, 1:nrow(uniqueConceptSets)),
     function(x) {
       sub(
@@ -44,7 +44,8 @@ getResolvedConceptSets <- function(connection,
         sprintf("SELECT %s as codeset_id", x$uniqueConceptSetId),
         x$conceptSetSql
       )
-    }
+    },
+    character(1)
   )
   
   batchSize <- 100

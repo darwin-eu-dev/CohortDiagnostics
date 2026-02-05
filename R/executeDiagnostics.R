@@ -146,7 +146,7 @@ getDefaultCovariateSettings <- function() {
 #'                                            Only records with values greater than 0.001 are returned.
 #' @param temporalCovariateSettings   Either an object of type \code{covariateSettings} as created using one of
 #'                                    the createTemporalCovariateSettings function in the FeatureExtraction package, or a list
-#'                                    of such objects. This can be anythin accepted by FeatureExtraction (including
+#'                                    of such objects. This can be anything accepted by FeatureExtraction (including
 #'                                    custom covariates). However, it should be noted that certain time windows will be
 #'                                    included by default. @seealso[getDefaultCovariateSettings]
 #' @param minCellCount                The minimum cell count for fields contains person counts or fractions.
@@ -361,7 +361,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   checkmate::reportAssertions(collection = errorMessage)
   
   # All temporal covariate settings objects must be covariateSettings
-  checkmate::assert_true(all(sapply(temporalCovariateSettings, function(s) "covariateSettings" %in% class(s))), add = errorMessage)
+  checkmate::assert_true(all_covariate_settings(temporalCovariateSettings), add = errorMessage)
 
   if (runTemporalCohortCharacterization) {
     requiredCharacterisationSettings <- c(
@@ -373,7 +373,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     presentSettings <- temporalCovariateSettings[[1]][requiredCharacterisationSettings]
     if (!all(unlist(presentSettings))) {
       warning(
-        "For cohort charcterization to display standardized results the following covariates must be present in your temporalCovariateSettings: \n\n",
+        "For cohort characterization to display standardized results the following covariates must be present in your temporalCovariateSettings: \n\n",
         paste(requiredCharacterisationSettings, collapse = ", ")
       )
     }

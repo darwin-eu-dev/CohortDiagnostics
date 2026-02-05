@@ -14,6 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#' Check that all elements are covariateSettings objects
+#'
+#' @param x A single \code{covariateSettings} object or a list of such objects.
+#' @return \code{TRUE} if \code{x} is a single covariateSettings object or a list of covariateSettings objects.
+#' @keywords internal
+all_covariate_settings <- function(x) {
+  if (is(x, "covariateSettings")) return(TRUE)
+  if (!is.list(x)) return(FALSE)
+  all(vapply(x, function(s) "covariateSettings" %in% class(s), logical(1)))
+}
+
 hasData <- function(data) {
   if (is.null(data)) {
     return(FALSE)

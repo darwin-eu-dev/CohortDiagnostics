@@ -104,7 +104,7 @@ schema name, for example 'vocabulary.dbo'.}
 
 \item{runIncidenceRate}{Generate and export the cohort incidence  rates?}
 
-\item{runCohortRelationship}{Compute cohort relationships. Overlap is now computed with FeaturExtraction, time paramters are derived from temporalCovariateSettings
+\item{runCohortRelationship}{Compute cohort relationships. Overlap is now computed with FeatureExtraction, time parameters are derived from temporalCovariateSettings
 relationship between two or more cohorts.}
 
 \item{runTemporalCohortCharacterization}{Generate and export the temporal cohort characterization?
@@ -112,7 +112,7 @@ Only records with values greater than 0.001 are returned.}
 
 \item{temporalCovariateSettings}{Either an object of type \code{covariateSettings} as created using one of
 the createTemporalCovariateSettings function in the FeatureExtraction package, or a list
-of such objects. This can be anythin accepted by FeatureExtraction (including
+of such objects. This can be anything accepted by FeatureExtraction (including
 custom covariates). However, it should be noted that certain time windows will be
 included by default. @seealso[getDefaultCovariateSettings]}
 
