@@ -54,11 +54,11 @@ getDefaultCovariateSettings <- function() {
     useMeasurementRangeGroup = TRUE,
     useConditionEraStart = TRUE,
     useConditionEraOverlap = TRUE,
-    useConditionEraGroupStart = FALSE, # do not use because https://github.com/OHDSI/FeatureExtraction/issues/144
+    useConditionEraGroupStart = TRUE,
     useConditionEraGroupOverlap = TRUE,
     useDrugExposure = FALSE, # leads to too many concept id
     useDrugEraOverlap = FALSE,
-    useDrugEraGroupStart = FALSE, # do not use because https://github.com/OHDSI/FeatureExtraction/issues/144
+    useDrugEraGroupStart = TRUE,
     useDrugEraGroupOverlap = TRUE,
     useObservation = TRUE,
     useObservationValueAsConcept = TRUE,
@@ -882,7 +882,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
 
   # Cohort relationship ---------------------------------------------------------------------------------
   if (runCohortRelationship && nrow(cohortDefinitionSet) > 1) {
-    covariateCohorts <- cohortDefinitionSet |> dplyr::select(cohortId, cohortName)
+    covariateCohorts <- cohortDefinitionSet |> dplyr::select("cohortId", "cohortName")
     analysisId <- as.integer(Sys.getenv("OHDSI_CD_CF_ANALYSIS_ID", unset = 173))
 
     cohortFeSettings <-
