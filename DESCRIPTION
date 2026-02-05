@@ -41,10 +41,11 @@ Imports:
     CohortGenerator (>= 0.10.0),
     remotes,
     scales,
-    cli
-Suggests:
+    cli,
     Eunomia,
     RSQLite (>= 2.2.1),
+    duckdb
+Suggests:
     testthat,
     withr,
     zip,
