@@ -84,7 +84,10 @@ getDefaultVocabularyTableNames <- function() {
 createResultsDataModel <- function(connectionDetails = NULL,
                                    databaseSchema,
                                    tablePrefix = "") {
-  if (connectionDetails$dbms == "sqlite" & databaseSchema != "main") {
+  if (is.null(connectionDetails)) {
+    stop("connectionDetails cannot be NULL")
+  }
+  if (connectionDetails$dbms == "sqlite" && databaseSchema != "main") {
     stop("Invalid schema for sqlite, use databaseSchema = 'main'")
   }
 
@@ -169,7 +172,11 @@ uploadResults <- function(connectionDetails,
 migrateDataModel <- function(connectionDetails, databaseSchema, tablePrefix = "") {
   ParallelLogger::logInfo("Migrating data set")
   migrator <- getDataMigrator(connectionDetails = connectionDetails, databaseSchema = databaseSchema, tablePrefix = tablePrefix)
-  migrator$executeMigrations()
+  if (isTRUE(getOption("CohortDiagnostics.suppressMigrationMessages", FALSE))) {
+    suppressMessages(migrator$executeMigrations())
+  } else {
+    migrator$executeMigrations()
+  }
   migrator$finalize()
 
   ParallelLogger::logInfo("Updating version number")
