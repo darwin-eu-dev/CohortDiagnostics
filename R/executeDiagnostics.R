@@ -140,7 +140,7 @@ getDefaultCovariateSettings <- function() {
 #' @param runVisitContext             Generate and export index-date visit context?
 #' @param runBreakdownIndexEvents     Generate and export the breakdown of index events?
 #' @param runIncidenceRate            Generate and export the cohort incidence  rates?
-#' @param runCohortRelationship       Compute cohort relationships. Overlap is now computed with FeaturExtraction, time paramters are derived from temporalCovariateSettings
+#' @param runCohortRelationship       Compute cohort relationships. Overlap is now computed with FeatureExtraction, time parameters are derived from temporalCovariateSettings
 #'                                    relationship between two or more cohorts.
 #' @param runTemporalCohortCharacterization   Generate and export the temporal cohort characterization?
 #'                                            Only records with values greater than 0.001 are returned.
@@ -341,39 +341,11 @@ executeDiagnostics <- function(cohortDefinitionSet,
   checkmate::assertNumeric(x = minCharacterizationMean, lower = 0, add = errorMessage)
   checkmate::assertLogical(incremental, add = errorMessage)
 
-  if (any(
-    runInclusionStatistics,
-    runIncludedSourceConcepts,
-    runOrphanConcepts,
-    runBreakdownIndexEvents,
-    runIncidenceRate
-  )) {
-    checkmate::assertCharacter(
-      x = cdmDatabaseSchema,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = vocabularyDatabaseSchema,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = cohortDatabaseSchema,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = cohortTable,
-      min.len = 1,
-      add = errorMessage
-    )
-    checkmate::assertCharacter(
-      x = databaseId,
-      min.len = 1,
-      add = errorMessage
-    )
-  }
+  checkArg(cdmDatabaseSchema, add = errorMessage)
+  checkArg(vocabularyDatabaseSchema, add = errorMessage)
+  checkArg(cohortDatabaseSchema, add = errorMessage)
+  checkArg(cohortTable, add = errorMessage)
+  checkArg(databaseId, add = errorMessage)
   
   # Create output and incremental folders. check that we have write access.
   checkArg(exportFolder, add = errorMessage)
@@ -389,7 +361,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   checkmate::reportAssertions(collection = errorMessage)
   
   # All temporal covariate settings objects must be covariateSettings
-  checkmate::assert_true(all(lapply(temporalCovariateSettings, class) == c("covariateSettings")), add = errorMessage)
+  checkmate::assert_true(all(sapply(temporalCovariateSettings, function(s) "covariateSettings" %in% class(s))), add = errorMessage)
 
   if (runTemporalCohortCharacterization) {
     requiredCharacterisationSettings <- c(
@@ -495,29 +467,27 @@ executeDiagnostics <- function(cohortDefinitionSet,
     SqlRender::snakeCaseToCamelCase() %>%
     sort()
 
-  expectedButNotObsevered <-
+  expectedButNotObserved <-
     setdiff(x = cohortTableColumnNamesExpected, y = cohortTableColumnNamesObserved)
-  
-  if (length(expectedButNotObsevered) > 0) {
-    requiredButNotObsevered <-
-      setdiff(x = cohortTableColumnNamesRequired, y = cohortTableColumnNamesObserved)
-  }
-  
-  obseveredButNotExpected <-
+
+  requiredButNotObserved <-
+    setdiff(x = cohortTableColumnNamesRequired, y = cohortTableColumnNamesObserved)
+
+  observedButNotExpected <-
     setdiff(x = cohortTableColumnNamesObserved, y = cohortTableColumnNamesExpected)
 
-  if (length(requiredButNotObsevered) > 0) {
+  if (length(requiredButNotObserved) > 0) {
     stop(paste(
       "The following required fields not found in cohort table:",
-      paste0(requiredButNotObsevered, collapse = ", ")
+      paste0(requiredButNotObserved, collapse = ", ")
     ))
   }
 
-  if (length(obseveredButNotExpected) > 0) {
+  if (length(observedButNotExpected) > 0) {
     ParallelLogger::logInfo(
       paste0(
         "The following fields found in the cohortDefinitionSet will be exported in JSON format as part of metadata field of cohort table:\n    ",
-        paste0(obseveredButNotExpected, collapse = ",\n    ")
+        paste0(observedButNotExpected, collapse = ",\n    ")
       )
     )
   }
@@ -615,7 +585,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
     cohortIds = NULL,
     parent = "executeDiagnostics",
     expr = {
-      observationPeriodDateRange <- renderTranslateQuerySql(
+      observationPeriodDateRange <- DatabaseConnector::renderTranslateQuerySql(
         connection = connection,
         sql = "SELECT MIN(observation_period_start_date) observation_period_min_date,
              MAX(observation_period_end_date) observation_period_max_date,
@@ -741,13 +711,13 @@ executeDiagnostics <- function(cohortDefinitionSet,
         dataSourceInfo <- getCdmDataSourceInformation(connection = connection, 
                                                       cdmDatabaseSchema = cdmDatabaseSchema)
         vocabVersion <- dataSourceInfo$vocabularyVersion
-        vocabVersionExternalConceptCountsTable <- renderTranslateQuerySql(
+        vocabVersionExternalConceptCountsTable <- DatabaseConnector::renderTranslateQuerySql(
           connection = connection,
           sql = "SELECT DISTINCT vocabulary_version FROM @work_database_schema.@concept_counts_table;",
           work_database_schema = cohortDatabaseSchema,
           concept_counts_table = conceptCountsTable,
           snakeCaseToCamelCase = TRUE,
-          tempEmulationSchema = getOption("sqlRenderTempEmulationSchena")
+          tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
         )
         if (!identical(vocabVersion, vocabVersionExternalConceptCountsTable[1,1])) {
           stop(paste0("External concept counts table (", 
@@ -777,7 +747,9 @@ executeDiagnostics <- function(cohortDefinitionSet,
       exportFolder = exportFolder,
       minCellCount = minCellCount,
       vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-      tempEmulationSchema = tempEmulationSchema) 
+      tempEmulationSchema = tempEmulationSchema,
+      incremental = incremental,
+      incrementalFolder = incrementalFolder)
       
     timeExecution(
       exportFolder,
@@ -798,6 +770,18 @@ executeDiagnostics <- function(cohortDefinitionSet,
         )
       }
     )
+
+    # Drop temp table after all concept-set consumers have run (resolved, included source, orphan, breakdown)
+    if (tempTableExists(connection, "inst_concept_sets")) {
+      ParallelLogger::logTrace("Dropping temp table #inst_concept_sets")
+      DatabaseConnector::renderTranslateExecuteSql(
+        connection = connection,
+        sql = "TRUNCATE TABLE #inst_concept_sets; DROP TABLE #inst_concept_sets;",
+        tempEmulationSchema = tempEmulationSchema,
+        progressBar = FALSE,
+        reportOverallTime = FALSE
+      )
+    }
   }
 
   # Time series ----------------------------------------------------------------------

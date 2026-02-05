@@ -84,7 +84,7 @@ checkArg <- function(arg, add) {
     if (is(arg, "covariateSettings")) {
       arg <- list(arg)
     }
-    checkmate::assert_true(all(lapply(arg, class) == c("covariateSettings")), add = add)
+    checkmate::assert_true(all(sapply(arg, function(s) "covariateSettings" %in% class(s))), add = add)
     
     requiredCharacterisationSettings <- c(
       "DemographicsGender", "DemographicsAgeGroup", "DemographicsRace",

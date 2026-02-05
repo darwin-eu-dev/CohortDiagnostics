@@ -116,7 +116,7 @@ of such objects. This can be anythin accepted by FeatureExtraction (including
 custom covariates). However, it should be noted that certain time windows will be
 included by default. @seealso[getDefaultCovariateSettings]}
 
-\item{minCellCount}{The minimum cell count for fields contains person counts or fractions}
+\item{minCellCount}{The minimum cell count for fields contains person counts or fractions.}
 
 \item{minCharacterizationMean}{The minimum mean value for characterization output. Values below this will be cut off from output. This
 will help reduce the file size of the characterization output, but will remove information

@@ -158,7 +158,6 @@ runIncludedSourceConcepts <- function(connection,
     recordKeepingFile = recordKeepingFile
   )
   
-  # TODO: Disregard empty cohorts in tally:
   if (incremental && (nrow(cohortDefinitionSet) - nrow(subset)) > 0) {
     ParallelLogger::logInfo(sprintf(
       "Skipping %s cohorts in incremental mode.",
@@ -167,8 +166,15 @@ runIncludedSourceConcepts <- function(connection,
   }
   
   if (nrow(subset) == 0) {
-    # TODO write/append an empty result
-    return(NULL)
+    emptyTable <- emptyResult("included_source_concept")
+    colnames(emptyTable) <- SqlRender::snakeCaseToCamelCase(colnames(emptyTable))
+    writeToCsv(
+      data = emptyTable,
+      fileName = file.path(exportFolder, "included_source_concept.csv"),
+      incremental = FALSE
+    )
+    ParallelLogger::logInfo("No cohorts to process for included source concepts; wrote empty result.")
+    return(invisible(NULL))
   }
   
   # We need to get concept sets from all cohorts in case subsets are present and

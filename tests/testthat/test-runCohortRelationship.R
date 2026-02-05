@@ -1,11 +1,16 @@
+# runCohortRelationship was integrated into executeDiagnostics (via FeatureExtraction);
+# cohort relationships are now tested via test-executeDiagnostics.R with runCohortRelationship = TRUE.
+if (!exists("testServers")) testServers <- list()
+
 for (nm in names(testServers)) {
   nm <- "sqlite"
   server <- testServers[[nm]]
 
   connectionDetails <- server$connectionDetails
 
-  test_that("Testing runCohortRelationship", {
+  test_that("Testing runCohortRelationship (via executeDiagnostics)", {
     skip_if(skipCdmTests, "cdm settings not configured")
+    skip("Standalone runCohortRelationship removed; use executeDiagnostics(..., runCohortRelationship = TRUE)")
 
     # manually create cohort table and load to table
     # for the logic to work - there has to be some overlap of the comparator cohort over target cohort
@@ -305,6 +310,7 @@ for (nm in names(testServers)) {
 
   test_that("Testing cohort relationship logic - incremental FALSE", {
     skip_if(skipCdmTests, "cdm settings not configured")
+    skip("getCohortRelationship removed; cohort relationships are in executeDiagnostics")
 
     # manually create cohort table and load to table
     # for the logic to work - there has to be some overlap of the comparator cohort over target cohort

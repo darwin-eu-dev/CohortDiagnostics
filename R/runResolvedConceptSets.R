@@ -138,6 +138,7 @@ getResolvedConceptSets <- function(connection,
 #' @template MinCellCount
 #' @template VocabularyDatabaseSchema 
 #' @template TempEmulationSchema 
+#' @template Incremental
 #'
 #' @return None, it will write the results to a csv file.
 #' @export
@@ -147,7 +148,9 @@ runResolvedConceptSets <- function(connection,
                                    exportFolder,
                                    minCellCount,
                                    vocabularyDatabaseSchema,
-                                   tempEmulationSchema) {
+                                   tempEmulationSchema,
+                                   incremental = FALSE,
+                                   incrementalFolder = exportFolder) {
   
   errorMessage <- checkmate::makeAssertCollection()
   checkArg(connection, add = errorMessage)
@@ -157,9 +160,9 @@ runResolvedConceptSets <- function(connection,
   checkArg(minCellCount, add = errorMessage)
   checkArg(vocabularyDatabaseSchema, add = errorMessage)
   checkArg(tempEmulationSchema, add = errorMessage)
+  checkArg(incremental, add = errorMessage)
+  checkArg(incrementalFolder, add = errorMessage)
   checkmate::reportAssertions(errorMessage)
-  
-  # TODO: how should this work in incremental mode
   
   timeExecution(
     exportFolder,
@@ -176,13 +179,18 @@ runResolvedConceptSets <- function(connection,
     }
   )
   
+  if (is.null(resolvedConceptIds) || nrow(resolvedConceptIds) == 0) {
+    return(invisible(NULL))
+  }
+  
   exportDataToCsv(
     data = resolvedConceptIds,
     tableName = "resolved_concepts",
     fileName = file.path(exportFolder, "resolved_concepts.csv"),
     minCellCount = minCellCount,
     databaseId = databaseId,
-    incremental = FALSE
+    incremental = incremental,
+    cohortId = resolvedConceptIds$cohortId
   )
 }
 

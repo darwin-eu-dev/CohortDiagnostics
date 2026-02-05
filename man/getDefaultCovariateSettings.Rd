@@ -12,6 +12,7 @@ Default covariate settings
 \description{
 Default covariate settings for cohort diagnostics execution
 
+
 Overriding this behaviour is possible, however, certain time windows are requirement of other diagnostics.
 For this reason, the time windows will be included, regardless of user specifications:
 

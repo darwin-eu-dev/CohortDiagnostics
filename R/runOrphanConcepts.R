@@ -216,13 +216,13 @@ runOrphanConcepts <- function(connection,
     # If conceptCountsTable exists, check the vocabVersion
     
     vocabVersion <- dataSourceInfo$vocabularyVersion
-    vocabVersionExternalConceptCountsTable <- renderTranslateQuerySql(
+    vocabVersionExternalConceptCountsTable <- DatabaseConnector::renderTranslateQuerySql(
       connection = connection,
       sql = "SELECT DISTINCT vocabulary_version FROM @work_database_schema.@concept_counts_table;",
       work_database_schema = cohortDatabaseSchema,
       concept_counts_table = conceptCountsTable,
       snakeCaseToCamelCase = TRUE,
-      tempEmulationSchema = getOption("sqlRenderTempEmulationSchena")
+      tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
     )
     if (!identical(vocabVersion, vocabVersionExternalConceptCountsTable[1,1])) {
       stop(paste0("External concept counts table (", 
@@ -240,7 +240,7 @@ runOrphanConcepts <- function(connection,
       nrow(cohorts) - nrow(subsetOrphans)
     ))
   }
-  if (nrow(subsetOrphans > 0)) {
+  if (nrow(subsetOrphans) > 0) {
     start <- Sys.time()
     
     # [OPTIMIZATION idea] can we modify the sql to do this for all uniqueConceptSetId in one query using group by?
@@ -410,21 +410,7 @@ runOrphanConcepts <- function(connection,
     databaseId = databaseId,
     incremental = TRUE
   )
-  
-  # TODO eliminate inst_concept_sets after three analysis complete in executeDiagnostics
-  # if (tempTableExists(connection, "inst_concept_sets")) {
-  #   ParallelLogger::logTrace("Dropping Unique ConceptSets table")
-  #   sql <-
-  #     "TRUNCATE TABLE #inst_concept_sets; DROP TABLE #inst_concept_sets;"
-  #   DatabaseConnector::renderTranslateExecuteSql(
-  #     connection,
-  #     sql,
-  #     tempEmulationSchema = tempEmulationSchema,
-  #     progressBar = FALSE,
-  #     reportOverallTime = FALSE
-  #   )
-  # }
-  
+
   if (conceptCountsTableIsTemp) {
     sql <- "TRUNCATE TABLE @count_table; DROP TABLE @count_table;"
     DatabaseConnector::renderTranslateExecuteSql(

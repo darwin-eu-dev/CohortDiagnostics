@@ -122,7 +122,7 @@ getTimeSeries <- function(
       FROM @cohort_database_schema.@cohort_table
       {@cohort_ids != ''} ? { where cohort_definition_id IN (@cohort_ids)}
       GROUP BY cohort_definition_id;"
-    resultsInAndromeda$cohortCount <- renderTranslateQuerySql(
+    resultsInAndromeda$cohortCount <- DatabaseConnector::renderTranslateQuerySql(
       connection = connection,
       sql = sqlCount,
       cohort_database_schema = cohortDatabaseSchema,
@@ -499,8 +499,11 @@ runTimeSeries <- function(connection,
     ) %>%
       dplyr::arrange(.data$cohortId)
 
-    #TODO print a message if we skip all cohorts in incremental mode. Make sure the code is the same in all runAnalysis functions
-    if (nrow(subset) > 0) {
+    if (nrow(subset) == 0) {
+      if (incremental) {
+        ParallelLogger::logInfo(" - Skipping all cohorts in incremental mode (no new or changed cohorts for time series).")
+      }
+    } else {
       if (incremental) {
         numSkippedCohorts <- length(instantiatedCohorts) - nrow(subset)
         if (numSkippedCohorts > 0) {
@@ -580,7 +583,7 @@ runTimeSeries <- function(connection,
     
     if (incremental && !isTaskRequired(
           task = "runDataSourceTimeSeries", 
-          checksum = computeChecksum(paste("runDatSourceTimeSeries - ", databaseId)),
+          checksum = computeChecksum(paste("runDataSourceTimeSeries - ", databaseId)),
           recordKeepingFile = recordKeepingFile)) {
       
       ParallelLogger::logInfo("Skipping Data Source Time Series in Incremental mode.")
@@ -619,7 +622,7 @@ runTimeSeries <- function(connection,
     recordTasksDone(
       cohortId = cohortId,
       task = "runDataSourceTimeSeries",
-      checksum = computeChecksum(paste("runDatSourceTimeSeries - ", databaseId)),
+      checksum = computeChecksum(paste("runDataSourceTimeSeries - ", databaseId)),
       recordKeepingFile = recordKeepingFile,
       incremental = incremental
     )

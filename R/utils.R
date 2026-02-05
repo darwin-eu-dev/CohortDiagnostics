@@ -14,6 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+hasData <- function(data) {
+  if (is.null(data)) {
+    return(FALSE)
+  }
+  if (is.data.frame(data)) {
+    if (nrow(data) == 0) {
+      return(FALSE)
+    }
+  }
+  if (!is.data.frame(data)) {
+    if (length(data) == 0) {
+      return(FALSE)
+    }
+    if (length(data) == 1) {
+      if (is.na(data)) {
+        return(FALSE)
+      }
+    }
+  }
+  return(TRUE)
+}
 
 createIfNotExist <-
   function(type,
@@ -21,7 +42,7 @@ createIfNotExist <-
            recursive = TRUE,
            errorMessage = NULL) {
     if (is.null(errorMessage) |
-      !is(errorMessage, "AssertColection")) {
+      !is(errorMessage, "AssertionCollection")) {
       errorMessage <- checkmate::makeAssertCollection()
     }
     if (!is.null(type)) {
@@ -238,16 +259,16 @@ makeDataExportable <- function(x,
   x <- dplyr::select(x, dplyr::all_of(presentInBoth))
 
   # enforce minimum cell count value
-    for (column in columnsToApplyMinCellValue) {
-      if (column %in% colnames(data)) {
-        data <-
-          enforceMinCellValue(
-            data = data,
-            columnName = column,
-            minValues = minCellCount
-          )
-      }
+  for (column in columnsToApplyMinCellValue) {
+    if (column %in% colnames(x)) {
+      x <-
+        enforceMinCellValue(
+          data = x,
+          columnName = column,
+          minValues = minCellCount
+        )
     }
+  }
 
   # Ensure that timeId is never NA
   if ("timeId" %in% colnames(x)) {

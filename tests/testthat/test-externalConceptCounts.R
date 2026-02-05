@@ -34,7 +34,7 @@ test_that("Creating and checking externalConceptCounts table", {
       work_database_schema = cdmDatabaseSchema,
       concept_counts_table = conceptCountsTable,
       snakeCaseToCamelCase = TRUE,
-      tempEmulationSchema = getOption("sqlRenderTempEmulationSchena")
+      tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
     )
 
     expect_equal(vocabVersion, vocabVersionExternalConceptCountsTable[1,1])
