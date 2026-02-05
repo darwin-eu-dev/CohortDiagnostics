@@ -235,7 +235,7 @@ test_that("getResultsDataModelSpecifications works", {
   expect_true(is.data.frame(spec))
   expect_named(spec, expectedColumnNames)
 
-  expect_equal(length(unique(spec$tableName)), 30)
+  expect_equal(length(unique(spec$tableName)), 29)
   spec <- getResultsDataModelSpecifications("cohort")
   expect_equal(length(unique(spec$tableName)), 1)
 

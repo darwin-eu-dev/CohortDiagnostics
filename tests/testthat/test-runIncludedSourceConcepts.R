@@ -1,11 +1,7 @@
-
-
-
 for (server in testServers) {
-  test_that(paste("getResolvedConceptSets works on", server$connectionDetails$dbms), {
-    
+  test_that(paste("getIncludedSourceConcepts works on", server$connectionDetails$dbms), {
     connection <- DatabaseConnector::connect(server$connectionDetails)
-    
+    on.exit(DatabaseConnector::disconnect(connection))
     # used to create the #inst_concept_sets
     invisible(
       getResolvedConceptSets(
@@ -28,14 +24,12 @@ for (server in testServers) {
     # empty cohort set works
     result <- getIncludedSourceConcepts(
       connection = connection,
-      cohortDefinitionSet = server$cohortDefinitionSet[-1:-100,],
+      cohortDefinitionSet = server$cohortDefinitionSet[-1:-100, ],
       cdmDatabaseSchema = server$cdmDatabaseSchema,
       tempEmulationSchema = server$tempEmulationSchema)
     
     expect_true(is.data.frame(result))
     expect_named(result, c("cohortId", "conceptSetId", "conceptId", "sourceConceptId", "conceptCount", "conceptSubjects"))
-    
-    DatabaseConnector::disconnect(connection)
   })
 }
 
@@ -43,8 +37,10 @@ test_that("runIncludedSourceConcepts works", {
   skip_if_not("sqlite" %in% names(testServers))
   server <- testServers[["sqlite"]]
   connection <- DatabaseConnector::connect(server$connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
   exportFolder <- getUniqueTempDir()
   dir.create(exportFolder, recursive = TRUE)
+  on.exit(unlink(exportFolder, recursive = TRUE, force = TRUE), add = TRUE)
 
   invisible(
     runResolvedConceptSets(
@@ -57,7 +53,7 @@ test_that("runIncludedSourceConcepts works", {
       tempEmulationSchema = server$tempEmulationSchema
     )
   )
-  
+
   runIncludedSourceConcepts(
     connection = connection,
     cohortDefinitionSet = server$cohortDefinitionSet,
@@ -67,12 +63,9 @@ test_that("runIncludedSourceConcepts works", {
     minCellCount = 1,
     tempEmulationSchema = server$tempEmulationSchema
   )
-  
-  DatabaseConnector::disconnect(connection)
-  result <- readr::read_csv(file.path(exportFolder, "resolved_concepts.csv"), show_col_types = F)
+
+  result <- readr::read_csv(file.path(exportFolder, "resolved_concepts.csv"), show_col_types = FALSE)
   expect_true(is.data.frame(result))
   expect_named(result, c("cohort_id", "concept_set_id", "concept_id", "database_id"))
 })
-
-
 

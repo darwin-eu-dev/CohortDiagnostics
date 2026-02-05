@@ -15,11 +15,6 @@
 # limitations under the License.
 
 for (nm in names(testServers)) {
-  # nm <- "sqlite"
-  # nm <- "duckdb"
-  # nm <- "postgresql"
-  # nm <- "sql_server"
-  # nm <- "oracle"
   server <- testServers[[nm]]
 
   # Params
@@ -46,9 +41,11 @@ for (nm in names(testServers)) {
 
   test_that(paste("test run orphan codes concept table", nm), {
     connection <- DatabaseConnector::connect(server$connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
     exportFolder <- getUniqueTempDir()
     recordKeepingFile <- file.path(exportFolder, "CreatedDiagnostics.csv")
     dir.create(exportFolder)
+    on.exit(unlink(exportFolder, recursive = TRUE, force = TRUE), add = TRUE)
     # CreateConceptcounts table
 
     CohortDiagnostics::createConceptCountsTable(connection = connection,
@@ -100,16 +97,14 @@ for (nm in names(testServers)) {
     # Check cohort_inc_stats
     expect_true(file.exists(file.path(exportFolder, "resolved_concepts.csv")))
     resolvedResult <- read.csv(file.path(exportFolder, "resolved_concepts.csv"))
-    expect_equal(colnames(resolvedResult), c("cohort_id", "concept_set_id", "concept_id", "database_id" ))
+    expect_equal(colnames(resolvedResult), c("cohort_id", "concept_set_id", "concept_id", "database_id"))
 
     # Check recordKeepingFile
     expect_true(file.exists(recordKeepingFile))
     recordKeeping <- read.csv(recordKeepingFile)
-    expect_equal(colnames(recordKeeping), c("cohortId", "task", "checksum" , "timeStamp"))
+    expect_equal(colnames(recordKeeping), c("cohortId", "task", "checksum", "timeStamp"))
     expect_equal(unique(recordKeeping$task), "runOrphanConcepts")
     expect_true(all(recordKeeping$cohortId %in% server$cohortDefinitionSet$cohortId))
-
-    unlink(exportFolder, recursive = TRUE)
 
     checkConceptCountsTableExists <- DatabaseConnector::dbExistsTable(connection,
                                                                       name = conceptCountsTable,
@@ -145,15 +140,15 @@ for (nm in names(testServers)) {
         reportOverallTime = FALSE
       )
     }
-    unlink(exportFolder, recursive = TRUE)
-    DatabaseConnector::disconnect(connection)
   })
 
   test_that(paste("test run orphan codes temp concept counts", nm), {
     connection <- DatabaseConnector::connect(server$connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
     exportFolder <- getUniqueTempDir()
     recordKeepingFile <- file.path(exportFolder, "CreatedDiagnostics.csv")
     dir.create(exportFolder)
+    on.exit(unlink(exportFolder, recursive = TRUE, force = TRUE), add = TRUE)
 
     # Instantiate Unique ConceptSets
     runResolvedConceptSets(connection = connection,
@@ -195,16 +190,13 @@ for (nm in names(testServers)) {
     # Check cohort_inc_stats
     expect_true(file.exists(file.path(exportFolder, "resolved_concepts.csv")))
     resolvedResult <- read.csv(file.path(exportFolder, "resolved_concepts.csv"))
-    expect_equal(colnames(resolvedResult), c("cohort_id", "concept_set_id", "concept_id", "database_id" ))
+    expect_equal(colnames(resolvedResult), c("cohort_id", "concept_set_id", "concept_id", "database_id"))
 
     # Check recordKeepingFile
     expect_true(file.exists(recordKeepingFile))
     recordKeeping <- read.csv(recordKeepingFile)
-    expect_equal(colnames(recordKeeping), c("cohortId", "task", "checksum" , "timeStamp"))
+    expect_equal(colnames(recordKeeping), c("cohortId", "task", "checksum", "timeStamp"))
     expect_equal(unique(recordKeeping$task), "runOrphanConcepts")
     expect_true(all(recordKeeping$cohortId %in% server$cohortDefinitionSet$cohortId))
-
-    unlink(exportFolder, recursive = TRUE)
-    DatabaseConnector::disconnect(connection)
   })
 }

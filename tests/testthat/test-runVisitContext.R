@@ -292,7 +292,7 @@ test_that(paste("test that the subject counts per cohort, visit concept and visi
 
 
   connectionDetailsCustomCDM <- createCustomCdm(patientDataFilePath)
-
+  skip_if(is.null(connectionDetailsCustomCDM), "Eunomia data not available (loadDataFiles)")
 
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetailsCustomCDM)
 
@@ -336,6 +336,7 @@ test_that(paste("test that only the new visit_concept_id are inserted into the #
   patientDataFilePath <- file.path("testCases", "testSubjectCounts", "getVisitContext-patientData.json")
 
   connectionDetailsCustomCDM <- createCustomCdm(patientDataFilePath)
+  skip_if(is.null(connectionDetailsCustomCDM), "Eunomia data not available (loadDataFiles)")
 
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetailsCustomCDM)
 
@@ -417,6 +418,7 @@ test_that(paste("test that to infer subject counts per cohort, visit concept, an
   patientDataFilePath <- file.path("testCases", "testSubjectCountsDates", "getVisitContext-patientData.json")
 
   connectionDetailsCustomCDM <- createCustomCdm(patientDataFilePath)
+  skip_if(is.null(connectionDetailsCustomCDM), "Eunomia data not available (loadDataFiles)")
 
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetailsCustomCDM)
 
@@ -434,7 +436,7 @@ test_that(paste("test that to infer subject counts per cohort, visit concept, an
 
     resultPath <- system.file(file.path("testCases", "testSubjectCountsDates", "expectedResult.csv"),
                               package = "CohortDiagnostics",
-                              mustWork = T)
+                              mustWork = TRUE)
 
     resultData <- readr::read_csv(resultPath, col_types = c("ddcd"))
 
@@ -459,6 +461,7 @@ test_that(paste("test that no other cohorts than the ones specified in cohortIds
   patientDataFilePath <- file.path("testCases", "testSubjectCounts", "getVisitContext-patientData.json")
 
   connectionDetailsCustomCDM <- createCustomCdm(patientDataFilePath)
+  skip_if(is.null(connectionDetailsCustomCDM), "Eunomia data not available (loadDataFiles)")
 
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetailsCustomCDM)
 
@@ -487,6 +490,7 @@ test_that(paste("test that when the subjects in the cohort have no visits an emp
   patientDataFilePath <- file.path("testCases", "testSubjectCountsNoVisits", "getVisitContext-patientData.json")
 
   connectionDetailsCustomCDM <- createCustomCdm(patientDataFilePath)
+  skip_if(is.null(connectionDetailsCustomCDM), "Eunomia data not available (loadDataFiles)")
 
   connection <- DatabaseConnector::connect(connectionDetails = connectionDetailsCustomCDM)
 

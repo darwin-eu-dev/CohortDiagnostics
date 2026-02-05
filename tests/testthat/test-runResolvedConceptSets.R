@@ -1,9 +1,7 @@
-
-
 for (server in testServers) {
   test_that(paste("getResolvedConceptSets works on", server$connectionDetails$dbms), {
-
     connection <- DatabaseConnector::connect(server$connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
     result <- getResolvedConceptSets(
       connection = connection,
       cohortDefinitionSet = server$cohortDefinitionSet,
@@ -15,7 +13,6 @@ for (server in testServers) {
     expect_named(result, c("cohortId", "conceptSetId", "conceptId"))
     expect_true(tempTableExists(connection, "concept_ids"))
     expect_true(tempTableExists(connection, "inst_concept_sets"))
-    DatabaseConnector::disconnect(connection)
   })
 }
 
@@ -23,8 +20,10 @@ test_that("runResolvedConceptSets works", {
   skip_if_not("sqlite" %in% names(testServers))
   server <- testServers[["sqlite"]]
   connection <- DatabaseConnector::connect(server$connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection))
   exportFolder <- getUniqueTempDir()
   dir.create(exportFolder, recursive = TRUE)
+  on.exit(unlink(exportFolder, recursive = TRUE, force = TRUE), add = TRUE)
 
   runResolvedConceptSets(
     connection = connection,
@@ -36,8 +35,7 @@ test_that("runResolvedConceptSets works", {
     tempEmulationSchema = server$tempEmulationSchema
   )
 
-  DatabaseConnector::disconnect(connection)
-  result <- readr::read_csv(file.path(exportFolder, "resolved_concepts.csv"), show_col_types = F)
+  result <- readr::read_csv(file.path(exportFolder, "resolved_concepts.csv"), show_col_types = FALSE)
   expect_true(is.data.frame(result))
   expect_named(result, c("cohort_id", "concept_set_id", "concept_id", "database_id"))
 })

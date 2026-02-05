@@ -351,13 +351,14 @@ test_that("subsetToRequiredCohorts adds checksum and parent json", {
 
   cohorts2 <- subsetToRequiredCohorts(
     cohorts,
-    incremental = F
+    incremental = FALSE
   )
   
   expect_named(
     cohorts2,
-    c("cohortId", "cohortName", "json", "sql", "subsetParent", "isSubset", 
-      "subsetDefinitionId", "checksum", "parentJson")
+    c("cohortId", "cohortName", "json", "sql", "subsetParent", "isSubset",
+      "isTemplatedCohort", "subsetDefinitionId", "checksum", "parentJson"),
+    ignore.order = FALSE
   )
   
 })

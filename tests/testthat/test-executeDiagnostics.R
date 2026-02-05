@@ -1,6 +1,8 @@
+skip_if_not("sqlite" %in% names(testServers), "sqlite test server not available (Eunomia data not loaded)")
 
 for (nm in "sqlite") {
   server <- testServers[[nm]]
+  skip_if(is.null(server), "sqlite server not configured")
 
   test_that(paste("Cohort diagnostics in incremental mode on", nm), {
 

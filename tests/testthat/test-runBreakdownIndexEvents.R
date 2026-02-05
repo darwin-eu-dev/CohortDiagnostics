@@ -1,15 +1,12 @@
-
 for (nm in names(testServers)) {
   server <- testServers[[nm]]
-
   test_that(paste("getBreakdownIndexsEvents works on", nm), {
-
     connection <- DatabaseConnector::connect(server$connectionDetails)
-
+    on.exit(DatabaseConnector::disconnect(connection))
     # #inst_concept_set table is required by getBreakdownIndexEvents
     resolvedConcepts <- getResolvedConceptSets(
       connection = connection,
-      cohortDefinitionSet = server$cohortDefinitionSet[2,], # must contain any parents of subset cohort definitions
+      cohortDefinitionSet = server$cohortDefinitionSet[2, ], # must contain any parents of subset cohort definitions
       vocabularyDatabaseSchema = server$vocabularyDatabaseSchema,
       tempEmulationSchema = server$tempEmulationSchema
     )
@@ -18,7 +15,7 @@ for (nm in names(testServers)) {
 
     result <- getBreakdownIndexEvents(
       connection = connection,
-      cohort = server$cohortDefinitionSet[2,], # must be one row
+      cohort = server$cohortDefinitionSet[2, ], # must be one row
       conceptSets = conceptSets,
       tempEmulationSchema = server$tempEmulationSchema,
       cdmDatabaseSchema = server$cdmDatabaseSchema,
@@ -32,27 +29,26 @@ for (nm in names(testServers)) {
       names(result),
       c("domainTable", "domainField", "conceptId", "conceptCount", "subjectCount", "cohortId")
     )
-
-    DatabaseConnector::disconnect(connection)
   })
 }
 
 test_that("runBreakdownIndexEvents", {
   skip_if_not("sqlite" %in% names(testServers))
-
   server <- testServers[["sqlite"]]
   exportFolder <- getUniqueTempDir()
   dir.create(exportFolder, recursive = TRUE)
-
+  on.exit(unlink(exportFolder, recursive = TRUE, force = TRUE))
   incrementalFolder <- tempfile()
   dir.create(incrementalFolder, recursive = TRUE)
+  on.exit(unlink(incrementalFolder, recursive = TRUE, force = TRUE), add = TRUE)
 
   connection <- DatabaseConnector::connect(server$connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection), add = TRUE)
 
   # #inst_concept_set table is required by getBreakdownIndexEvents
   resolvedConcepts <- getResolvedConceptSets(
     connection = connection,
-    cohortDefinitionSet = server$cohortDefinitionSet[2,], # must contain any parents of subset cohort definitions
+    cohortDefinitionSet = server$cohortDefinitionSet[2, ], # must contain any parents of subset cohort definitions
     vocabularyDatabaseSchema = server$vocabularyDatabaseSchema,
     tempEmulationSchema = server$tempEmulationSchema
   )
@@ -60,7 +56,7 @@ test_that("runBreakdownIndexEvents", {
 
   runBreakdownIndexEvents(
     connection = connection,
-    cohortDefinitionSet = server$cohortDefinitionSet[2,],
+    cohortDefinitionSet = server$cohortDefinitionSet[2, ],
     tempEmulationSchema = server$tempEmulationSchema,
     cdmDatabaseSchema = server$cdmDatabaseSchema,
     vocabularyDatabaseSchema = server$vocabularyDatabaseSchema,
@@ -72,9 +68,6 @@ test_that("runBreakdownIndexEvents", {
     incremental = FALSE,
     incrementalFolder = incrementalFolder)
 
-  DatabaseConnector::disconnect(connection)
   expect_true(file.exists(file.path(exportFolder, "index_event_breakdown.csv")))
 })
-
-
 

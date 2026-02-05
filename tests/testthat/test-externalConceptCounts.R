@@ -1,7 +1,9 @@
 test_that("Creating and checking externalConceptCounts table", {
+  skip_if_not("sqlite" %in% names(testServers), "sqlite test server not available (Eunomia data not loaded)")
   if (dbmsToTest == "sqlite") {
     connectionDetails <- testServers[["sqlite"]]$connectionDetails
     connection <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
     cdmDatabaseSchema <- testServers[["sqlite"]]$cdmDatabaseSchema
     conceptCountsTable <- "concept_counts"
     CohortDiagnostics::createConceptCountsTable(connectionDetails = connectionDetails,
@@ -23,9 +25,6 @@ test_that("Creating and checking externalConceptCounts table", {
     expect_true(checkConceptCountsTableExists)
 
     # Checking vocab version matches
-    useExternalConceptCountsTable <- TRUE
-    conceptCountsTable <- "concept_counts"
-    conceptCountsTable <- conceptCountsTable
     dataSourceInfo <- getCdmDataSourceInformation(connection = connection, cdmDatabaseSchema = cdmDatabaseSchema)
     vocabVersion <- dataSourceInfo$vocabularyVersion
     vocabVersionExternalConceptCountsTable <- renderTranslateQuerySql(
@@ -37,18 +36,16 @@ test_that("Creating and checking externalConceptCounts table", {
       tempEmulationSchema = getOption("sqlRenderTempEmulationSchema")
     )
 
-    expect_equal(vocabVersion, vocabVersionExternalConceptCountsTable[1,1])
-    DatabaseConnector::disconnect(connection)
+    expect_equal(vocabVersion, vocabVersionExternalConceptCountsTable[1, 1])
   }
-
 })
 
 test_that("Creating and checking externalConceptCounts temp table", {
+  skip_if_not("sqlite" %in% names(testServers), "sqlite test server not available (Eunomia data not loaded)")
   if (dbmsToTest == "sqlite") {
-    # Creating externalConceptCounts
-    # sql_lite_path <- file.path(test_path(), databaseFile)
     connectionDetails <- testServers[["sqlite"]]$connectionDetails
     connection <- DatabaseConnector::connect(connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
     cdmDatabaseSchema <- testServers[["sqlite"]]$cdmDatabaseSchema
     conceptCountsTable <- "concept_counts"
     CohortDiagnostics::createConceptCountsTable(connectionDetails = connectionDetails,
@@ -67,6 +64,5 @@ test_that("Creating and checking externalConceptCounts temp table", {
                                                                       name = conceptCountsTable,
                                                                       databaseSchema = cdmDatabaseSchema)
     expect_true(checkConceptCountsTableExists)
-    DatabaseConnector::disconnect(connection)
   }
 })

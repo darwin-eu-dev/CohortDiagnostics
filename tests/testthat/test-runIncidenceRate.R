@@ -1,11 +1,10 @@
-
 # test getIncidenceRate on all dbms
 for (nm in names(testServers)) {
   server <- testServers[[nm]]
-
   test_that(paste("getIncidenceRate works on", nm), {
-
     connection <- DatabaseConnector::connect(server$connectionDetails)
+    on.exit(DatabaseConnector::disconnect(connection))
+
     result <- getIncidenceRate(
       connection = connection,
       cohortDatabaseSchema = server$cohortDatabaseSchema,
@@ -18,14 +17,10 @@ for (nm in names(testServers)) {
       cohortId = server$cohortDefinitionSet$cohortId[1])
 
     expect_true(is.data.frame(result))
-
-    # getResultsDataModelSpecifications("incidence_rate")$columnName
     expect_equal(
       names(result),
       c("cohortCount", "personYears", "gender", "ageGroup", "calendarYear", "incidenceRate")
     )
-
-    DatabaseConnector::disconnect(connection)
   })
 }
 
@@ -37,12 +32,14 @@ test_that("runIncidenceRate", {
   server <- testServers[["sqlite"]]
   exportFolder <- getUniqueTempDir()
   dir.create(exportFolder, recursive = TRUE)
+  on.exit(unlink(exportFolder, recursive = TRUE, force = TRUE))
 
   connection <- DatabaseConnector::connect(server$connectionDetails)
+  on.exit(DatabaseConnector::disconnect(connection), add = TRUE)
 
   runIncidenceRate(
     connection,
-    cohortDefinitionSet = server$cohortDefinitionSet[1:2,],
+    cohortDefinitionSet = server$cohortDefinitionSet[1:2, ],
     tempEmulationSchema = server$tempEmulationSchema,
     cdmDatabaseSchema = server$cdmDatabaseSchema,
     cohortDatabaseSchema = server$cohortDatabaseSchema,
@@ -51,10 +48,7 @@ test_that("runIncidenceRate", {
     exportFolder = exportFolder,
     minCellCount = 1,
     washoutPeriod = 0,
-    incremental =  F)
-  DatabaseConnector::disconnect(connection)
+    incremental = FALSE)
   expect_true(file.exists(file.path(exportFolder, "incidence_rate.csv")))
 })
-
-
 

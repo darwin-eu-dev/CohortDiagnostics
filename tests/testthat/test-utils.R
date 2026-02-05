@@ -113,9 +113,6 @@ test_that("timeExecution function", {
     )
   )
 
-  # result <- readr::read_csv(expectedFilePath, col_types = readr::cols())
-  # checkmate::expect_data_frame(result, nrows = 4, ncols = 5)
-
   expect_error(
     timeExecution(
       exportFolder = temp,
@@ -125,11 +122,6 @@ test_that("timeExecution function", {
       start = Sys.time()
     )
   )
-
-  # result <- readr::read_csv(expectedFilePath, col_types = readr::cols())
-  # checkmate::expect_data_frame(result, nrows = 5, ncols = 5)
-  # expect_false(all(is.na(result$startTime)))
-  
 })
 
 test_that("enforceMinCellValue replaces values below minimum with negative of minimum", {
@@ -186,7 +178,7 @@ test_that("timeExecution uses minutes as unit", {
                 execTime = oneHour)
 
   list.files(exportFolder)
-  df <- readr::read_csv(file.path(exportFolder, "executionTimes.csv"), show_col_types = F)
+  df <- readr::read_csv(file.path(exportFolder, "executionTimes.csv"), show_col_types = FALSE)
 
   expect_equal(df$task, c("test 1 second", "test 1 minute", "test 1 hour"))
   expect_equal(round(df$executionTime), c(0, 1, 60))
@@ -195,15 +187,15 @@ test_that("timeExecution uses minutes as unit", {
 for (server in testServers) {
   test_that(paste("tempTableExists works on ", server$connectionDetails$dbms), {
     con <- DatabaseConnector::connect(server$connectionDetails)
+    on.exit(DatabaseConnector::disconnect(con))
     DatabaseConnector::renderTranslateExecuteSql(con, "create table #tmp110010 (a int);",
-                                                 progressBar = F,
-                                                 reportOverallTime = F)
+                                                progressBar = FALSE,
+                                                reportOverallTime = FALSE)
     expect_false(tempTableExists(con, "tmp98765"))
     expect_true(tempTableExists(con, "tmp110010"))
     DatabaseConnector::renderTranslateExecuteSql(con, "drop table #tmp110010;",
-                                                 progressBar = F,
-                                                 reportOverallTime = F)
-    DatabaseConnector::disconnect(con)
+                                                progressBar = FALSE,
+                                                reportOverallTime = FALSE)
   })
 }
 
