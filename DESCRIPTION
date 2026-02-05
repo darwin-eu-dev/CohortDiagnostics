@@ -50,12 +50,17 @@ Suggests:
     zip,
     knitr,
     shiny,
-    OhdsiShinyModules,
     rsconnect,
     yaml,
-    ggplot2
-Remotes:
-  ohdsi/OhdsiShinyModules
+    ggplot2,
+    reactable,
+    tippy,
+    shinyWidgets,
+    shinydashboard,
+    plotly,
+    markdown,
+    CirceR,
+    shinytest2
 License: Apache License
 VignetteBuilder: knitr
 URL: https://ohdsi.github.io/CohortDiagnostics, https://github.com/OHDSI/CohortDiagnostics

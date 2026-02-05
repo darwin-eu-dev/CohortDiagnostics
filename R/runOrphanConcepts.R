@@ -124,15 +124,10 @@ runOrphanConcepts <- function(connection,
   checkArg(cdmDatabaseSchema, add = errorMessage)
   checkArg(vocabularyDatabaseSchema, add = errorMessage)
   checkArg(databaseId, add = errorMessage)
-  # checkArg(cohorts, add = errorMessage) # no argument check currently available
   checkArg(exportFolder, add = errorMessage)
   checkArg(minCellCount, add = errorMessage)
-  # checkArg(conceptCountsDatabaseSchema, add = errorMessage) # no argument check currently available
-  # checkArg(conceptCountsTable, add = errorMessage) # no argument check currently available
-  # checkArg(instantiatedCodeSets, add = errorMessage) # no argument check currently available
   checkArg(cohortDatabaseSchema, add = errorMessage)
   checkArg(cohortTable, add = errorMessage)
-  # checkArg(conceptIdTable, add = errorMessage) # no argument check currently available
   checkArg(incremental, add = errorMessage)
   checkArg(incrementalFolder, add = errorMessage)
   checkmate::reportAssertions(errorMessage)

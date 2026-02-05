@@ -35,7 +35,7 @@ getBreakdownIndexEvents <- function(connection,
   
   domains <- 
     readr::read_csv(
-      system.file("csv", "domains.csv", package = "CohortDiagnostics", mustWork = T),
+      system.file("csv", "domains.csv", package = "CohortDiagnostics", mustWork = TRUE),
       show_col_types = FALSE
     )
   
@@ -49,7 +49,7 @@ getBreakdownIndexEvents <- function(connection,
   )
   
   if (isTRUE(cohort$isSubset)) {
-    checkmate::assert_character(cohort$parentJson, len = 1, any.missing = F)
+    checkmate::assert_character(cohort$parentJson, len = 1, any.missing = FALSE)
     jsonDef <- cohort$parentJson
   } else {
     jsonDef <- cohort$json

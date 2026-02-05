@@ -340,7 +340,7 @@ tempTableExists <- function(connection, tempTableName) {
     error = function(e) {
       if (methods::is(connection, "DatabaseConnectorJdbcConnection") &&
           DatabaseConnector::dbms(connection) %in% c("postgresql", "redshift")) {
-        DatabaseConnector::executeSql(connection, "rollback;", reportOverallTime = F, progressBar = F) 
+        DatabaseConnector::executeSql(connection, "rollback;", reportOverallTime = FALSE, progressBar = FALSE) 
       }
       return(FALSE)
     }
