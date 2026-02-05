@@ -192,6 +192,38 @@ createMergedResultsFile <-
         tablePrefix = tablePrefix
       )
     }
+
+    # Create indexes on SQLite to improve Diagnostics Explorer query performance
+    if (connectionDetails$dbms == "sqlite") {
+      resolvedConceptsTable <- paste0(tablePrefix, "resolved_concepts")
+      conceptRelationshipTable <- paste0(tablePrefix, "concept_relationship")
+      conceptTable <- paste0(tablePrefix, "concept")
+      DatabaseConnector::executeSql(
+        connection,
+        paste0(
+          "CREATE INDEX IF NOT EXISTS idx_resolved_concepts ON ",
+          resolvedConceptsTable,
+          " (concept_id, database_id, cohort_id, concept_set_id);"
+        )
+      )
+      DatabaseConnector::executeSql(
+        connection,
+        paste0(
+          "CREATE INDEX IF NOT EXISTS idx_concept_relationship ON ",
+          conceptRelationshipTable,
+          " (concept_id_2, relationship_id);"
+        )
+      )
+      DatabaseConnector::executeSql(
+        connection,
+        paste0(
+          "CREATE INDEX IF NOT EXISTS idx_concept_main ON ",
+          conceptTable,
+          " (concept_id, standard_concept);"
+        )
+      )
+    }
+
     DatabaseConnector::renderTranslateExecuteSql(connection, "VACUUM;")
   }
 
