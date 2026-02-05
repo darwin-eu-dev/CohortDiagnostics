@@ -96,8 +96,8 @@ getKeyIndex <- function(key, recordKeeping) {
     return(c())
   } else {
     key <- dplyr::as_tibble(key) %>% dplyr::distinct()
-    recordKeeping$idxCol <- 1:nrow(recordKeeping)
-    idx <- merge(recordKeeping, key)$idx
+    recordKeeping$idxCol <- seq_len(nrow(recordKeeping))
+    idx <- merge(recordKeeping, key)$idxCol
     return(idx)
   }
 }
