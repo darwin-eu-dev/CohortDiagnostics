@@ -120,7 +120,7 @@ plotTimeDistribution <- function(data, shortNameRef = NULL, showMax = FALSE) {
 
   # Fixed colour reference
   nCohorts <- plotData$shortName %>% unique() %>% length()
-  colorPallet <- RColorBrewer::brewer.pal(max(c(3, nCohorts)), "Set3")
+  colorPallet <- RColorBrewer::brewer.pal(CohortDiagnostics::safeMax(c(3, nCohorts)), "Set3")
 
   sortShortName <- plotData %>%
     dplyr::select("shortName") %>%
@@ -250,7 +250,7 @@ timeDistributionsView <- function(id) {
       collapsed = TRUE,
       title = "Time Distributions",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www", "timeDistribution.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "timeDistribution.html"))
     ),
     shinydashboard::box(
       status = "warning",

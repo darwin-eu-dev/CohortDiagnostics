@@ -248,9 +248,9 @@ fuzzySearch <- reactable::JS('function(rows, columnIds, filterValue) {
         shiny::validate(shiny::need(hasData(df()), "No data for selection"))
         # set row height based on nchar of table
         height <- NULL
-        maxMinWidth <- max(unlist(lapply(colDefsInputReactive(), function(x) x$minWidth)))
+        maxMinWidth <- CohortDiagnostics::safeMax(unlist(lapply(colDefsInputReactive(), function(x) x$minWidth)))
         maxMinWidth <- ifelse(is.finite(maxMinWidth),maxMinWidth, 40)
-        if(max(apply(df(), 1, function(x) max(nchar(x))), na.rm = TRUE) < maxMinWidth*3){
+        if(CohortDiagnostics::safeMax(apply(df(), 1, function(x) CohortDiagnostics::safeMax(nchar(x)))) < maxMinWidth*3){
           if(!is.null(addActions)){
             height <- 40*3#length(addActions)
           }
@@ -262,7 +262,7 @@ fuzzySearch <- reactable::JS('function(rows, columnIds, filterValue) {
                   onClick = onClick,
                   groupBy = groupBy,
                   selection = selection,
-                  defaultSelected = shiny::reactive({if(max(selectedRowId()) == 0){NULL}else{selectedRowId()}})(),
+                  defaultSelected = shiny::reactive({if(CohortDiagnostics::safeMax(selectedRowId()) == 0){NULL}else{selectedRowId()}})(),
                   #these can be turned on/off and will overwrite colDef args
                   sortable = TRUE,
                   resizable = TRUE,
@@ -308,7 +308,7 @@ fuzzySearch <- reactable::JS('function(rows, columnIds, filterValue) {
       shiny::observeEvent(
         eventExpr = setSelected(), {
           
-          if(max(selectedRowId()) == 0){
+          if(CohortDiagnostics::safeMax(selectedRowId()) == 0){
             # do nothing
           } else{
             # code to set the row if selectedRow() is not NULL

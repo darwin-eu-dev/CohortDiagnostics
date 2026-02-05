@@ -29,7 +29,7 @@ orpahanConceptsView <- function(id) {
       collapsed = TRUE,
       title = "Orphan Concepts",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www", "orphanConcepts.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "orphanConcepts.html"))
     ),
     shinydashboard::box(
       status = "warning",

@@ -397,7 +397,7 @@ getDisplayTableGroupedByDatabaseId <- function(data,
           }
           if (is.numeric(value) & hasData(dt)) {
             value <- ifelse(is.na(value), min(dt, na.rm = TRUE), value)
-            normalized <- (value - min(dt, na.rm = TRUE)) / (max(dt, na.rm = TRUE) - min(dt, na.rm = TRUE))
+            normalized <- (value - min(dt, na.rm = TRUE)) / (CohortDiagnostics::safeMax(dt) - min(dt, na.rm = TRUE))
             color <- pallete(normalized)
           }
           list(background = color)
@@ -615,7 +615,7 @@ getMaxValByString <-
     if (!hasData(data)) {
       return(0)
     } else {
-      return(max(data, na.rm = TRUE))
+      return(CohortDiagnostics::safeMax(data))
     }
   }
 
@@ -629,7 +629,7 @@ getDisplayTableColumnMinMaxWidth <- function(data,
   columnNameFormatted <- SqlRender::camelCaseToTitleCase(columnName)
 
   if ("character" %in% class(data[[columnName]])) {
-    maxWidth <- (max(stringr::str_length(
+    maxWidth <- (CohortDiagnostics::safeMax(stringr::str_length(
       c(
         stringr::str_replace_na(
           string = data[[columnName]],
@@ -647,21 +647,19 @@ getDisplayTableColumnMinMaxWidth <- function(data,
 
   if ("logical" %in% class(data[[columnName]])) {
     maxWidth <-
-      max(stringr::str_length(columnNameFormatted) * pixelMultipler,
-          na.rm = TRUE
-      ) + padPixel
+      CohortDiagnostics::safeMax(stringr::str_length(columnNameFormatted) * pixelMultipler) + padPixel
     minWidth <-
       (stringr::str_length(columnNameFormatted) * pixelMultipler) + padPixel
   }
 
   if ("numeric" %in% class(data[[columnName]])) {
     maxWidth <-
-      (max(stringr::str_length(
+      (CohortDiagnostics::safeMax(stringr::str_length(
         c(
           as.character(data[[columnName]]),
           columnNameFormatted
         )
-      ), na.rm = TRUE) * pixelMultipler) + padPixel # to pad for table icon like sort
+      )) * pixelMultipler) + padPixel # to pad for table icon like sort
     minWidth <-
       min(stringr::str_length(columnNameFormatted) * pixelMultipler,
           maxWidth,

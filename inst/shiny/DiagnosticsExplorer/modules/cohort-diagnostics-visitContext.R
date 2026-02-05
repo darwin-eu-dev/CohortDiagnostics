@@ -29,7 +29,7 @@ visitContextView <- function(id) {
       collapsed = TRUE,
       title = "Visit Context",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www",  "visitContext.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "visitContext.html"))
     ),
     shinydashboard::box(
       status = "warning",

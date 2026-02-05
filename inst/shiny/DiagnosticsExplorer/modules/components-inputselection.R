@@ -80,7 +80,7 @@ inputSelectionServer <- function(
       rowNumbers <- unlist(lapply(inputSettingList, function(x){x$rowNumber}))
       inputNames <- unlist(lapply(inputSettingList, function(x){x$varName}))
       rows <- list()
-      for(i in 1:max(rowNumbers)){
+      for(i in seq_len(CohortDiagnostics::safeMax(c(0, rowNumbers)))){
         rows[[i]] <- shiny::fluidRow(
           lapply(which(rowNumbers == i), function(x){
             
@@ -136,7 +136,7 @@ inputSelectionServer <- function(
           # create the text output
           
           otext <- list()
-          for(i in 1:max(rowNumbers)){
+          for(i in seq_len(CohortDiagnostics::safeMax(c(0, rowNumbers)))){
             otext[[i]] <- shiny::fluidRow(
               lapply(which(rowNumbers == i), function(x){
                 shiny::column(

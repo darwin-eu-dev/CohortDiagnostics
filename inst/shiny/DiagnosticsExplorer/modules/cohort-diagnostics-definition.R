@@ -426,7 +426,7 @@ getCountForConceptIdInCohort <-
         .data$conceptId
       ) %>%
       dplyr::summarise(
-        conceptSubjects = max(.data$conceptSubjects),
+        conceptSubjects = CohortDiagnostics::safeMax(.data$conceptSubjects),
         conceptCount = sum(.data$conceptCount),
         .groups = "keep"
       ) %>%
@@ -446,7 +446,7 @@ getCountForConceptIdInCohort <-
         .data$conceptId
       ) %>%
       dplyr::summarise(
-        conceptSubjects = max(.data$conceptSubjects),
+        conceptSubjects = CohortDiagnostics::safeMax(.data$conceptSubjects),
         conceptCount = sum(.data$conceptCount),
         .groups = "keep"
       ) %>%

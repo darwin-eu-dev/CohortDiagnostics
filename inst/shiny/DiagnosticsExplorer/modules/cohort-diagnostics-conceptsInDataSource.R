@@ -29,7 +29,7 @@ conceptsInDataSourceView <- function(id) {
       collapsed = TRUE,
       title = "Concepts in Data Source",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www",  "conceptsInDataSource.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "conceptsInDataSource.html"))
     ),
     shinydashboard::box(
       status = "warning",

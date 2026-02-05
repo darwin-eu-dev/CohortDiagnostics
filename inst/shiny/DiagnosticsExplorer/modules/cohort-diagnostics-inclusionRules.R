@@ -29,7 +29,7 @@ inclusionRulesView <- function(id) {
       collapsed = TRUE,
       title = "Inclusion Rules",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www",  "inclusionRuleStats.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "inclusionRuleStats.html"))
     ),
     shinydashboard::box(
       status = "warning",

@@ -167,6 +167,9 @@ Any additional fields found will be stored as JSON object in the metadata field 
 \item{json}{The JSON cohort definition for the cohort.}
 \item{sql}{The SQL of the cohort definition rendered from the cohort json.}
 }
+
+Logging is written to the export folder (e.g. \code{log.txt}). Console logging can be disabled by
+setting \code{options(CohortDiagnostics.logToConsole = FALSE)}.
 }
 \examples{
 \dontrun{

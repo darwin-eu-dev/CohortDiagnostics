@@ -185,7 +185,7 @@ cohortOverlapView <- function(id) {
       collapsed = TRUE,
       title = "Cohort Overlap (subjects)",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www", "cohortOverlap.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "cohortOverlap.html"))
     ),
     shinydashboard::box(
       status = "warning",

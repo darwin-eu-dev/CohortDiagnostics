@@ -257,7 +257,7 @@ compareCohortCharacterizationView <- function(id, title = "Compare cohort charac
       collapsed = TRUE,
       title = "Compare Cohort Characterization",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www", "compareCohortCharacterization.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "compareCohortCharacterization.html"))
     ),
     shinydashboard::box(
       width = NULL,
@@ -906,7 +906,7 @@ compareCohortCharacterizationModule <- function(id,
               color <- '#fff'
               if (is.numeric(value) & hasData(data$StdDiff)) {
                 value <- ifelse(is.na(value), min(data$StdDiff, na.rm = TRUE), value)
-                normalized <- (value - min(data$StdDiff, na.rm = TRUE)) / (max(data$StdDiff, na.rm = TRUE) - min(data$StdDiff, na.rm = TRUE))
+                normalized <- (value - min(data$StdDiff, na.rm = TRUE)) / (CohortDiagnostics::safeMax(data$StdDiff) - min(data$StdDiff, na.rm = TRUE))
                 color <- pallete(normalized)
               }
               list(background = color)

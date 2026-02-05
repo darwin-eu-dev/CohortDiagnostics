@@ -254,11 +254,11 @@ largeTableServer <- function(id,
     })
 
     pageCount <- shiny::reactive({
-      max(1, ceiling(rowCount()/pageSize()))
+      CohortDiagnostics::safeMax(c(1, ceiling(rowCount()/pageSize())))
     })
 
     shiny::observeEvent(input$nextButton, pageNum(min(pageNum() + 1, rowCount())))
-    shiny::observeEvent(input$previousButton, pageNum(max(pageNum() - 1, 1)))
+    shiny::observeEvent(input$previousButton, pageNum(CohortDiagnostics::safeMax(c(pageNum() - 1, 1))))
 
     shiny::observeEvent(input$pageNum, pageNum(input$pageNum))
 
@@ -326,7 +326,7 @@ largeTableServer <- function(id,
                       style = "cursor:pointer;", format(pageLink, big.mark = ",", scientific = FALSE))
       }
 
-      linkNums <- unique(c(max(2, pageNum() - 2):min(pageCount() - 1, pageNum() + 3)))
+      linkNums <- unique(c(CohortDiagnostics::safeMax(c(2, pageNum() - 2)):min(pageCount() - 1, pageNum() + 3)))
       links <- lapply(linkNums, createPageLink)
 
       ## render action buttons

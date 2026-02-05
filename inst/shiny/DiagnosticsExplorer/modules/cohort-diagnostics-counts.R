@@ -28,7 +28,7 @@ cohortCountsView <- function(id) {
       collapsed = TRUE,
       title = "Cohort Counts",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www", "cohortCounts.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "cohortCounts.html"))
     ),
     shinydashboard::box(
       status = "warning",

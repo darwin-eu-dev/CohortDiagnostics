@@ -379,7 +379,7 @@ plotIncidenceRate <- function(data,
                   fixedrange = TRUE)
 
     if (yscaleFixed) {
-      yaxis$range <- c(min(yRange), max(yRange))
+      yaxis$range <- c(min(yRange), CohortDiagnostics::safeMax(yRange))
     }
 
     plt <- plt %>%
@@ -507,7 +507,7 @@ incidenceRatesView <- function(id) {
       collapsed = TRUE,
       title = "Incidence Rates",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www", "incidenceRate.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "incidenceRate.html"))
     ),
     shinydashboard::box(
       width = NULL,
@@ -773,7 +773,7 @@ incidenceRatesModule <- function(id,
 
       if (nrow(calenderFilter) > 0) {
         minValue <- min(calenderFilter$calendarYear)
-        maxValue <- max(calenderFilter$calendarYear)
+        maxValue <- CohortDiagnostics::safeMax(calenderFilter$calendarYear)
       } else {
         minValue <- 2010
         maxValue <- 2030
@@ -790,7 +790,7 @@ incidenceRatesModule <- function(id,
 
     shiny::observe({
       minIncidenceRateValue <- round(min(irRanges$incidenceRate$minIr), digits = 2)
-      maxIncidenceRateValue <- round(max(irRanges$incidenceRate$maxIr), digits = 2)
+      maxIncidenceRateValue <- round(CohortDiagnostics::safeMax(irRanges$incidenceRate$maxIr), digits = 2)
       shiny::updateSliderInput(
         session = session,
         inputId = "YscaleMinAndMax",
@@ -962,7 +962,7 @@ incidenceRatesModule <- function(id,
         "incidenceRate" = reactable::colDef(header = withTooltip("Inicidence per 1k/py",
                                                                  "Incidence of event per 1000 person years - (Events/Person Years * 1000)"),
                                             cell = function(value) {
-                                              width <- paste0(value / max(data$incidenceRate) * 100, "%")
+                                              width <- paste0(value / CohortDiagnostics::safeMax(data$incidenceRate) * 100, "%")
                                               barChart(sprintf("%.2f", value), width = width)
                                             },
                                             format = reactable::colFormat(digits = 3)),

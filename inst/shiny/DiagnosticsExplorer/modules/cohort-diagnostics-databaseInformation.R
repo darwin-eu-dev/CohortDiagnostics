@@ -104,7 +104,7 @@ getExecutionMetadata <- function(dataSource, databaseId) {
     dplyr::rename(name = "variableField") %>%
     dplyr::group_by(.data$databaseId, .data$startTime, .data$name) %>%
     dplyr::summarise(
-      valueField = max(.data$valueField),
+      valueField = CohortDiagnostics::safeMax(.data$valueField),
       .groups = "keep"
     ) %>%
     dplyr::ungroup() %>%
@@ -126,7 +126,7 @@ getExecutionMetadata <- function(dataSource, databaseId) {
     dplyr::rename(name = "variableField") %>%
     dplyr::group_by(.data$databaseId, .data$startTime, .data$name) %>%
     dplyr::summarise(
-      valueField = max(.data$valueField),
+      valueField = CohortDiagnostics::safeMax(.data$valueField),
       .groups = "keep"
     ) %>%
     dplyr::ungroup() %>%

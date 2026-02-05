@@ -30,7 +30,7 @@ indexEventBreakdownView <- function(id) {
       collapsed = TRUE,
       title = "Index Events",
       width = "100%",
-      shiny::htmlTemplate(system.file("cohort-diagnostics-www",  "indexEventBreakdown.html", package = "CohortDiagnostics"))
+      shiny::htmlTemplate(file.path(cdWwwPath, "indexEventBreakdown.html"))
     ),
     shinydashboard::box(
       status = "warning",

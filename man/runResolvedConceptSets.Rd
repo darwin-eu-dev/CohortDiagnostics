@@ -11,7 +11,9 @@ runResolvedConceptSets(
   exportFolder,
   minCellCount,
   vocabularyDatabaseSchema,
-  tempEmulationSchema
+  tempEmulationSchema,
+  incremental = FALSE,
+  incrementalFolder = exportFolder
 )
 }
 \arguments{
@@ -36,6 +38,14 @@ schema name, for example 'vocabulary.dbo'.}
 
 \item{tempEmulationSchema}{Some database platforms like Oracle and Impala do not truly support temp tables. To emulate temp 
 tables, provide a schema with write privileges where temp tables can be created.}
+
+\item{incremental}{`TRUE` or `FALSE` (default). If TRUE diagnostics for cohorts in the 
+cohort definition set that have not changed will be skipped and existing results 
+csv files will be updated. If FALSE then diagnostics for all cohorts in the cohort 
+definition set will be executed and pre-existing results files will be deleted.}
+
+\item{incrementalFolder}{If \code{incremental = TRUE}, specify a folder where records are kept
+of which cohort diagnostics has been executed.}
 }
 \value{
 None, it will write the results to a csv file.
