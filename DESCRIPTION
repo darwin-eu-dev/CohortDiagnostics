@@ -9,6 +9,10 @@ Authors@R: c(
     person("Martijn", "Schuemie", role = c("aut")),
     person("Patrick", "Ryan", role = c("aut")),
     person("James", "Weaver", role = c("aut")),
+    person("Ioanna", "Nika", , "i.nika@darwin-eu.org", role = "aut"),
+    person("Maarten", "van Kessel", email = "m.l.vankessel@erasmusmc.nl", role = c("aut"), comment = c(ORCID = "0009-0006-8832-6030")),
+    person("Ger", "Inberg", email = "g.inberg@erasmusmc.nl", role = c("aut"), comment = c(ORCID = "0000-0001-8993-8748")),
+    person("Adam", "Black", , "black@ohdsi.org", role = c("aut"), comment = c(ORCID = "0000-0001-5576-8701")),
     person("Observational Health Data Science and Informatics", role = c("cph"))
   )
 Maintainer: Jamie Gilbert <gilbert@ohdsi.org>
