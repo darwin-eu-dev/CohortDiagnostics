@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="280" viewBox="0 0 1160 280" role="img" aria-labelledby="title desc">
+  <title id="title">OHDSI logo</title>
+  <desc id="desc">OHDSI logo in blue, orange, and white.</desc>
+  <rect x="0" y="0" width="1160" height="280" fill="#FFFFFF"/>
+
+  <!-- Icon -->
+  <rect x="24" y="24" width="180" height="180" fill="#F7A600"/>
+  <polygon points="24,24 204,24 24,204" fill="#1F4563"/>
+  <path d="M28 176 C52 116, 100 68, 184 28 L156 28 C98 56, 58 96, 28 156 Z" fill="#FFFFFF"/>
+  <line x1="30" y1="198" x2="198" y2="30" stroke="#FFFFFF" stroke-width="4"/>
+  <line x1="30" y1="34" x2="198" y2="198" stroke="#FFFFFF" stroke-width="4"/>
+
+  <!-- Wordmark -->
+  <text x="244" y="150" fill="#1F4563" font-family="Arial, Helvetica, sans-serif" font-size="170" font-weight="700" letter-spacing="3">OHDSI</text>
+  <text x="246" y="198" fill="#1F4563" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" letter-spacing="1.2">OBSERVATIONAL HEALTH DATA SCIENCES AND INFORMATICS</text>
+</svg>

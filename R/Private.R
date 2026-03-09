@@ -19,8 +19,8 @@ createIfNotExist <-
            name,
            recursive = TRUE,
            errorMessage = NULL) {
-    if (is.null(errorMessage) |
-      !is(errorMessage, "AssertColection")) {
+    if (is.null(errorMessage) ||
+      !is(errorMessage, "AssertCollection")) {
       errorMessage <- checkmate::makeAssertCollection()
     }
     if (!is.null(type)) {
@@ -125,7 +125,14 @@ makeDataExportable <- function(x,
                                minCellCount = 5,
                                databaseId = NULL) {
   ParallelLogger::logTrace(paste0(" - Ensuring data is exportable: ", tableName))
-  if (!hasData(x)) {
+  if (is.null(x)) {
+    ParallelLogger::logTrace("  - Object has no data.")
+    return(x)
+  }
+
+  # Keep empty data frames in the export path so we can still normalize
+  # column names and enforce data-model shape for zero-row outputs.
+  if (!is.data.frame(x) && !hasData(x)) {
     ParallelLogger::logTrace("  - Object has no data.")
     return(x)
   }

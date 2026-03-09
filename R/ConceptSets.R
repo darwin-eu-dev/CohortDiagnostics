@@ -107,7 +107,7 @@ extractConceptSetsJsonFromCohortJson <- function(cohortJson) {
 }
 
 getParentCohort <- function(cohort, cohortDefinitionSet) {
-  if (is.null(cohort$subsetParent) || cohort$cohortId == cohort$subsetParent) {
+  if (is.null(cohort$subsetParent) || is.na(cohort$subsetParent) || cohort$cohortId == cohort$subsetParent) {
     return(cohort)
   }
 
@@ -195,8 +195,8 @@ combineConceptSetsFromCohorts <- function(cohorts) {
 
   uniqueConceptSets <- conceptSets %>%
     dplyr::select("conceptSetExpression") %>%
-    dplyr::mutate(uniqueConceptSetId = dplyr::row_number()) %>%
-    dplyr::distinct()
+    dplyr::distinct() %>%
+    dplyr::mutate(uniqueConceptSetId = dplyr::row_number())
 
   conceptSets <- conceptSets %>%
     dplyr::inner_join(uniqueConceptSets,
@@ -321,22 +321,33 @@ instantiateUniqueConceptSets <- function(uniqueConceptSets,
 
 getCodeSetId <- function(criterion) {
   if (is.list(criterion)) {
-    criterion$CodesetId
+    if ("CodesetId" %in% names(criterion)) {
+      return(criterion$CodesetId)
+    }
+    return(NULL)
   } else if (is.vector(criterion)) {
-    return(criterion["CodesetId"])
+    if ("CodesetId" %in% names(criterion)) {
+      return(unname(criterion["CodesetId"]))
+    }
+    return(NULL)
   } else {
     return(NULL)
   }
 }
 
 getCodeSetIds <- function(criterionList) {
-  codeSetIds <- lapply(criterionList, getCodeSetId)
-  codeSetIds <- do.call(c, codeSetIds)
-  if (is.null(codeSetIds)) {
+  codeSetIds <- lapply(names(criterionList), function(domain) {
+    codeSetId <- getCodeSetId(criterionList[[domain]])
+    if (is.null(codeSetId) || any(is.na(codeSetId))) {
+      return(NULL)
+    }
+    dplyr::tibble(domain = domain, codeSetIds = codeSetId)
+  })
+  codeSetIds <- dplyr::bind_rows(codeSetIds)
+  if (nrow(codeSetIds) == 0) {
     return(NULL)
   } else {
-    return(dplyr::tibble(domain = names(criterionList), codeSetIds = codeSetIds)
-    %>% dplyr::filter(!is.na(.data$codeSetIds)))
+    return(codeSetIds)
   }
 }
 
@@ -887,7 +898,7 @@ runConceptSetDiagnostics <- function(connection,
         nrow(cohorts) - nrow(subsetOrphans)
       ))
     }
-    if (nrow(subsetOrphans > 0)) {
+    if (nrow(subsetOrphans) > 0) {
       start <- Sys.time()
 
       if (!useExternalConceptCountsTable) {

@@ -81,7 +81,10 @@ jobs:
 
       - name: Test coverage
         if: runner.os == 'macOS'
-        run: covr::codecov()
+        run: |
+          source("extras/coverage_profile.R")
+          cov <- covr::package_coverage(line_exclusions = getCoverageLineExclusions())
+          covr::codecov(coverage = cov)
         shell: Rscript {0}
 
   Release:

@@ -1,0 +1,231 @@
+:root {
+  /* Brand */
+  --color-primary: #E09030;
+  --color-primary-light: #F0C040;
+  --color-primary-mid: #E0A040;
+
+  /* Secondary */
+  --color-secondary: #204050;
+
+  /* Neutrals */
+  --color-white: #F0F0F0;
+  --color-gray-light: #D9D9D9;
+
+  --gradient-brand: linear-gradient(
+    135deg,
+    #E09030 0%,
+    #E0A040 50%,
+    #F0C040 100%
+  );
+
+  /* UI roles */
+  --color-background: #FFFFFF;
+  --color-surface: #F5F5F5;
+  --color-border: #E0E0E0;
+
+  /* Text */
+  --color-text-primary: #204050;
+  --color-text-muted: #6B7280;
+
+  /* Aliases for existing component names */
+  --primary: #E09030;
+  --primary-light: #F0C040;
+  --secondary: #204050;
+  --neutral-100: #F0F0F0;
+  --neutral-300: #D9D9D9;
+
+  --ohdsi-blue: #204050;
+  --ohdsi-orange: #E09030;
+  --ohdsi-white: #F0F0F0;
+}
+
+body {
+  background: var(--color-gray-light);
+  color: var(--color-text-primary);
+  font-family: "Avenir Next", "Segoe UI", Arial, sans-serif;
+  line-height: 1.4;
+}
+
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 10px 18px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 2px solid var(--color-secondary);
+  border-radius: 10px;
+  background: var(--color-white);
+}
+
+.app-logo {
+  width: 280px;
+  max-width: 45vw;
+  height: auto;
+}
+
+.app-title-wrap {
+  flex: 1;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 28px;
+  color: var(--color-secondary);
+}
+
+.app-subtitle {
+  margin: 4px 0 0;
+  color: var(--color-text-primary);
+}
+
+.sidebar-panel {
+  border: 2px solid var(--color-secondary);
+  border-radius: 10px;
+  background: var(--color-white);
+  padding: 12px;
+}
+
+.main-panel {
+  border: 2px solid var(--color-secondary);
+  border-radius: 10px;
+  background: var(--color-white);
+  min-height: 500px;
+  padding: 6px 10px 12px;
+}
+
+.panel-title {
+  margin-top: 0;
+  color: var(--color-secondary);
+  font-size: 18px;
+}
+
+.button-primary,
+.primary-action {
+  width: 100%;
+  margin-top: 8px;
+  background: var(--gradient-brand);
+  color: var(--color-secondary);
+  border: 1px solid var(--color-primary-mid);
+  font-weight: 700;
+}
+
+.button-primary:hover,
+.button-primary:focus,
+.button-primary:active,
+.primary-action:hover,
+.primary-action:focus,
+.primary-action:active {
+  background: linear-gradient(
+    135deg,
+    #F0C040 0%,
+    #E0A040 50%,
+    #E09030 100%
+  );
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.sidebar-help {
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.nav-tabs {
+  border-bottom: 2px solid var(--color-secondary);
+}
+
+.nav-tabs > li > a {
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+  color: var(--color-secondary);
+  background: var(--color-white);
+  border: 2px solid var(--color-secondary);
+  border-bottom-color: var(--color-white);
+}
+
+.tab-copy {
+  margin: 10px 0 12px;
+  padding: 10px;
+  border-left: 4px solid var(--color-primary);
+  background: var(--gradient-brand);
+  border-radius: 4px;
+}
+
+.tab-copy strong,
+.tab-copy p,
+.context-line {
+  color: var(--color-secondary);
+}
+
+.tab-copy p {
+  margin: 4px 0;
+}
+
+.context-line {
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.empty-line {
+  margin-top: 8px;
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.table {
+  margin-bottom: 6px;
+}
+
+.table > thead > tr > th {
+  background: var(--color-secondary);
+  color: var(--color-white);
+  border-color: var(--color-secondary);
+}
+
+.table > tbody > tr:nth-child(odd) {
+  background: var(--color-surface);
+}
+
+.table > tbody > tr > td {
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.form-control,
+.selectize-input,
+.selectize-control.multi .selectize-input.has-items {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+}
+
+label {
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+@media (max-width: 991px) {
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-logo {
+    width: 220px;
+    max-width: 90%;
+  }
+}

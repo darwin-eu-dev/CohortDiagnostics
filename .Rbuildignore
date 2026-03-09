@@ -30,3 +30,14 @@ compare_versions
 ^doc$
 ^Meta$
 inst/shiny/DiagnosticsExplorer/renv
+^\.Rlib$
+^CohortDiagnostics\.Rcheck$
+^CohortDiagnostics_[0-9\.]+\.tar\.gz$
+^MergedCohortDiagnosticsData\.sqlite$
+^POLIMI - P4-C1-011_cohortDiagnostics \(1\)$
+^POLIMI - P4-C1-011_cohortDiagnostics \(1\)\.zip$
+^work$
+^review\.md$
+^style\.md$
+^production_readiness\.md$
+^sql$

@@ -130,3 +130,25 @@ createTestShinyDb <- function(connectionDetails = Eunomia::getEunomiaConnectionD
     overwrite = TRUE
   )
 }
+
+getMockConnection <- function(dbms = "sqlite") {
+  if (!methods::isClass("mockConnection")) {
+    methods::setClass("mockConnection", slots = c(dbms = "character"))
+  }
+  methods::new("mockConnection", dbms = dbms)
+}
+
+makeConceptSetJson <- function(ids = c(1, 2), wrapExpression = TRUE) {
+  conceptSets <- lapply(ids, function(id) {
+    list(
+      id = id,
+      name = paste0("set_", id),
+      expression = list(items = list(list(conceptId = 1000 + id)))
+    )
+  })
+  payload <- list(ConceptSets = conceptSets)
+  if (wrapExpression) {
+    payload <- list(expression = payload)
+  }
+  jsonlite::toJSON(payload, auto_unbox = TRUE)
+}

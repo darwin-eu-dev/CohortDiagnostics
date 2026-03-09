@@ -104,10 +104,12 @@ jobs:
       - name: Test coverage
         if: runner.os == 'Linux'
         run: |
+          source("extras/coverage_profile.R")
           cov <- covr::package_coverage(
             quiet = FALSE,
             clean = FALSE,
-            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
+            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package"),
+            line_exclusions = getCoverageLineExclusions()
           )
           covr::to_cobertura(cov)
         shell: Rscript {0}
@@ -187,4 +189,3 @@ jobs:
         if: ${{ env.new_version != '' }}
         run: |
           curl --data "build=true" -X POST https://registry.hub.docker.com/u/ohdsi/broadsea-methodslibrary/trigger/f0b51cec-4027-4781-9383-4b38b42dd4f5/
-

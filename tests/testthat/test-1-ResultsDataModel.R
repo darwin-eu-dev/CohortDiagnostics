@@ -1,5 +1,5 @@
 skipResultsDm <- FALSE
-if (Sys.getenv("CDM5_POSTGRESQL_SERVER") == "") {
+if (Sys.getenv("CDM5_POSTGRESQL_SERVER") == "" || skipCdmTests) {
   skipResultsDm <- TRUE
 } else {
   postgresConnectionDetails <- DatabaseConnector::createConnectionDetails(

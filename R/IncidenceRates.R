@@ -21,7 +21,7 @@ getIncidenceRate <- function(connectionDetails = NULL,
                              cdmDatabaseSchema,
                              vocabularyDatabaseSchema = cdmDatabaseSchema,
                              cdmVersion = 5,
-                             tempEmulationSchema = tempEmulationSchema,
+                             tempEmulationSchema = NULL,
                              firstOccurrenceOnly = TRUE,
                              washoutPeriod = 365,
                              cohortId) {

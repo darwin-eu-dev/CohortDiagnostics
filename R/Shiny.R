@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-REQUIRED_OSM_VERSION <- base::package_version("3.2.0")
-
 #' Launch the Diagnostics Explorer Shiny app
 #' @param connectionDetails An object of type \code{connectionDetails} as created using the
 #'                          \code{\link[DatabaseConnector]{createConnectionDetails}} function in the
@@ -82,7 +80,7 @@ launchDiagnosticsExplorer <- function(sqliteDbPath = "MergedCohortDiagnosticsDat
     if (is.null(resultsDatabaseSchema)) {
       stop("resultsDatabaseSchema is required to connect to the database.")
     }
-    if (!is.null(vocabularyDatabaseSchema) &
+    if (!is.null(vocabularyDatabaseSchema) &&
       is.null(vocabularyDatabaseSchemas)) {
       vocabularyDatabaseSchemas <- vocabularyDatabaseSchema
       warning(
@@ -109,20 +107,6 @@ launchDiagnosticsExplorer <- function(sqliteDbPath = "MergedCohortDiagnosticsDat
     checkmate::assertFileExists(shinyConfigPath)
     options("CD-shiny-config" = normalizePath(shinyConfigPath))
     on.exit(options("CD-shiny-config" = NULL))
-  }
-
-  if (!"OhdsiShinyModules" %in% as.data.frame(utils::installed.packages())$Package) {
-    if (!interactive() || isTRUE(utils::askYesNo("OhdsiShinyModules not installed, get from github?"))) {
-      remotes::install_github("OHDSI/OhdsiShinyModules")
-    } else {
-      stop("Cannot continue without OhdsiShinyModulesPackage from github")
-    }
-  }
-
-  osmVersion <- utils::packageVersion("OhdsiShinyModules")
-
-  if (osmVersion < REQUIRED_OSM_VERSION) {
-    cli::cli_warn("OhdsiShinyModules version {osmVersion} is out of date. It is suggested you update to at least {REQUIRED_OSM_VERSION}")
   }
 
   appDir <-
@@ -183,7 +167,7 @@ createMergedResultsFile <-
            sqliteDbPath = "MergedCohortDiagnosticsData.sqlite",
            overwrite = FALSE,
            tablePrefix = "") {
-    if (file.exists(sqliteDbPath) & !overwrite) {
+    if (file.exists(sqliteDbPath) && !overwrite) {
       stop("File ", sqliteDbPath, " already exists. Set overwrite = TRUE to replace")
     } else if (file.exists(sqliteDbPath)) {
       unlink(sqliteDbPath)
@@ -244,7 +228,7 @@ createDiagnosticsExplorerZip <- function(outputZipfile = file.path(getwd(), "Dia
                                          overwrite = FALSE) {
   outputZipfile <- normalizePath(outputZipfile, mustWork = FALSE)
 
-  if (file.exists(outputZipfile) & !overwrite) {
+  if (file.exists(outputZipfile) && !overwrite) {
     stop(outputZipfile, " already exists. Set overwrite = TRUE to continue")
   }
   stopifnot(dir.exists(shinyDirectory))
@@ -302,10 +286,6 @@ deployPositConnectApp <- function(appName,
     install.packages("yaml")
   }
 
-  if (!"OhdsiShinyModules" %in% as.data.frame(utils::installed.packages())$Package) {
-    remotes::install_github("OHDSI/OhdsiShinyModules")
-  }
-
   checkmate::assertDirectory(appDir, access = "w")
 
   args <- rlang::dots_list(...)
@@ -319,7 +299,12 @@ deployPositConnectApp <- function(appName,
     checkmate::assertFileExists(sqliteDbPath)
     file.copy(sqliteDbPath, file.path(appDir, "data", "MergedCohortDiagnosticsData.sqlite"), overwrite = TRUE)
   } else if (!is.null(shinyConfigPath)) {
-    DatabaseConnector::downloadJdbcDrivers(connectionDetails$dbms, appDir)
+    config <- yaml::read_yaml(shinyConfigPath)
+    dbms <- "sqlite"
+    if (!is.null(config$connectionDetails$dbms)) {
+      dbms <- config$connectionDetails$dbms
+    }
+    DatabaseConnector::downloadJdbcDrivers(dbms, appDir)
     file.copy(shinyConfigPath, file.path(appDir, "config.yml"))
   } else {
     DatabaseConnector::downloadJdbcDrivers(connectionDetails$dbms, appDir)

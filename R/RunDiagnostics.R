@@ -312,7 +312,7 @@ executeDiagnostics <- function(cohortDefinitionSet,
   )
 
   if (!"isSubset" %in% colnames(cohortDefinitionSet)) {
-    cohortDefinitionSet$isSubset <- FALSE
+    cohortDefinitionSet$isSubset <- rep(FALSE, nrow(cohortDefinitionSet))
   }
 
   cohortTable <- cohortTableNames$cohortTable

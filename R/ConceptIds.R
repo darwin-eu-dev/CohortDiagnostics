@@ -130,7 +130,7 @@ exportConceptInformation <- function(connection = NULL,
       "domain",
       "relationship",
       "vocabulary",
-      "conceptClass"
+      "concept_class"
     )) {
       sql <- "SELECT * FROM @cdm_database_schema.@table;"
       data <-
